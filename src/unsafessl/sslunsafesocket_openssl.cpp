@@ -574,6 +574,11 @@ void SslUnsafeSocketPrivate::resetDefaultCiphers()
     SSL_CTX *myCtx = uq_SSL_CTX_new(uq_SSLv23_client_method());
     SSL *mySsl = uq_SSL_new(myCtx);
 
+    // explicitly enable SSLv2 and SSLv3
+    uq_SSL_ctrl(mySsl, SSL_CTRL_CLEAR_OPTIONS, (SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3), NULL);
+    // request *all* ciphers
+    uq_SSL_CTX_set_cipher_list(myCtx, "ALL");
+
     QList<SslUnsafeCipher> ciphers;
     QList<SslUnsafeCipher> defaultCiphers;
 
