@@ -9,8 +9,10 @@
 
 #ifdef UNSAFE
 #include "sslunsafesocket.h"
+#include "sslunsafeconfiguration.h"
 #else
 #include <QSslSocket>
+#include <QSslConfiguration>
 #endif
 
 
@@ -20,6 +22,17 @@ SslCAudit::SslCAudit(const SslUserSettings settings, QObject *parent) :
     settings(settings)
 {
     VERBOSE("SSL library used: " + XSslSocket::sslLibraryVersionString());
+
+    VERBOSE("supported ciphers:");
+    QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
+    QString ciphersString = "\t";
+    for (int i = 0; i < ciphers.size(); i++) {
+        ciphersString += ciphers.at(i).name() + " ";
+        if (((i + 1) % 4) == 0) {
+            VERBOSE(ciphersString);
+            ciphersString = "\t";
+        }
+    }
 }
 
 void SslCAudit::setSslTests(const QList<SslTest *> &tests)
