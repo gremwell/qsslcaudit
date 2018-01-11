@@ -27,8 +27,34 @@ list(APPEND unsafessl_SOURCES
     sslunsafesocket_openssl_symbols.cpp
 )
 
+list(APPEND unsafessl_HEADERS
+    sslunsafecertificateextension.h
+    sslunsafecertificateextension_p.h
+    sslunsafecertificate.h
+    sslunsafecertificate_p.h
+    sslunsafecipher.h
+    sslunsafecipher_p.h
+    sslunsafeconfiguration.h
+    sslunsafeconfiguration_p.h
+    sslunsafecontext_openssl_p.h
+    sslunsafediffiehellmanparameters.h
+    sslunsafediffiehellmanparameters_p.h
+    sslunsafeellipticcurve.h
+    sslunsafeerror.h
+    sslunsafekey.h
+    sslunsafekey_p.h
+    sslunsafemutexpool_p.h
+    sslunsafepresharedkeyauthenticator.h
+    sslunsafepresharedkeyauthenticator_p.h
+    sslunsaferingbuffer_p.h
+    sslunsafesocket.h
+    sslunsafesocket_openssl_p.h
+    sslunsafesocket_openssl_symbols_p.h
+    sslunsafesocket_p.h
+)
+
 include_directories(${unsafessl_INCLUDE_DIRECTORIES})
-add_library(unsafessl STATIC ${unsafessl_SOURCES})
+add_library(unsafessl STATIC ${unsafessl_SOURCES} ${unsafessl_HEADERS})
 set_target_properties(
     unsafessl
         PROPERTIES

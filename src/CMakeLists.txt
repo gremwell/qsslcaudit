@@ -10,6 +10,18 @@ SET( qsslcauditSources
     main.cpp
     )
 
+SET( qsslcauditHeaders
+    ciphers.h
+    debug.h
+    errorhandler.h
+    sslcaudit.h
+    sslcertgen.h
+    sslserver.h
+    ssltest.h
+    ssltests.h
+    sslusersettings.h
+    )
+
 add_definitions(-DUNSAFE)
 
 add_subdirectory(unsafessl)
@@ -24,7 +36,7 @@ INCLUDE_DIRECTORIES(
     ${UNSAFESSL_DIR}
     )
 
-ADD_EXECUTABLE( ${APPLICATION_TARGET} ${qsslcauditSources} )
+ADD_EXECUTABLE( ${APPLICATION_TARGET} ${qsslcauditSources} ${qsslcauditHeaders} )
 SET_TARGET_PROPERTIES( ${APPLICATION_TARGET}
     PROPERTIES
     AUTOMOC TRUE

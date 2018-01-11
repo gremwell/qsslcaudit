@@ -17,10 +17,24 @@ list(APPEND qtcertificateaddon_SOURCES
     utils.cpp
 )
 
+list(APPEND qtcertificateaddon_HEADERS
+    certificatebuilder.h
+    certificatebuilder_p.h
+    certificate_global.h
+    certificate.h
+    certificaterequestbuilder.h
+    certificaterequestbuilder_p.h
+    certificaterequest.h
+    certificaterequest_p.h
+    keybuilder.h
+    randomgenerator.h
+    utils_p.h
+)
+
 add_definitions(-DUNSAFE)
 
 include_directories(${qtcertificateaddon_INCLUDE_DIRECTORIES} ${GNUTLS_INCLUDE_DIR})
-add_library(qtcertificateaddon STATIC ${qtcertificateaddon_SOURCES})
+add_library(qtcertificateaddon STATIC ${qtcertificateaddon_SOURCES} ${qtcertificateaddon_HEADERS})
 set_target_properties(
     qtcertificateaddon
         PROPERTIES
