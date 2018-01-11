@@ -489,6 +489,9 @@ bool SslUnsafeCertificate::importPkcs12(QIODevice *device,
 // These certificates are known to be fraudulent and were created during the comodo
 // compromise. See http://www.comodo.com/Comodo-Fraud-Incident-2011-03-23.html
 static const char *const certificate_blacklist[] = {
+    0
+};
+#if 0
     "04:7e:cb:e9:fc:a5:5f:7b:d0:9e:ae:36:e1:0c:ae:1e", "mail.google.com", // Comodo
     "f5:c8:6a:f3:61:62:f1:3a:64:f5:4f:6d:c9:58:7c:06", "www.google.com", // Comodo
     "d7:55:8f:da:f5:f1:10:5b:b2:13:28:2b:70:77:29:a3", "login.yahoo.com", // Comodo
@@ -535,6 +538,7 @@ static const char *const certificate_blacklist[] = {
     "27:b1",                                           "NIC CA 2014", // intermediate certificate from NIC India (2014)
     0
 };
+#endif
 
 bool SslUnsafeCertificatePrivate::isBlacklisted(const SslUnsafeCertificate &certificate)
 {
