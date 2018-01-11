@@ -10,12 +10,31 @@
 #include <QHostAddress>
 
 
+static QList<SslTest *> allTests = QList<SslTest *>()
+        << new SslTest01()
+        << new SslTest02()
+        << new SslTest03()
+        << new SslTest04()
+        << new SslTest05()
+        << new SslTest06()
+        << new SslTest07();
+
+static QList<int> selectedTests = QList<int>()
+        << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7;
+
+
 void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 {
     QCommandLineParser parser;
     bool ok;
 
-    parser.setApplicationDescription("A tool to test SSL clients behavior");
+    QString appDescription = "A tool to test SSL clients behavior\n\n";
+    appDescription += "SSL client tests:\n";
+    for (int i = 0; i < allTests.size(); i++) {
+        appDescription += QString("\t%1: %2\n").arg(i + 1).arg(allTests.at(i)->description());
+    }
+
+    parser.setApplicationDescription(appDescription);
     parser.addHelpOption();
     parser.addVersionOption();
     QCommandLineOption listenAddressOption(QStringList() << "l" << "listen-address",
@@ -42,6 +61,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption userCaKeyOption(QStringList() << "user-ca-key",
                                        "path to file containing custom private key for CA certificate.", "path");
     parser.addOption(userCaKeyOption);
+    QCommandLineOption selectedTestsOption(QStringList() << "selected-tests",
+                                     "comma-separated list of tests (id) to execute", "1,3,5");
+    parser.addOption(selectedTestsOption);
 
     parser.process(a);
 
@@ -104,30 +126,38 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             exit(-1);
         }
     }
+    if (parser.isSet(selectedTestsOption)) {
+        selectedTests.clear();
+
+        QString testsStr = parser.value(selectedTestsOption);
+        QStringList testsListStr = testsStr.split(",", QString::SkipEmptyParts);
+        for (int i = 0; i < testsListStr.size(); i++) {
+            bool ok;
+            int num = testsListStr.at(i).toInt(&ok) - 1;
+            if (ok && (allTests.size() > num))
+                selectedTests << num;
+        }
+    }
 }
 
 
 QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
 {
     QList<SslTest *> ret;
-    QList<SslTest *> all = QList<SslTest *>() << new SslTest01()
-                                              << new SslTest02()
-                                              << new SslTest03()
-                                              << new SslTest04()
-                                              << new SslTest05()
-                                              << new SslTest06()
-                                              << new SslTest07();
-    SslTest *test;
 
-    foreach (test, all) {
+    VERBOSE("preparing selected tests...");
+    for (int i = 0; i < allTests.size(); i++) {
+        if (!selectedTests.contains(i))
+            continue;
+
+        SslTest *test = allTests.at(i);
         if (test->prepare(settings)) {
             ret << test;
         } else {
-            VERBOSE("skipping test: " + test->description());
+            VERBOSE("\tskipping test: " + test->description());
         }
     }
-
-    all.clear();
+    VERBOSE("");
 
     return ret;
 }

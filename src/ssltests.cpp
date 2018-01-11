@@ -12,8 +12,6 @@
 
 bool SslTest01::prepare(const SslUserSettings &settings)
 {
-    setDescription("certificate trust test with user-supplied certificate");
-
     QList<XSslCertificate> chain = settings.getUserCert();
     if (chain.size() == 0) {
         RED("can not parse user-supplied certificate");
@@ -40,8 +38,6 @@ bool SslTest01::prepare(const SslUserSettings &settings)
 
 bool SslTest02::prepare(const SslUserSettings &settings)
 {
-    setDescription("certificate trust test with self-signed certificate for user-supplied common name");
-
     if (settings.getUserCN().length()) {
         return false;
     }
@@ -64,8 +60,6 @@ bool SslTest02::prepare(const SslUserSettings &settings)
 
 bool SslTest03::prepare(const SslUserSettings &settings)
 {
-    setDescription("certificate trust test with self-signed certificate for www.example.com");
-
     QPair<XSslCertificate, XSslKey> cert = SslCertGen::genSignedCert("www.example.com");
 
     QList<XSslCertificate> chain;
@@ -84,8 +78,6 @@ bool SslTest03::prepare(const SslUserSettings &settings)
 
 bool SslTest04::prepare(const SslUserSettings &settings)
 {
-    setDescription("certificate trust test with user-supplied common name signed by user-supplied certificate");
-
     if (settings.getUserCN().length() == 0)
         return false;
 
@@ -112,8 +104,6 @@ bool SslTest04::prepare(const SslUserSettings &settings)
 
 bool SslTest05::prepare(const SslUserSettings &settings)
 {
-    setDescription("certificate trust test with www.example.com common name signed by user-supplied certificate");
-
     QList<XSslCertificate> chain = settings.getUserCert();
     if (chain.size() == 0)
         return false;
@@ -137,8 +127,6 @@ bool SslTest05::prepare(const SslUserSettings &settings)
 
 bool SslTest06::prepare(const SslUserSettings &settings)
 {
-    setDescription("certificate trust test with user-supplied common name signed by user-supplied CA certificate");
-
     if (settings.getUserCN().length() == 0)
         return false;
 
@@ -167,8 +155,6 @@ bool SslTest06::prepare(const SslUserSettings &settings)
 
 bool SslTest07::prepare(const SslUserSettings &settings)
 {
-    setDescription("certificate trust test with www.example.com common name signed by user-supplied CA certificate");
-
     QList<XSslCertificate> chain = settings.getUserCaCert();
     if (chain.size() == 0)
         return false;
@@ -194,8 +180,6 @@ bool SslTest08::prepare(const SslUserSettings &settings)
 {
     QSsl::SslProtocol proto = QSsl::TlsV1_0OrLater;
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
-
-    setDescription("protocol/ciphers support test for protocol ...");
 
     QList<XSslCertificate> chain;
     XSslKey key;
