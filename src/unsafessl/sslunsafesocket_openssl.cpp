@@ -582,15 +582,19 @@ void SslUnsafeSocketPrivate::resetDefaultCiphers()
         if (SSL_CIPHER *cipher = uq_sk_SSL_CIPHER_value(supportedCiphers, i)) {
             SslUnsafeCipher ciph = SslUnsafeSocketBackendPrivate::SslUnsafeCipher_from_SSL_CIPHER(cipher);
             if (!ciph.isNull()) {
+#if 0
                 // Unconditionally exclude ADH and AECDH ciphers since they offer no MITM protection
                 if (!ciph.name().toLower().startsWith(QLatin1String("adh")) &&
                     !ciph.name().toLower().startsWith(QLatin1String("exp-adh")) &&
                     !ciph.name().toLower().startsWith(QLatin1String("aecdh"))) {
+#endif
                     ciphers << ciph;
 
                     if (ciph.usedBits() >= 128)
                         defaultCiphers << ciph;
+#if 0
                 }
+#endif
             }
         }
     }
