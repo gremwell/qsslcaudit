@@ -4,7 +4,7 @@
 
 # include <QtCore/qlibrary.h>
 #include <QtCore/qmutex.h>
-//#include <private/qmutexpool_p.h>
+#include "sslunsafemutexpool_p.h"
 #include <QtCore/qdatetime.h>
 #if defined(Q_OS_UNIX)
 #include <QtCore/qdir.h>
@@ -652,7 +652,7 @@ bool uq_resolveOpenSslSymbols()
     static bool symbolsResolved = false;
     static bool triedToResolveSymbols = false;
 #ifndef QT_NO_THREAD
-    //QMutexLocker locker(QMutexPool::globalInstanceGet((void *)&uq_SSL_library_init));
+    QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&uq_SSL_library_init));
 #endif
     if (symbolsResolved)
         return true;
