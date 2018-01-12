@@ -287,6 +287,19 @@ init_context:
         uq_DH_free(dh);
     }
 
+    // we need 512-bits ephemeral RSA key in case we use some insecure ciphers
+    // see NOTES on https://www.openssl.org/docs/man1.0.2/ssl/SSL_CTX_set_cipher_list.html
+    // here we do it always, which is not optimal and insecure. well, we are in 'unsafe' mode anyway.
+    {
+        BIGNUM *bn = uq_BN_new();
+        RSA *rsa = uq_RSA_new();
+        uq_BN_set_word(bn, RSA_F4);
+        uq_RSA_generate_key_ex(rsa, 512, bn, NULL);
+        uq_SSL_CTX_set_tmp_rsa(sslContext->ctx, rsa);
+        uq_RSA_free(rsa);
+        uq_BN_free(bn);
+    }
+
 #ifndef OPENSSL_NO_EC
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L
     if (uq_SSLeay() >= 0x10002000L) {
