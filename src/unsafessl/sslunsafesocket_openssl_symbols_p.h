@@ -119,6 +119,7 @@ BIO *uq_BIO_new_mem_buf(void *a, int b);
 int uq_BIO_read(BIO *a, void *b, int c);
 Q_AUTOTEST_EXPORT BIO_METHOD *uq_BIO_s_mem();
 Q_AUTOTEST_EXPORT int uq_BIO_write(BIO *a, const void *b, int c);
+BIGNUM * uq_BN_new();
 int uq_BN_num_bits(const BIGNUM *a);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 int uq_BN_is_word(BIGNUM *a, BN_ULONG w);
@@ -135,6 +136,8 @@ int uq_BN_is_word(BIGNUM *a, BN_ULONG w);
 #define uq_BN_is_word BN_is_word
 #endif // OPENSSL_VERSION_NUMBER >= 0x10100000L
 BN_ULONG uq_BN_mod_word(const BIGNUM *a, BN_ULONG w);
+int uq_BN_set_word(const BIGNUM *a, BN_ULONG w);
+void uq_BN_free(BIGNUM *a);
 #ifndef OPENSSL_NO_EC
 const EC_GROUP* uq_EC_KEY_get0_group(const EC_KEY* k);
 int uq_EC_GROUP_get_degree(const EC_GROUP* g);
@@ -218,6 +221,7 @@ void uq_RAND_seed(const void *a, int b);
 int uq_RAND_status();
 RSA *uq_RSA_new();
 void uq_RSA_free(RSA *a);
+int uq_RSA_generate_key_ex(RSA *a, int bits, BIGNUM *e, BN_GENCB *cb);
 int uq_sk_num(STACK *a);
 void uq_sk_pop_free(STACK *a, void (*b)(void *));
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
@@ -391,6 +395,7 @@ int uq_DH_check(DH *dh, int *codes);
 
 BIGNUM *uq_BN_bin2bn(const unsigned char *s, int len, BIGNUM *ret);
 #define uq_SSL_CTX_set_tmp_dh(ctx, dh) uq_SSL_CTX_ctrl((ctx), SSL_CTRL_SET_TMP_DH, 0, (char *)dh)
+#define uq_SSL_CTX_set_tmp_rsa(ctx, rsa) uq_SSL_CTX_ctrl((ctx), SSL_CTRL_SET_TMP_RSA, 0, (char *)rsa)
 
 #ifndef OPENSSL_NO_EC
 // EC Diffie-Hellman support
