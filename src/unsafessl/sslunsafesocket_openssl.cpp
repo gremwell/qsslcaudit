@@ -1,6 +1,6 @@
 
-#define SslUnsafeSocket_DEBUG
-#define QT_DECRYPT_SSL_TRAFFIC
+//#define SslUnsafeSocket_DEBUG
+//#define QT_DECRYPT_SSL_TRAFFIC
 
 //#include "qssl_p.h"
 #include "sslunsafeerror.h"

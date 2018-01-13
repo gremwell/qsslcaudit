@@ -1,6 +1,6 @@
 #include "sslunsafesocket.h"
 
-#define SSLUNSAFESOCKET_DEBUG
+//#define SSLUNSAFESOCKET_DEBUG
 
 //#include "qssl_p.h"
 //#include "SslUnsafeSocket.h"
