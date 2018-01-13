@@ -51,6 +51,11 @@ public:
     QString getUserCaKeyPath() const;
     XSslKey getUserCaKey() const;
 
+    void setForwardAddr(const QString &addr);
+    QString getForwardAddr() const;
+    QHostAddress getForwardHostAddr() const;
+    quint16 getForwardHostPort() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -60,6 +65,7 @@ private:
     QString userKeyPath;
     QString userCaCertPath;
     QString userCaKeyPath;
+    QString forwardAddr;
 
 };
 

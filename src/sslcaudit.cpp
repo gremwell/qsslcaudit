@@ -71,27 +71,65 @@ void SslCAudit::runTest(const SslTest *test)
     if (sslServer.waitForNewConnection(-1)) {
         XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sslServer.nextPendingConnection());
 
-        connect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
-                this, &SslCAudit::handleSocketError);
-        connect(sslSocket, &XSslSocket::encrypted, this, &SslCAudit::sslHandshakeFinished);
-        connect(sslSocket, static_cast<void(XSslSocket::*)(const QList<XSslError> &)>(&XSslSocket::sslErrors),
-                this, &SslCAudit::handleSslErrors);
-        connect(sslSocket, &XSslSocket::peerVerifyError, this, &SslCAudit::handlePeerVerifyError);
-
         VERBOSE(QString("connection from: %1:%2").arg(sslSocket->peerAddress().toString()).arg(sslSocket->peerPort()));
 
-        if (sslSocket->waitForReadyRead(5000)) {
-            QByteArray message = sslSocket->readAll();
+        if (!settings.getForwardHostAddr().isNull()) {
+            // in case 'forward' option was set, we do the following:
+            // - connect to the proxy;
+            // - synchronously read data from ssl socket
+            // - synchronously send this data to proxy
 
-            VERBOSE("received data: " + QString(message));
+            QTcpSocket proxy;
 
-            testDataReceived = true;
+            proxy.connectToHost(settings.getForwardHostAddr(), settings.getForwardHostPort());
 
-            sslSocket->disconnectFromHost();
-            sslSocket->waitForDisconnected();
-            VERBOSE("disconnected");
+            if (!proxy.waitForConnected(2000)) {
+                RED("can't connect to the forward proxy");
+            } else {
+                WHITE("forwarding incoming data to the provided proxy");
+                WHITE("to get test results, relauch this app without 'forward' option");
+
+                while (1) {
+                    if (sslSocket->state() == QAbstractSocket::UnconnectedState)
+                        break;
+                    if (proxy.state() == QAbstractSocket::UnconnectedState)
+                        break;
+
+                    if (sslSocket->waitForReadyRead(100)) {
+                        testDataReceived = true;
+
+                        proxy.write(sslSocket->readAll());
+                    }
+
+                    if (proxy.waitForReadyRead(100)) {
+                        sslSocket->write(proxy.readAll());
+                    }
+                }
+            }
         } else {
-            VERBOSE("no data received (" + sslSocket->errorString() + ")");
+            // handling socket errors makes sence only in non-interception mode
+
+            connect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
+                    this, &SslCAudit::handleSocketError);
+            connect(sslSocket, &XSslSocket::encrypted, this, &SslCAudit::sslHandshakeFinished);
+            connect(sslSocket, static_cast<void(XSslSocket::*)(const QList<XSslError> &)>(&XSslSocket::sslErrors),
+                    this, &SslCAudit::handleSslErrors);
+            connect(sslSocket, &XSslSocket::peerVerifyError, this, &SslCAudit::handlePeerVerifyError);
+
+            // no 'forward' option -- just read the first packet of unencrypted data and close the connection
+            if (sslSocket->waitForReadyRead(5000)) {
+                QByteArray message = sslSocket->readAll();
+
+                VERBOSE("received data: " + QString(message));
+
+                testDataReceived = true;
+
+                sslSocket->disconnectFromHost();
+                sslSocket->waitForDisconnected();
+                VERBOSE("disconnected");
+            } else {
+                VERBOSE("no data received (" + sslSocket->errorString() + ")");
+            }
         }
     } else {
         VERBOSE("could not establish encrypted connection (" + sslServer.errorString() + ")");

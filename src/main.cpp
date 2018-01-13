@@ -44,32 +44,35 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     parser.addHelpOption();
     parser.addVersionOption();
     QCommandLineOption listenAddressOption(QStringList() << "l" << "listen-address",
-                                           "listen on <address>.", "0.0.0.0");
+                                           "listen on <address>", "0.0.0.0");
     parser.addOption(listenAddressOption);
     QCommandLineOption listenPortOption(QStringList() << "p" << "listen-port",
-                                        "bind to <port>.", "8443");
+                                        "bind to <port>", "8443");
     parser.addOption(listenPortOption);
     QCommandLineOption userCNOption(QStringList() << "user-cn",
-                                    "common name (CN) to suggest to client", "CN");
+                                    "common name (CN) to suggest to client", "example.com");
     parser.addOption(userCNOption);
     QCommandLineOption serverOption(QStringList() << "server",
-                                    "grab certificate information from <server>.", "server");
+                                    "grab certificate information from <server>", "https://example.com");
     parser.addOption(serverOption);
     QCommandLineOption userCertOption(QStringList() << "user-cert",
-                                      "path to file containing custom certificate (or chain of certificates).", "path");
+                                      "path to file containing custom certificate (or chain of certificates)", "~/host.cert");
     parser.addOption(userCertOption);
     QCommandLineOption userKeyOption(QStringList() << "user-key",
-                                     "path to file containing custom private key.", "path");
+                                     "path to file containing custom private key", "~/host.key");
     parser.addOption(userKeyOption);
     QCommandLineOption userCaCertOption(QStringList() << "user-ca-cert",
-                                        "path to file containing custom certificate usable as CA.", "path");
+                                        "path to file containing custom certificate usable as CA", "~/ca.cert");
     parser.addOption(userCaCertOption);
     QCommandLineOption userCaKeyOption(QStringList() << "user-ca-key",
-                                       "path to file containing custom private key for CA certificate.", "path");
+                                       "path to file containing custom private key for CA certificate", "~/ca.key");
     parser.addOption(userCaKeyOption);
     QCommandLineOption selectedTestsOption(QStringList() << "selected-tests",
                                      "comma-separated list of tests (id) to execute", "1,3,5");
     parser.addOption(selectedTestsOption);
+    QCommandLineOption forwardOption(QStringList() << "forward",
+                                    "forward connection to upstream proxy", "127.0.0.1:6666");
+    parser.addOption(forwardOption);
 
     parser.process(a);
 
@@ -143,6 +146,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             if (ok && (allTests.size() > num))
                 selectedTests << num;
         }
+    }
+    if (parser.isSet(forwardOption)) {
+        settings->setForwardAddr(parser.value(forwardOption));
     }
 }
 

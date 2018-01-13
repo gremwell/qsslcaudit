@@ -14,6 +14,7 @@ SslUserSettings::SslUserSettings()
     userKeyPath = "";
     userCaCertPath = "";
     userCaKeyPath = "";
+    forwardAddr = "";
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -146,4 +147,26 @@ QString SslUserSettings::getUserCaKeyPath() const
 XSslKey SslUserSettings::getUserCaKey() const
 {
     return SslCertGen::keyFromFile(userCaKeyPath);
+}
+
+void SslUserSettings::setForwardAddr(const QString &addr)
+{
+    forwardAddr = addr;
+}
+
+QString SslUserSettings::getForwardAddr() const
+{
+    return forwardAddr;
+}
+
+QHostAddress SslUserSettings::getForwardHostAddr() const
+{
+    // TODO: too naive
+    return QHostAddress(forwardAddr.split(":").at(0));
+}
+
+quint16 SslUserSettings::getForwardHostPort() const
+{
+    // TODO: too naive
+    return forwardAddr.split(":").last().toInt();
 }
