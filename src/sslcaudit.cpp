@@ -140,11 +140,6 @@ void SslCAudit::runTest(const SslTest *test)
 
     WHITE("report:");
 
-    qDebug() << testSslErrors;
-    qDebug() << testSocketErrors;
-    qDebug() << testSslConnectionEstablished;
-    qDebug() << testDataReceived;
-
     test->report(testSslErrors, testSocketErrors, testSslConnectionEstablished, testDataReceived);
 
     WHITE("test finished");
