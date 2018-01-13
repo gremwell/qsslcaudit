@@ -17,10 +17,16 @@ static QList<SslTest *> allTests = QList<SslTest *>()
         << new SslTest04()
         << new SslTest05()
         << new SslTest06()
-        << new SslTest07();
+        << new SslTest07()
+        << new SslTest08()
+        << new SslTest09()
+        << new SslTest10()
+        << new SslTest11()
+        << new SslTest12()
+           ;
 
 static QList<int> selectedTests = QList<int>()
-        << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7;
+        << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12;
 
 
 void parseOptions(const QCoreApplication &a, SslUserSettings *settings)

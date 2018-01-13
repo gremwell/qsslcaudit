@@ -36,7 +36,7 @@ public:
     virtual void report(const QList<XSslError> sslErrors,
                         const QList<QAbstractSocket::SocketError> socketErrors,
                         bool sslConnectionEstablished,
-                        bool dataReceived) const;
+                        bool dataReceived) const = 0;
 
     QString description() const { return m_description; }
     void setDescription(const QString &descr) { m_description = descr; }
@@ -59,6 +59,28 @@ private:
     XSslKey m_privateKey;
     QSsl::SslProtocol m_sslProtocol;
     QList<XSslCipher> m_sslCiphers;
+
+};
+
+class SslCertificatesTest : public SslTest
+{
+public:
+    virtual void report(const QList<XSslError> sslErrors,
+                        const QList<QAbstractSocket::SocketError> socketErrors,
+                        bool sslConnectionEstablished,
+                        bool dataReceived) const;
+
+};
+
+class SslProtocolsTest : public SslTest
+{
+public:
+    virtual bool prepare(const SslUserSettings &settings);
+    virtual void report(const QList<XSslError> sslErrors,
+                        const QList<QAbstractSocket::SocketError> socketErrors,
+                        bool sslConnectionEstablished,
+                        bool dataReceived) const;
+    virtual void setProtoAndCiphers() = 0;
 
 };
 
