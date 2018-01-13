@@ -73,9 +73,16 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption forwardOption(QStringList() << "forward",
                                     "forward connection to upstream proxy", "127.0.0.1:6666");
     parser.addOption(forwardOption);
+    QCommandLineOption showciphersOption(QStringList() << "show-ciphers",
+                                    "show ciphers provided by loaded openssl library");
+    parser.addOption(showciphersOption);
 
     parser.process(a);
 
+    if (parser.isSet(showciphersOption)) {
+        SslCAudit::showCiphers();
+        exit(0);
+    }
     if (parser.isSet(listenAddressOption)) {
         settings->setListenAddress(QHostAddress(parser.value(listenAddressOption)));
     }

@@ -34,6 +34,8 @@ public:
 
     void setSslTests(const QList<SslTest *> &tests);
 
+    static void showCiphers();
+
 public slots:
     void run();
 

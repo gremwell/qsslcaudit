@@ -22,7 +22,10 @@ SslCAudit::SslCAudit(const SslUserSettings settings, QObject *parent) :
     settings(settings)
 {
     VERBOSE("SSL library used: " + XSslSocket::sslLibraryVersionString());
+}
 
+void SslCAudit::showCiphers()
+{
     VERBOSE("supported ciphers:");
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
     QString ciphersString = "\t";
