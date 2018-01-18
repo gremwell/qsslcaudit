@@ -1,11 +1,43 @@
 #include "ssltest.h"
 #include "debug.h"
 #include "sslcertgen.h"
+#include "ssltests.h"
 
 
 SslTest::SslTest()
 {
 
+}
+
+SslTest *SslTest::createTest(int id)
+{
+    switch (id) {
+    case 0:
+        return new SslTest01();
+    case 1:
+        return new SslTest02();
+    case 2:
+        return new SslTest03();
+    case 3:
+        return new SslTest04();
+    case 4:
+        return new SslTest05();
+    case 5:
+        return new SslTest06();
+    case 6:
+        return new SslTest07();
+    case 7:
+        return new SslTest08();
+    case 8:
+        return new SslTest09();
+    case 9:
+        return new SslTest10();
+    case 10:
+        return new SslTest11();
+    case 11:
+        return new SslTest12();
+    }
+    return NULL;
 }
 
 void SslCertificatesTest::report(const QList<XSslError> sslErrors,

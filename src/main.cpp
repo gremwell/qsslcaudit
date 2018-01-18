@@ -1,7 +1,7 @@
 
 #include "debug.h"
 #include "sslusersettings.h"
-#include "ssltests.h"
+#include "ssltest.h"
 #include "sslcaudit.h"
 
 #include <QCoreApplication>
@@ -10,24 +10,17 @@
 #include <QHostAddress>
 
 
-static QList<SslTest *> allTests = QList<SslTest *>()
-        << new SslTest01()
-        << new SslTest02()
-        << new SslTest03()
-        << new SslTest04()
-        << new SslTest05()
-        << new SslTest06()
-        << new SslTest07()
-        << new SslTest08()
-        << new SslTest09()
-        << new SslTest10()
-        << new SslTest11()
-        << new SslTest12()
-           ;
+static QList<SslTest *> allTests;
+static QList<int> selectedTests;
 
-static QList<int> selectedTests = QList<int>()
-        << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12;
 
+void createTests()
+{
+    for (int i = 0; i < 12; i++) {
+        selectedTests << i;
+        allTests << SslTest::createTest(i);
+    }
+}
 
 void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 {
@@ -189,6 +182,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion("0.1");
 
     SslUserSettings settings;
+
+    createTests();
 
     parseOptions(a, &settings);
 

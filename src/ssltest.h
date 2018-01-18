@@ -31,6 +31,8 @@ class SslTest
 public:
     SslTest();
 
+    static SslTest *createTest(int id);
+
     virtual bool prepare(const SslUserSettings &settings) = 0;
 
     virtual void report(const QList<XSslError> sslErrors,
