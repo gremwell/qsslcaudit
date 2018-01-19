@@ -1,4 +1,4 @@
-set(APPLICATION_TARGET qsslcaudit)
+set(APPLICATION_TARGET qsslcaudit.bin)
 
 SET( qsslcauditSources
     sslcaudit.cpp

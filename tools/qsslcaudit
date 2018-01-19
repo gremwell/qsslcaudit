@@ -1,0 +1,5 @@
+#!/bin/sh
+
+curdir=`pwd`
+
+LD_LIBRARY_PATH="$curdir" qsslcaudit.bin
