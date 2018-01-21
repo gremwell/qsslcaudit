@@ -7,8 +7,8 @@ This tool can be used to determine if an application that uses TLS/SSL for its d
 Basically, after performing tests using `qsslcaudit` one can answer the following questions about TLS/SSL client:
 
 * Does it properly verify server's certificate?
-** Does it verify that server name (CN) field in the certificate is the same as the target name?
-** Does it verify that certificate was issued by an authority that can be trusted?
+* Does it verify that server name (CN) field in the certificate is the same as the target name?
+* Does it verify that certificate was issued by an authority that can be trusted?
 * Does it support weak protocols (SSLv2, SSLv3) or weak ciphers (EXPORT/LOW/MEDIUM grade)?
 
 If the tested application has some weaknesses in TLS/SSL implementation, there is a risk of man-in-the-middle attack which could lead to sensitive information (such as user credentials) disclosure.
@@ -21,8 +21,14 @@ Some packages have to be installed in order to compile `qsslcaudit`:
 
 * [Qt](https://www.qt.io/) (Qt5-base) development package
 * [GNU TLS](https://www.gnutls.org/) library development package
-* [OpenSSL](https://www.gnutls.org/) library development package
+* [OpenSSL](https://www.openssl.org/) library development package
 * [CMake](https://cmake.org/) tool
+
+Packages for ALT Linux: `cmake qt5-base-devel libgnutls-devel libssl-devel`
+
+Packages for Ubuntu 16.04: `cmake qtbase5-dev libgnutls-dev libssl-dev`
+
+Packages for Fedora 27: `cmake qt5-qtbase-devel gnutls-devel openssl-devel`. Note that Fedora 27 is not supported yet.
 
 Once you have `qsslcaudit` source code repository and packages installed, do the following:
 
@@ -31,11 +37,13 @@ Once you have `qsslcaudit` source code repository and packages installed, do the
 * Compile sources (run make)
 * Install binaries (run make install), optional
 
-    mkdir build
-    cd build
-    cmake ..
-    make
-    sudo make install
+```
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
 
 The following binaries will be installed:
 
@@ -47,15 +55,57 @@ Now the tool is ready to use. However, unsafe SSL protocols can be tested only w
 * Create directory where you would like to store unsafe OpenSSL libraries and binary (can be somewhere in your `$HOME`)
 * Launch helper script to download and compile unsafe OpenSSL library
 
-    mkdir openssl
-    cd openssl
-    ~/Downloads/qsslcaudit/tools/build_openssl.sh
+```
+mkdir openssl
+cd openssl
+~/Downloads/qsslcaudit/tools/build_openssl.sh
+```
 
 That is all. Now, if you want to use `qsslcaudit` with unsafe OpenSSL version, just launch it inside `openssl` directory (or any other you chose).
 
 # Usage
 
 Use `-h` flag to get some usage help.
+
+```
+$ qsslcaudit -h
+Usage: qsslcaudit.bin [options]
+A tool to test SSL clients behavior
+
+SSL client tests:
+        1: certificate trust test with user-supplied certificate
+        2: certificate trust test with self-signed certificate for user-supplied common name
+        3: certificate trust test with self-signed certificate for www.example.com
+        4: certificate trust test with user-supplied common name signed by user-supplied certificate
+        5: certificate trust test with www.example.com common name signed by user-supplied certificate
+        6: certificate trust test with user-supplied common name signed by user-supplied CA certificate
+        7: certificate trust test with www.example.com common name signed by user-supplied CA certificate
+        8: SSLv2 protocol support test
+        9: SSLv3 protocol support test
+        10: SSLv3 protocol and EXPORT grade ciphers support test
+        11: SSLv3 protocol and LOW grade ciphers support test
+        12: SSLv3 protocol and MEDIUM grade ciphers support test
+
+
+Options:
+  -h, --help                      Displays this help.
+  -v, --version                   Displays version information.
+  -l, --listen-address <0.0.0.0>  listen on <address>
+  -p, --listen-port <8443>        bind to <port>
+  --user-cn <example.com>         common name (CN) to suggest to client
+  --server <https://example.com>  grab certificate information from <server>
+  --user-cert <~/host.cert>       path to file containing custom certificate
+                                  (or chain of certificates)
+  --user-key <~/host.key>         path to file containing custom private key
+  --user-ca-cert <~/ca.cert>      path to file containing custom certificate
+                                  usable as CA
+  --user-ca-key <~/ca.key>        path to file containing custom private key
+                                  for CA certificate
+  --selected-tests <1,3,5>        comma-separated list of tests (id) to execute
+  --forward <127.0.0.1:6666>      forward connection to upstream proxy
+  --show-ciphers                  show ciphers provided by loaded openssl
+                                  library
+```
 
 Usage example:
 
@@ -168,6 +218,6 @@ At the time of writing adding new tests requires some knowledge of C++ and QtSsl
 
 The repository includes copy *modified* sources of [Qt Certificate Addon](https://github.com/richmoore/qt-certificate-addon) project. `Qt Certificate Addon` implements abstraction layer over [GNU TLS](https://www.gnutls.org/) library and provides Qt-friendly methods to generate certificates. As its sources were modified (mostly, adaptations to modified Qt SSL stack), it was decided to this project into the repository. However, in future, this decision could be reconsidered.
 
-The most time-consuming part of `qsslcaudit` project development was supporting insecure/unsafe TLS/SSL configurations. Indeed, in present (year 2018) times most operating systems (Linux distributions) include [OpenSSL](https://www.gnutls.org/) library compiled with security-safe settings (disabling SSLv2 and weak ciphers). Some TLS/SSL libraries (like GNU TLS) do not support weak protocols at all. Additionally, abstraction layers (QtSsl, Python M2Crypto and others) implement some security checks disabling unsafe configurations. To overcome these problems and be able to test unsafe TLS/SSL cases it was decided to take QtSsl module implementation and make it *unsafe*.
+The most time-consuming part of `qsslcaudit` project development was supporting insecure/unsafe TLS/SSL configurations. Indeed, in present (year 2018) times most operating systems (Linux distributions) include [OpenSSL](https://www.openssl.org/) library compiled with security-safe settings (disabling SSLv2 and weak ciphers). Some TLS/SSL libraries (like GNU TLS) do not support weak protocols at all. Additionally, abstraction layers (QtSsl, Python M2Crypto and others) implement some security checks disabling unsafe configurations. To overcome these problems and be able to test unsafe TLS/SSL cases it was decided to take QtSsl module implementation and make it *unsafe*.
 
 For this reason one can find `src/unsafessl` directory here with QtSsl modules sources taken from https://github.com/qt/qtbase.git, Git tag `v5.9.3`. Obviously, these sources were heavily modified to make them work outside of the Qt main source tree. However, having such complete implementation in our hands is very helpful if we want to test some non-standard cases.
