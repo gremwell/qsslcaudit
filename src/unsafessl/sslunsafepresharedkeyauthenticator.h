@@ -1,7 +1,7 @@
 #ifndef SSLUNSAFEPRESHAREDKEYAUTHENTICATOR_H
 #define SSLUNSAFEPRESHAREDKEYAUTHENTICATOR_H
 
-#include <QtNetwork/qtnetworkglobal.h>
+//#include <QtNetwork/qtnetworkglobal.h>
 #include <QtCore/QString>
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QMetaType>

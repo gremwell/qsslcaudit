@@ -1,6 +1,6 @@
 
 #include "sslunsafesocket.h"
-#include <QtNetwork/qssldiffiehellmanparameters.h>
+#include "sslunsafediffiehellmanparameters.h"
 #include <QtCore/qmutex.h>
 
 //#include "private/qssl_p.h"

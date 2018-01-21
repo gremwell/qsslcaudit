@@ -1,5 +1,5 @@
 
-#include <QtNetwork/qtnetworkglobal.h>
+//#include <QtNetwork/qtnetworkglobal.h>
 #ifndef QT_NO_OPENSSL
 #include "sslunsafesocket_openssl_symbols_p.h"
 #endif

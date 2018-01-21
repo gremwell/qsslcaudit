@@ -472,7 +472,7 @@ void SslUnsafeSocketPrivate::ensureCiphersAndCertsLoaded()
     resetDefaultCiphers();
     resetDefaultEllipticCurves();
 
-#if QT_CONFIG(library)
+#if 1 //QT_CONFIG(library)
     //load symbols needed to receive certificates from system store
 #if defined(Q_OS_WIN)
     HINSTANCE hLib = LoadLibraryW(L"Crypt32");

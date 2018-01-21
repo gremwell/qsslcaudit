@@ -1,7 +1,7 @@
 #ifndef SSLUNSAFEELLIPTICCURVE_H
 #define SSLUNSAFEELLIPTICCURVE_H
 
-#include <QtNetwork/qtnetworkglobal.h>
+//#include <QtNetwork/qtnetworkglobal.h>
 #include <QtCore/QString>
 #include <QtCore/QMetaType>
 #if QT_DEPRECATED_SINCE(5, 6)

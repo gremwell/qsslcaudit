@@ -1,7 +1,7 @@
 #ifndef SSLUNSAFECONFIGURATION_H
 #define SSLUNSAFECONFIGURATION_H
 
-#include <QtNetwork/qtnetworkglobal.h>
+//#include <QtNetwork/qtnetworkglobal.h>
 #include <QtCore/qshareddata.h>
 
 #include "sslunsafesocket.h"

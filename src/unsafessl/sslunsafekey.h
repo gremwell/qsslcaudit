@@ -1,7 +1,7 @@
 #ifndef SSLUNSAFEKEY_H
 #define SSLUNSAFEKEY_H
 
-#include <QtNetwork/qtnetworkglobal.h>
+//#include <QtNetwork/qtnetworkglobal.h>
 #include <QtCore/qnamespace.h>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qsharedpointer.h>

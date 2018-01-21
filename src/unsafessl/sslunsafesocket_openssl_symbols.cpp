@@ -23,7 +23,7 @@ void sslUnsafeSocketUnresolvedSymbolWarning(const char *functionName)
     qWarning() << "QSslSocket: cannot call unresolved function " << functionName;
 }
 
-#if QT_CONFIG(library)
+#if 1 //QT_CONFIG(library)
 void sslUnsafeSocketCannotResolveSymbolWarning(const char *functionName)
 {
     qWarning() << "QSslSocket: cannot resolve " << functionName;
@@ -370,7 +370,7 @@ DEFINEFUNC(void, PKCS12_free, PKCS12 *pkcs12, pkcs12, return, DUMMYARG)
 
 #if !defined QT_LINKED_OPENSSL
 
-#if !QT_CONFIG(library)
+#if 0 //!QT_CONFIG(library)
 bool uq_resolveOpenSslSymbols()
 {
     qCWarning(lcSsl, "QSslSocket: unable to resolve symbols. Qt is configured without the "

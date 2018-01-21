@@ -1,7 +1,7 @@
 #ifndef SSLUNSAFECERTIFICATEEXTENSION_H
 #define SSLUNSAFECERTIFICATEEXTENSION_H
 
-#include <QtNetwork/qtnetworkglobal.h>
+//#include <QtNetwork/qtnetworkglobal.h>
 #include <QtCore/qnamespace.h>
 #include <QtCore/qshareddata.h>
 #include <QtCore/qstring.h>

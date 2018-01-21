@@ -1,7 +1,7 @@
 #ifndef SSLUNSAFEERROR_H
 #define SSLUNSAFEERROR_H
 
-#include <QtNetwork/qtnetworkglobal.h>
+//#include <QtNetwork/qtnetworkglobal.h>
 #include <QtCore/qvariant.h>
 #include "sslunsafecertificate.h"
 
