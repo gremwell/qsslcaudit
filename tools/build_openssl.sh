@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # this script downloads and compiles openssl.
 # the resulting libraries and openssl binary are stored in the current directory.
