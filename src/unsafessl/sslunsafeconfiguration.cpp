@@ -211,7 +211,11 @@ QList<SslUnsafeCertificate> SslUnsafeConfiguration::systemCaCertificates()
 
 void SslUnsafeConfiguration::setSslOption(QSsl::SslOption option, bool on)
 {
-    d->sslOptions.setFlag(option, on);
+    if (on)
+        d->sslOptions |= option;
+    else
+        d->sslOptions &= ~option;
+    //d->sslOptions.setFlag(option, on);
 }
 
 bool SslUnsafeConfiguration::testSslOption(QSsl::SslOption option) const

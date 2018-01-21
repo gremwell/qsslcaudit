@@ -7,7 +7,7 @@
 #if QT_DEPRECATED_SINCE(5, 6)
 #include <QtCore/QHash>
 #endif
-#include <QtCore/qhashfunctions.h>
+//#include <QtCore/qhashfunctions.h>
 
 
 class SslUnsafeEllipticCurve;

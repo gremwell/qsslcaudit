@@ -482,7 +482,7 @@ static QStringList findAllLibs(QLatin1String filter)
         QStringList entryList = dir.entryList(filters, QDir::Files);
 
         std::sort(entryList.begin(), entryList.end(), LibGreaterThan());
-        for (const QString &entry : qAsConst(entryList))
+        for (const QString &entry : const_cast<const QStringList&>(entryList)) //qAsConst(entryList))
             found << path + QLatin1Char('/') + entry;
     }
 

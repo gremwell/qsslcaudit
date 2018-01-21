@@ -305,8 +305,10 @@ long SslUnsafeSocketBackendPrivate::setupOpenSslOptions(QSsl::SslProtocol protoc
         options |= SSL_OP_NO_COMPRESSION;
 #endif
 
+#if 0
     if (!(sslOptions & QSsl::SslOptionDisableServerCipherPreference))
         options |= SSL_OP_CIPHER_SERVER_PREFERENCE;
+#endif
 
     return options;
 }
@@ -697,7 +699,7 @@ QList<SslUnsafeCertificate> SslUnsafeSocketPrivate::systemCaCertificates()
                 certFiles.insert(it.fileInfo().canonicalFilePath());
             }
         }
-        for (const QString& file : qAsConst(certFiles))
+        for (const QString& file : const_cast<const QSet<QString>&>(certFiles)) //qAsConst(certFiles))
             systemCerts.append(SslUnsafeCertificate::fromPath(file, platformEncodingFormat));
 # ifndef Q_OS_ANDROID
         systemCerts.append(SslUnsafeCertificate::fromPath(QLatin1String("/etc/pki/tls/certs/ca-bundle.crt"), QSsl::Pem)); // Fedora, Mandriva
@@ -804,7 +806,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                     emit q->bytesWritten(totalBytesWritten);
                     emittedBytesWritten = false;
                 }
-                emit q->channelBytesWritten(0, totalBytesWritten);
+                //emit q->channelBytesWritten(0, totalBytesWritten);
             }
         }
 
@@ -908,7 +910,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                 if (readyReadEmittedPointer)
                     *readyReadEmittedPointer = true;
                 emit q->readyRead();
-                emit q->channelReadyRead(0);
+                //emit q->channelReadyRead(0);
                 transmitting = true;
                 continue;
             }
@@ -1099,7 +1101,7 @@ bool SslUnsafeSocketBackendPrivate::startHandshake()
 
     // Translate errors from the error list into SslUnsafeErrors.
     errors.reserve(errors.size() + errorList.size());
-    for (const auto &error : qAsConst(errorList))
+    for (const auto &error : const_cast<const QVector<SslUnsafeErrorEntry>&>(errorList)) //qAsConst(errorList))
         errors << _q_OpenSSL_to_SslUnsafeError(error.code, configuration.peerCertificateChain.value(error.depth));
 
     if (!errors.isEmpty()) {
@@ -1191,7 +1193,7 @@ bool SslUnsafeSocketBackendPrivate::checkSslErrors()
             pauseSocketNotifiers(q);
             paused = true;
         } else {
-            setErrorAndEmit(QAbstractSocket::SslHandshakeFailedError, sslErrors.constFirst().errorString());
+            setErrorAndEmit(QAbstractSocket::SslHandshakeFailedError, sslErrors.first().errorString());
             plainSocket->disconnectFromHost();
         }
         return false;
@@ -1724,7 +1726,7 @@ QList<SslUnsafeError> SslUnsafeSocketBackendPrivate::verify(const QList<SslUnsaf
 
     // Translate errors from the error list into SslUnsafeErrors.
     errors.reserve(errors.size() + errorList.size());
-    for (const auto &error : qAsConst(errorList))
+    for (const auto &error : const_cast<const QVector<SslUnsafeErrorEntry>&>(errorList)) //qAsConst(errorList))
         errors << _q_OpenSSL_to_SslUnsafeError(error.code, certificateChain.value(error.depth));
 
     uq_X509_STORE_free(certStore);

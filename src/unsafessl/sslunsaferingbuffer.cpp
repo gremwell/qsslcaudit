@@ -26,14 +26,14 @@ void SslUnsafeRingBuffer::free(qint64 bytes)
     Q_ASSERT(bytes <= bufferSize);
 
     while (bytes > 0) {
-        const qint64 blockSize = buffers.constFirst().size() - head;
+        const qint64 blockSize = buffers.first().size() - head;
 
         if (tailBuffer == 0 || blockSize > bytes) {
             // keep a single block around if it does not exceed
             // the basic block size, to avoid repeated allocations
             // between uses of the buffer
             if (bufferSize <= bytes) {
-                if (buffers.constFirst().size() <= basicBlockSize) {
+                if (buffers.first().size() <= basicBlockSize) {
                     bufferSize = 0;
                     head = tail = 0;
                 } else {
@@ -68,7 +68,7 @@ char *SslUnsafeRingBuffer::reserve(qint64 bytes)
     } else {
         const qint64 newSize = bytes + tail;
         // if need a new buffer
-        if (basicBlockSize == 0 || (newSize > buffers.constLast().capacity()
+        if (basicBlockSize == 0 || (newSize > buffers.last().capacity()
                                     && (tail >= basicBlockSize || newSize >= MaxByteArraySize))) {
             // shrink this buffer to its current size
             buffers.last().resize(tail);
@@ -77,7 +77,7 @@ char *SslUnsafeRingBuffer::reserve(qint64 bytes)
             buffers.append(QByteArray(qMax(basicBlockSize, int(bytes)), Qt::Uninitialized));
             ++tailBuffer;
             tail = 0;
-        } else if (newSize > buffers.constLast().size()) {
+        } else if (newSize > buffers.last().size()) {
             buffers.last().resize(qMax(basicBlockSize, int(newSize)));
         }
     }
@@ -133,7 +133,7 @@ void SslUnsafeRingBuffer::chop(qint64 bytes)
             // the basic block size, to avoid repeated allocations
             // between uses of the buffer
             if (bufferSize <= bytes) {
-                if (buffers.constFirst().size() <= basicBlockSize) {
+                if (buffers.first().size() <= basicBlockSize) {
                     bufferSize = 0;
                     head = tail = 0;
                 } else {
@@ -151,7 +151,7 @@ void SslUnsafeRingBuffer::chop(qint64 bytes)
         bytes -= tail;
         buffers.removeLast();
         --tailBuffer;
-        tail = buffers.constLast().size();
+        tail = buffers.last().size();
     }
 }
 

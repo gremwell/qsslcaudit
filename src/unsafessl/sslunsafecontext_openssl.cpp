@@ -151,7 +151,7 @@ init_context:
     QList<SslUnsafeCipher> ciphers = sslContext->sslConfiguration.ciphers();
     if (ciphers.isEmpty())
         ciphers = SslUnsafeSocketPrivate::defaultCiphers();
-    for (const SslUnsafeCipher &cipher : qAsConst(ciphers)) {
+    for (const SslUnsafeCipher &cipher : const_cast<const QList<SslUnsafeCipher>&>(ciphers)) { // qAsConst(ciphers)) {
         if (first)
             first = false;
         else
@@ -243,7 +243,7 @@ init_context:
 
         // If we have any intermediate certificates then we need to add them to our chain
         bool first = true;
-        for (const SslUnsafeCertificate &cert : qAsConst(configuration.d->localCertificateChain)) {
+        for (const SslUnsafeCertificate &cert : const_cast<const QList<SslUnsafeCertificate>&>(configuration.d->localCertificateChain)) { //qAsConst(configuration.d->localCertificateChain)) {
             if (first) {
                 first = false;
                 continue;

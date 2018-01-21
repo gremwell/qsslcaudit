@@ -113,8 +113,8 @@ bool SslUnsafeSocket::setSocketDescriptor(qintptr socketDescriptor, SocketState 
     setPeerPort(d->plainSocket->peerPort());
     setPeerAddress(d->plainSocket->peerAddress());
     setPeerName(d->plainSocket->peerName());
-    d->readChannelCount = d->plainSocket->readChannelCount();
-    d->writeChannelCount = d->plainSocket->writeChannelCount();
+    // d->readChannelCount = d->plainSocket->readChannelCount();
+    // d->writeChannelCount = d->plainSocket->writeChannelCount();
     return retVal;
 }
 
@@ -1284,7 +1284,7 @@ void SslUnsafeSocket::connectToHost(const QString &hostName, quint16 port, OpenM
     d->plainSocket->setProxy(proxy());
 #endif
     QIODevice::open(openMode);
-    d->readChannelCount = d->writeChannelCount = 0;
+    //d->readChannelCount = d->writeChannelCount = 0;
     d->plainSocket->connectToHost(hostName, port, openMode, d->preferredNetworkLayerProtocol);
     d->cachedSocketDescriptor = d->plainSocket->socketDescriptor();
 }
@@ -1640,15 +1640,15 @@ void SslUnsafeSocketPrivate::createPlainSocket(QIODevice::OpenMode openMode)
     q->connect(plainSocket, SIGNAL(readyRead()),
                q, SLOT(_q_readyReadSlot()),
                Qt::DirectConnection);
-    q->connect(plainSocket, SIGNAL(channelReadyRead(int)),
-               q, SLOT(_q_channelReadyReadSlot(int)),
-               Qt::DirectConnection);
+//    q->connect(plainSocket, SIGNAL(channelReadyRead(int)),
+//               q, SLOT(_q_channelReadyReadSlot(int)),
+//               Qt::DirectConnection);
     q->connect(plainSocket, SIGNAL(bytesWritten(qint64)),
                q, SLOT(_q_bytesWrittenSlot(qint64)),
                Qt::DirectConnection);
-    q->connect(plainSocket, SIGNAL(channelBytesWritten(int, qint64)),
-               q, SLOT(_q_channelBytesWrittenSlot(int, qint64)),
-               Qt::DirectConnection);
+//    q->connect(plainSocket, SIGNAL(channelBytesWritten(int, qint64)),
+//               q, SLOT(_q_channelBytesWrittenSlot(int, qint64)),
+//               Qt::DirectConnection);
     q->connect(plainSocket, SIGNAL(readChannelFinished()),
                q, SLOT(_q_readChannelFinishedSlot()),
                Qt::DirectConnection);
@@ -1707,7 +1707,7 @@ bool SslUnsafeSocketPrivate::bind(const QHostAddress &address, quint16 port, QAb
     //localAddress = plainSocket->localAddress();
     setLocalAddress(plainSocket->localAddress());
     cachedSocketDescriptor = plainSocket->socketDescriptor();
-    readChannelCount = writeChannelCount = 0;
+    //readChannelCount = writeChannelCount = 0;
     return ret;
 }
 
@@ -1723,8 +1723,8 @@ void SslUnsafeSocketPrivate::_q_connectedSlot()
     q->setPeerAddress(plainSocket->peerAddress());
     q->setPeerName(plainSocket->peerName());
     cachedSocketDescriptor = plainSocket->socketDescriptor();
-    readChannelCount = plainSocket->readChannelCount();
-    writeChannelCount = plainSocket->writeChannelCount();
+    // readChannelCount = plainSocket->readChannelCount();
+    // writeChannelCount = plainSocket->writeChannelCount();
 
 #ifdef SSLUNSAFESOCKET_DEBUG
     qDebug() << "SslUnsafeSocket::_q_connectedSlot()";
@@ -1837,12 +1837,12 @@ void SslUnsafeSocketPrivate::_q_readyReadSlot()
 /*!
     \internal
 */
-void SslUnsafeSocketPrivate::_q_channelReadyReadSlot(int channel)
-{
-    Q_Q(SslUnsafeSocket);
-    if (mode == SslUnsafeSocket::UnencryptedMode)
-        emit q->channelReadyRead(channel);
-}
+//void SslUnsafeSocketPrivate::_q_channelReadyReadSlot(int channel)
+//{
+//    Q_Q(SslUnsafeSocket);
+//    if (mode == SslUnsafeSocket::UnencryptedMode)
+//        emit q->channelReadyRead(channel);
+//}
 
 /*!
     \internal
@@ -1865,12 +1865,12 @@ void SslUnsafeSocketPrivate::_q_bytesWrittenSlot(qint64 written)
 /*!
     \internal
 */
-void SslUnsafeSocketPrivate::_q_channelBytesWrittenSlot(int channel, qint64 written)
-{
-    Q_Q(SslUnsafeSocket);
-    if (mode == SslUnsafeSocket::UnencryptedMode)
-        emit q->channelBytesWritten(channel, written);
-}
+//void SslUnsafeSocketPrivate::_q_channelBytesWrittenSlot(int channel, qint64 written)
+//{
+//    Q_Q(SslUnsafeSocket);
+//    if (mode == SslUnsafeSocket::UnencryptedMode)
+//        emit q->channelBytesWritten(channel, written);
+//}
 
 /*!
     \internal
@@ -2059,19 +2059,18 @@ QSharedPointer<SslUnsafeContext> SslUnsafeSocketPrivate::sslContext(SslUnsafeSoc
 
 bool SslUnsafeSocketPrivate::isMatchingHostname(const SslUnsafeCertificate &cert, const QString &peerName)
 {
-    const QString lowerPeerName = QString::fromLatin1(QUrl::toAce(peerName));
-    const QStringList commonNames = cert.subjectInfo(SslUnsafeCertificate::CommonName);
+    QStringList commonNameList = cert.subjectInfo(SslUnsafeCertificate::CommonName);
 
-    for (const QString &commonName : commonNames) {
-        if (isMatchingHostname(commonName, lowerPeerName))
+    foreach (const QString &commonName, commonNameList) {
+        if (isMatchingHostname(commonName.toLower(), peerName.toLower())) {
             return true;
+        }
     }
 
-    const auto subjectAlternativeNames = cert.subjectAlternativeNames();
-    const auto altNames = subjectAlternativeNames.equal_range(QSsl::DnsEntry);
-    for (auto it = altNames.first; it != altNames.second; ++it) {
-        if (isMatchingHostname(*it, lowerPeerName))
+    foreach (const QString &altName, cert.subjectAlternativeNames().values(QSsl::DnsEntry)) {
+        if (isMatchingHostname(altName.toLower(), peerName.toLower())) {
             return true;
+        }
     }
 
     return false;
