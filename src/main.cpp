@@ -89,7 +89,10 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         settings->setUserCN(parser.value(userCNOption));
     }
     if (parser.isSet(serverOption)) {
-        settings->setServerAddr(parser.value(serverOption));
+        ok = settings->setServerAddr(parser.value(serverOption));
+        if (!ok)
+            exit(-1);
+
         if ((settings->getServerAddr().length() > 0)
                 && (settings->getUserCN().length() > 0)) {
             VERBOSE("as server address is specified, user-cn value will be ignored");

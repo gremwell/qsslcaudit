@@ -1,7 +1,15 @@
 
 #include "sslusersettings.h"
-
 #include "sslcertgen.h"
+#include "debug.h"
+
+#include <QUrl>
+
+#ifdef UNSAFE
+#include "sslunsafesocket.h"
+#else
+#include <QSslSocket>
+#endif
 
 
 SslUserSettings::SslUserSettings()
@@ -47,14 +55,37 @@ QString SslUserSettings::getUserCN() const
     return userCN;
 }
 
-void SslUserSettings::setServerAddr(const QString &addr)
+bool SslUserSettings::setServerAddr(const QString &addr)
 {
+    XSslSocket socket;
+    QUrl url = QUrl::fromUserInput(addr);
+    QString host = url.host();
+    quint16 port = url.port(443);
+
+    socket.connectToHostEncrypted(host, port);
+    if (!socket.waitForEncrypted()) {
+        RED("failed to connect to " + addr);
+        return false;
+    }
+
+    // obtain connection parameters
+    peerCerts = socket.peerCertificateChain();
+
+    socket.disconnectFromHost();
+
     serverAddr = addr;
+
+    return true;
 }
 
 QString SslUserSettings::getServerAddr() const
 {
     return serverAddr;
+}
+
+QList<XSslCertificate> SslUserSettings::getPeerCertificates() const
+{
+    return peerCerts;
 }
 
 bool SslUserSettings::setUserCertPath(const QString &path)
@@ -161,12 +192,12 @@ QString SslUserSettings::getForwardAddr() const
 
 QHostAddress SslUserSettings::getForwardHostAddr() const
 {
-    // TODO: too naive
-    return QHostAddress(forwardAddr.split(":").at(0));
+    QUrl url = QUrl::fromUserInput(forwardAddr);
+    return QHostAddress(url.host());
 }
 
 quint16 SslUserSettings::getForwardHostPort() const
 {
-    // TODO: too naive
-    return forwardAddr.split(":").last().toInt();
+    QUrl url = QUrl::fromUserInput(forwardAddr);
+    return url.port();
 }

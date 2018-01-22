@@ -12,9 +12,11 @@
 #ifdef UNSAFE
 #define XSslCertificate SslUnsafeCertificate
 #define XSslKey SslUnsafeKey
+#define XSslSocket SslUnsafeSocket
 #else
 #define XSslCertificate QSslCertificate
 #define XSslKey QSslKey
+#define XSslSocket QSslSocket
 #endif
 
 
@@ -32,8 +34,9 @@ public:
     void setUserCN(const QString &cn);
     QString getUserCN() const;
 
-    void setServerAddr(const QString &addr);
+    bool setServerAddr(const QString &addr);
     QString getServerAddr() const;
+    QList<XSslCertificate> getPeerCertificates() const;
 
     bool setUserCertPath(const QString &path);
     QString getUserCertPath() const;
@@ -66,6 +69,7 @@ private:
     QString userCaCertPath;
     QString userCaKeyPath;
     QString forwardAddr;
+    QList<XSslCertificate> peerCerts;
 
 };
 

@@ -39,11 +39,17 @@ bool SslTest01::prepare(const SslUserSettings &settings)
 
 bool SslTest02::prepare(const SslUserSettings &settings)
 {
-    if (settings.getUserCN().length()) {
+    QString cn;
+
+    if (settings.getUserCN().length() != 0) {
+        cn = settings.getUserCN();
+    } else if (settings.getServerAddr().length() != 0) {
+        cn = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
+    } else {
         return false;
     }
 
-    QPair<XSslCertificate, XSslKey> cert = SslCertGen::genSignedCert(settings.getUserCN());
+    QPair<XSslCertificate, XSslKey> cert = SslCertGen::genSignedCert(cn);
 
     QList<XSslCertificate> chain;
     chain << cert.first;
@@ -79,8 +85,15 @@ bool SslTest03::prepare(const SslUserSettings &settings)
 
 bool SslTest04::prepare(const SslUserSettings &settings)
 {
-    if (settings.getUserCN().length() == 0)
+    QString cn;
+
+    if (settings.getUserCN().length() != 0) {
+        cn = settings.getUserCN();
+    } else if (settings.getServerAddr().length() != 0) {
+        cn = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
+    } else {
         return false;
+    }
 
     QList<XSslCertificate> chain = settings.getUserCert();
     if (chain.size() == 0)
@@ -90,7 +103,7 @@ bool SslTest04::prepare(const SslUserSettings &settings)
     if (key.isNull())
         return false;
 
-    QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert(settings.getUserCN(), chain.at(0), key);
+    QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert(cn, chain.at(0), key);
 
     setLocalCert(generatedCert.first);
     setPrivateKey(generatedCert.second);
@@ -128,9 +141,15 @@ bool SslTest05::prepare(const SslUserSettings &settings)
 
 bool SslTest06::prepare(const SslUserSettings &settings)
 {
-    if (settings.getUserCN().length() == 0)
-        return false;
+    QString cn;
 
+    if (settings.getUserCN().length() != 0) {
+        cn = settings.getUserCN();
+    } else if (settings.getServerAddr().length() != 0) {
+        cn = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
+    } else {
+        return false;
+    }
 
     QList<XSslCertificate> chain = settings.getUserCaCert();
     if (chain.size() == 0)
@@ -141,7 +160,7 @@ bool SslTest06::prepare(const SslUserSettings &settings)
         return false;
 
 
-    QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert(settings.getUserCN(), chain.at(0), key);
+    QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert(cn, chain.at(0), key);
 
     setLocalCert(generatedCert.first);
     setPrivateKey(generatedCert.second);
