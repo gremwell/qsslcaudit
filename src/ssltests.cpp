@@ -39,17 +39,19 @@ bool SslTest01::prepare(const SslUserSettings &settings)
 
 bool SslTest02::prepare(const SslUserSettings &settings)
 {
-    QString cn;
+    QPair<XSslCertificate, XSslKey> cert;
 
     if (settings.getUserCN().length() != 0) {
-        cn = settings.getUserCN();
+        QString cn = settings.getUserCN();
+
+        cert = SslCertGen::genSignedCert(cn);
     } else if (settings.getServerAddr().length() != 0) {
-        cn = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
+        XSslCertificate basecert = settings.getPeerCertificates().first();
+
+        cert = SslCertGen::genSignedCertFromTemplate(basecert);
     } else {
         return false;
     }
-
-    QPair<XSslCertificate, XSslKey> cert = SslCertGen::genSignedCert(cn);
 
     QList<XSslCertificate> chain;
     chain << cert.first;
@@ -85,15 +87,7 @@ bool SslTest03::prepare(const SslUserSettings &settings)
 
 bool SslTest04::prepare(const SslUserSettings &settings)
 {
-    QString cn;
-
-    if (settings.getUserCN().length() != 0) {
-        cn = settings.getUserCN();
-    } else if (settings.getServerAddr().length() != 0) {
-        cn = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
-    } else {
-        return false;
-    }
+    QPair<QList<XSslCertificate>, XSslKey> generatedCert;
 
     QList<XSslCertificate> chain = settings.getUserCert();
     if (chain.size() == 0)
@@ -103,7 +97,17 @@ bool SslTest04::prepare(const SslUserSettings &settings)
     if (key.isNull())
         return false;
 
-    QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert(cn, chain.at(0), key);
+    if (settings.getUserCN().length() != 0) {
+        QString cn = settings.getUserCN();
+
+        generatedCert = SslCertGen::genSignedByCACert(cn, chain.at(0), key);
+    } else if (settings.getServerAddr().length() != 0) {
+        XSslCertificate basecert = settings.getPeerCertificates().first();
+
+        generatedCert = SslCertGen::genSignedByCACertFromTemplate(basecert, chain.at(0), key);
+    } else {
+        return false;
+    }
 
     setLocalCert(generatedCert.first);
     setPrivateKey(generatedCert.second);
