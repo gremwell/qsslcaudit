@@ -32,9 +32,16 @@ public:
 
     static QPair<XSslCertificate, XSslKey> genSignedCert(const QString &domain, const XSslKey &key = XSslKey());
 
+    static QPair<XSslCertificate, XSslKey> genSignedCertFromTemplate(const XSslCertificate &basecert,
+                                                                     const XSslKey &key = XSslKey());
+
     static QPair<QList<XSslCertificate>, XSslKey> genSignedByCACert(const QString &domain,
                                                                     const XSslCertificate &cacert,
                                                                     const XSslKey &cakey);
+
+    static QPair<QList<XSslCertificate>, XSslKey> genSignedByCACertFromTemplate(const XSslCertificate &basecert,
+                                                                                const XSslCertificate &cacert,
+                                                                                const XSslKey &cakey);
 
     static QPair<QList<XSslCertificate>, XSslKey> genSignedByCACertChain(const QString &domain,
                                                                          const XSslCertificate &cacert,
