@@ -93,6 +93,9 @@ QByteArray entrytype_to_oid(Certificate::EntryType type)
     case EntryEmail:
         oid = QByteArray(GNUTLS_OID_PKCS9_EMAIL);
         break;
+    case EntryDistinguishedNameQualifier:
+        oid = QByteArray(GNUTLS_OID_X520_DN_QUALIFIER);
+        break;
     default:
         qWarning("Unhandled name entry type %d", int(type));
     }

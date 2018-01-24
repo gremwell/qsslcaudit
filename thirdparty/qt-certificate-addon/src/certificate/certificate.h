@@ -49,9 +49,10 @@ namespace Certificate {
         EntryCommonName,
         EntryLocalityName,
         EntryStateOrProvinceName,
-        EntryEmail
+        EntryEmail,
+        EntryDistinguishedNameQualifier,
     };
-};
+}
 
 QT_END_NAMESPACE_CERTIFICATE
 
