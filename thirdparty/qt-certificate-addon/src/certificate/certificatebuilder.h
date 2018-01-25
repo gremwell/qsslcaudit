@@ -50,14 +50,6 @@
 
 #include "certificate_global.h"
 
-#ifdef UNSAFE
-#define XSslCertificate SslUnsafeCertificate
-#define XSslKey SslUnsafeKey
-#else
-#define XSslCertificate QSslCertificate
-#define XSslKey QSslKey
-#endif
-
 
 class QDateTime;
 

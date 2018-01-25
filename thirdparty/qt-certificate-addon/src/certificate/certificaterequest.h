@@ -50,11 +50,6 @@
 #include "certificate_global.h"
 #include "certificate.h"
 
-#ifdef UNSAFE
-#define XSsl SslUnsafe
-#else
-#define XSsl QSsl
-#endif
 
 class QIODevice;
 

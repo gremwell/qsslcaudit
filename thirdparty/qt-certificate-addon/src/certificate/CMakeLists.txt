@@ -31,7 +31,28 @@ list(APPEND qtcertificateaddon_HEADERS
     utils_p.h
 )
 
+# unsafe mode
 add_definitions(-DUNSAFE)
+
+add_definitions(-DXSsl=SslUnsafe)
+add_definitions(-DXSslConfiguration=SslUnsafeConfiguration)
+add_definitions(-DXSslSocket=SslUnsafeSocket)
+add_definitions(-DXSslCertificate=SslUnsafeCertificate)
+add_definitions(-DXSslKey=SslUnsafeKey)
+add_definitions(-DXSslCipher=SslUnsafeCipher)
+add_definitions(-DXSslEllipticCurve=SslUnsafeEllipticCurve)
+add_definitions(-DXSslError=SslUnsafeError)
+
+# safe mode
+#add_definitions(-DXSsl=QSsl)
+#add_definitions(-DXSslConfiguration=QSslConfiguration)
+#add_definitions(-DXSslSocket=QSslSocket)
+#add_definitions(-DXSslCertificate=QSslCertificate)
+#add_definitions(-DXSslKey=QSslKey)
+#add_definitions(-DXSslCipher=QSslCipher)
+#add_definitions(-DXSslEllipticCurve=QSslEllipticCurve)
+#add_definitions(-DXSslError=QSslError)
+
 
 include_directories(${qtcertificateaddon_INCLUDE_DIRECTORIES} ${GNUTLS_INCLUDE_DIR})
 add_library(qtcertificateaddon STATIC ${qtcertificateaddon_SOURCES} ${qtcertificateaddon_HEADERS})

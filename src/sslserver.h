@@ -35,23 +35,6 @@
 #include <QSslCipher>
 #endif
 
-#ifdef UNSAFE
-#define XSsl SslUnsafe
-#define XSslConfiguration SslUnsafeConfiguration
-#define XSslSocket SslUnsafeSocket
-#define XSslCertificate SslUnsafeCertificate
-#define XSslKey SslUnsafeKey
-#define XSslCipher SslUnsafeCipher
-#define XSslEllipticCurve SslUnsafeEllipticCurve
-#else
-#define XSsl QSsl
-#define XSslConfiguration QSslConfiguration
-#define XSslSocket QSslSocket
-#define XSslCertificate QSslCertificate
-#define XSslKey QSslKey
-#define XSslCipher QSslCipher
-#define XSslEllipticCurve QSslEllipticCurve
-#endif
 
 class XSslSocket;
 

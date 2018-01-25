@@ -14,16 +14,6 @@
 #include "sslusersettings.h"
 #include "ssltest.h"
 
-#ifdef UNSAFE
-#define XSslSocket SslUnsafeSocket
-#define XSslError SslUnsafeError
-#define XSslCertificate SslUnsafeCertificate
-#else
-#define XSslSocket QSslSocket
-#define XSslError QSslError
-#define XSslCertificate QSslCertificate
-#endif
-
 
 class SslCAudit : public QObject
 {

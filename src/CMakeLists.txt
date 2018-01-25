@@ -24,9 +24,30 @@ SET( qsslcauditHeaders
     starttls.h
     )
 
+# unsafe mode
 add_definitions(-DUNSAFE)
 
+add_definitions(-DXSsl=SslUnsafe)
+add_definitions(-DXSslConfiguration=SslUnsafeConfiguration)
+add_definitions(-DXSslSocket=SslUnsafeSocket)
+add_definitions(-DXSslCertificate=SslUnsafeCertificate)
+add_definitions(-DXSslKey=SslUnsafeKey)
+add_definitions(-DXSslCipher=SslUnsafeCipher)
+add_definitions(-DXSslEllipticCurve=SslUnsafeEllipticCurve)
+add_definitions(-DXSslError=SslUnsafeError)
+
 add_subdirectory(unsafessl)
+
+# safe mode
+#add_definitions(-DXSsl=QSsl)
+#add_definitions(-DXSslConfiguration=QSslConfiguration)
+#add_definitions(-DXSslSocket=QSslSocket)
+#add_definitions(-DXSslCertificate=QSslCertificate)
+#add_definitions(-DXSslKey=QSslKey)
+#add_definitions(-DXSslCipher=QSslCipher)
+#add_definitions(-DXSslEllipticCurve=QSslEllipticCurve)
+#add_definitions(-DXSslError=QSslError)
+
 
 SET( THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty" )
 SET( UNSAFESSL_DIR "${CMAKE_SOURCE_DIR}/src/unsafessl" )

@@ -49,14 +49,6 @@
 
 #include "certificate_global.h"
 
-#ifdef UNSAFE
-#define XSsl SslUnsafe
-#define XSslKey SslUnsafeKey
-#else
-#define XSsl QSsl
-#define XSslKey QSslKey
-#endif
-
 
 QT_BEGIN_NAMESPACE_CERTIFICATE
 

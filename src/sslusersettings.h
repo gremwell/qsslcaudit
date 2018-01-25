@@ -11,16 +11,6 @@
 #include <QSslCertificate>
 #endif
 
-#ifdef UNSAFE
-#define XSslCertificate SslUnsafeCertificate
-#define XSslKey SslUnsafeKey
-#define XSslSocket SslUnsafeSocket
-#else
-#define XSslCertificate QSslCertificate
-#define XSslKey QSslKey
-#define XSslSocket QSslSocket
-#endif
-
 
 class SslUserSettings
 {

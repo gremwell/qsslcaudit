@@ -13,20 +13,6 @@
 
 #include "sslusersettings.h"
 
-#ifdef UNSAFE
-#define XSsl SslUnsafe
-#define XSslError SslUnsafeError
-#define XSslCertificate SslUnsafeCertificate
-#define XSslKey SslUnsafeKey
-#define XSslCipher SslUnsafeCipher
-#else
-#define XSsl QSsl
-#define XSslError QSslError
-#define XSslCertificate QSslCertificate
-#define XSslKey QSslKey
-#define XSslCipher QSslCipher
-#endif
-
 
 class SslTest
 {

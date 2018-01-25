@@ -3,15 +3,6 @@
 
 #include "ssltest.h"
 
-#ifdef UNSAFE
-#define XSslConfiguration SslUnsafeConfiguration
-#define XSslError SslUnsafeError
-#define XSslCertificate SslUnsafeCertificate
-#else
-#define XSslConfiguration QSslConfiguration
-#define XSslError QSslError
-#define XSslCertificate QSslCertificate
-#endif
 
 class SslTest01 : public SslCertificatesTest
 {

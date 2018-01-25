@@ -52,16 +52,6 @@
 
 #include "certificate_global.h"
 
-#ifdef UNSAFE
-#define XSsl SslUnsafe
-#define XSslCertificate SslUnsafeCertificate
-#define XSslKey SslUnsafeKey
-#else
-#define XSsl QSsl
-#define XSslCertificate QSslCertificate
-#define XSslKey QSslKey
-#endif
-
 
 class QIODevice;
 class QByteArray;
