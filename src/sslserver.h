@@ -36,6 +36,7 @@
 #endif
 
 #ifdef UNSAFE
+#define XSsl SslUnsafe
 #define XSslConfiguration SslUnsafeConfiguration
 #define XSslSocket SslUnsafeSocket
 #define XSslCertificate SslUnsafeCertificate
@@ -43,6 +44,7 @@
 #define XSslCipher SslUnsafeCipher
 #define XSslEllipticCurve SslUnsafeEllipticCurve
 #else
+#define XSsl QSsl
 #define XSslConfiguration QSslConfiguration
 #define XSslSocket QSslSocket
 #define XSslCertificate QSslCertificate
@@ -62,19 +64,19 @@ public:
 
     const XSslCertificate &getSslLocalCertificate() const;
     const XSslKey &getSslPrivateKey() const;
-    QSsl::SslProtocol getSslProtocol() const;
+    XSsl::SslProtocol getSslProtocol() const;
 
     void setSslLocalCertificate(const XSslCertificate &certificate);
-    bool setSslLocalCertificate(const QString &path, QSsl::EncodingFormat format = QSsl::Pem);
+    bool setSslLocalCertificate(const QString &path, XSsl::EncodingFormat format = XSsl::Pem);
 
     void setSslLocalCertificateChain(const QList<XSslCertificate> &chain);
-    bool setSslLocalCertificateChain(const QString &path, QSsl::EncodingFormat format = QSsl::Pem);
+    bool setSslLocalCertificateChain(const QString &path, XSsl::EncodingFormat format = XSsl::Pem);
 
     void setSslPrivateKey(const XSslKey &key);
-    bool setSslPrivateKey(const QString &fileName, QSsl::KeyAlgorithm algorithm = QSsl::Rsa,
-                          QSsl::EncodingFormat format = QSsl::Pem, const QByteArray &passPhrase = QByteArray());
+    bool setSslPrivateKey(const QString &fileName, XSsl::KeyAlgorithm algorithm = XSsl::Rsa,
+                          XSsl::EncodingFormat format = XSsl::Pem, const QByteArray &passPhrase = QByteArray());
 
-    void setSslProtocol(const QSsl::SslProtocol protocol);
+    void setSslProtocol(const XSsl::SslProtocol protocol);
 
     void setSslCiphers(const QList<XSslCipher> &ciphers);
     void setSslEllipticCurves(const QVector<XSslEllipticCurve> &ecurves);
@@ -96,7 +98,7 @@ private:
     XSslCertificate m_sslLocalCertificate;
     QList<XSslCertificate> m_sslCertsChain;
     XSslKey m_sslPrivateKey;
-    QSsl::SslProtocol m_sslProtocol;
+    XSsl::SslProtocol m_sslProtocol;
     QList<XSslCipher> m_sslCiphers;
     QVector<XSslEllipticCurve> m_sslEllipticCurves;
     SslServer::StartTlsProtocol m_startTlsProtocol;

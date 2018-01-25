@@ -219,7 +219,7 @@ bool CertificateRequestBuilder::addNameEntry(const QByteArray &oid, const QByteA
 }
 
 #if QT_VERSION >= 0x050000
-bool CertificateRequestBuilder::addSubjectAlternativeNameEntry(QSsl::AlternativeNameEntryType qtype, const QByteArray &value)
+bool CertificateRequestBuilder::addSubjectAlternativeNameEntry(XSsl::AlternativeNameEntryType qtype, const QByteArray &value)
 {
     gnutls_x509_subject_alt_name_t type = qssl_altnameentrytype_to_altname(qtype);
 
@@ -227,7 +227,7 @@ bool CertificateRequestBuilder::addSubjectAlternativeNameEntry(QSsl::Alternative
     return GNUTLS_E_SUCCESS == d->errnumber;
 }
 #else
-bool CertificateRequestBuilder::addSubjectAlternativeNameEntry(QSsl::AlternateNameEntryType qtype, const QByteArray &value)
+bool CertificateRequestBuilder::addSubjectAlternativeNameEntry(XSsl::AlternateNameEntryType qtype, const QByteArray &value)
 {
     gnutls_x509_subject_alt_name_t type = qssl_altnameentrytype_to_altname(qtype);
 

@@ -19,7 +19,7 @@ SslCertGen::SslCertGen()
 
 }
 
-XSslCertificate SslCertGen::certFromFile(const QString &path, QSsl::EncodingFormat format)
+XSslCertificate SslCertGen::certFromFile(const QString &path, XSsl::EncodingFormat format)
 {
     XSslCertificate ret;
     QFile certificateFile(path);
@@ -36,7 +36,7 @@ XSslCertificate SslCertGen::certFromFile(const QString &path, QSsl::EncodingForm
     return ret;
 }
 
-QList<XSslCertificate> SslCertGen::certChainFromFile(const QString &path, QSsl::EncodingFormat format)
+QList<XSslCertificate> SslCertGen::certChainFromFile(const QString &path, XSsl::EncodingFormat format)
 {
     QList<XSslCertificate> ret;
     QFile certificateFile(path);
@@ -52,8 +52,8 @@ QList<XSslCertificate> SslCertGen::certChainFromFile(const QString &path, QSsl::
     return ret;
 }
 
-XSslKey SslCertGen::keyFromFile(const QString &path, QSsl::KeyAlgorithm algorithm,
-                                QSsl::EncodingFormat format, const QByteArray &passPhrase)
+XSslKey SslCertGen::keyFromFile(const QString &path, XSsl::KeyAlgorithm algorithm,
+                                XSsl::EncodingFormat format, const QByteArray &passPhrase)
 {
     XSslKey ret;
     QFile keyFile(path);
@@ -63,7 +63,7 @@ XSslKey SslCertGen::keyFromFile(const QString &path, QSsl::KeyAlgorithm algorith
         return ret;
     }
 
-    ret = XSslKey(keyFile.readAll(), algorithm, format, QSsl::PrivateKey, passPhrase);
+    ret = XSslKey(keyFile.readAll(), algorithm, format, XSsl::PrivateKey, passPhrase);
     if (ret.isNull())
         qDebug() << "failed to read key from file" << path;
 
@@ -174,7 +174,7 @@ QPair<XSslCertificate, XSslKey> SslCertGen::genSignedCert(const QString &domain,
     // if null key is provided, then generate self-signed certificate with random private key,
     // otherwise, use the provided key
     if (ukey.isNull()) {
-        key = KeyBuilder::generate(QSsl::Rsa, KeyBuilder::StrengthNormal);
+        key = KeyBuilder::generate(XSsl::Rsa, KeyBuilder::StrengthNormal);
     } else {
         key = ukey;
     }
@@ -200,7 +200,7 @@ QPair<XSslCertificate, XSslKey> SslCertGen::genSignedCertFromTemplate(const XSsl
     // if null key is provided, then generate self-signed certificate with random private key,
     // otherwise, use the provided key
     if (ukey.isNull()) {
-        key = KeyBuilder::generate(QSsl::Rsa, KeyBuilder::StrengthNormal);
+        key = KeyBuilder::generate(XSsl::Rsa, KeyBuilder::StrengthNormal);
     } else {
         key = ukey;
     }
@@ -227,7 +227,7 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACert(const QStri
                                                                      const XSslCertificate &cacert,
                                                                      const XSslKey &cakey)
 {
-    XSslKey leafkey = KeyBuilder::generate(QSsl::Rsa, KeyBuilder::StrengthNormal);
+    XSslKey leafkey = KeyBuilder::generate(XSsl::Rsa, KeyBuilder::StrengthNormal);
 
     CertificateRequest leafreq = genCertRequest(leafkey, domain);
 
@@ -250,7 +250,7 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACertFromTemplate
                                                                                  const XSslCertificate &cacert,
                                                                                  const XSslKey &cakey)
 {
-    XSslKey leafkey = KeyBuilder::generate(QSsl::Rsa, KeyBuilder::StrengthNormal);
+    XSslKey leafkey = KeyBuilder::generate(XSsl::Rsa, KeyBuilder::StrengthNormal);
 
     CertificateRequest leafreq = genCertRequestFromTemplate(leafkey, basecert);
 
@@ -279,7 +279,7 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACertChain(const 
                                                                           const XSslKey &cakey)
 {
     // make an intermediate
-    XSslKey interkey = KeyBuilder::generate(QSsl::Rsa, KeyBuilder::StrengthNormal);
+    XSslKey interkey = KeyBuilder::generate(XSsl::Rsa, KeyBuilder::StrengthNormal);
 
     CertificateRequest interreq = genCertRequest(interkey, "", "Gremwell Intermediate Auth");
 
@@ -294,7 +294,7 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACertChain(const 
     XSslCertificate intercert = interbuilder.signedCertificate(cacert, cakey);
 
     // Create the leaf
-    XSslKey leafkey = KeyBuilder::generate(QSsl::Rsa, KeyBuilder::StrengthNormal);
+    XSslKey leafkey = KeyBuilder::generate(XSsl::Rsa, KeyBuilder::StrengthNormal);
 
     CertificateRequest leafreq = genCertRequest(leafkey, domain);
 

@@ -104,7 +104,7 @@ CertificateRequest::CertificateRequest(const CertificateRequest &other)
 /*!
   Load a CertificateRequest from the specified QIODevice using the specified format.
  */
-CertificateRequest::CertificateRequest(QIODevice *io, QSsl::EncodingFormat format)
+CertificateRequest::CertificateRequest(QIODevice *io, XSsl::EncodingFormat format)
     : d(new CertificateRequestPrivate)
 {
     QByteArray buf = io->readAll();
@@ -114,7 +114,7 @@ CertificateRequest::CertificateRequest(QIODevice *io, QSsl::EncodingFormat forma
     buffer.data = (unsigned char *)(buf.data());
     buffer.size = buf.size();
 
-    d->errnumber = gnutls_x509_crq_import(d->crq, &buffer, (QSsl::Pem == format) ? GNUTLS_X509_FMT_PEM : GNUTLS_X509_FMT_DER);
+    d->errnumber = gnutls_x509_crq_import(d->crq, &buffer, (XSsl::Pem == format) ? GNUTLS_X509_FMT_PEM : GNUTLS_X509_FMT_DER);
     if (GNUTLS_E_SUCCESS == d->errnumber)
         d->null = false;
 }

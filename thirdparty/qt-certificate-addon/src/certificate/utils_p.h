@@ -41,16 +41,24 @@
 
 #include <gnutls/x509.h>
 
-#include <QtNetwork/QSsl>
 #include <QtCore/QByteArray>
 
 #include "certificate_global.h"
 #include "certificate.h"
 
 #ifdef UNSAFE
+#include "sslunsafe.h"
+#else
+#include <QtNetwork/QSsl>
+#endif
+
+
+#ifdef UNSAFE
+#define XSsl SslUnsafe
 #define XSslCertificate SslUnsafeCertificate
 #define XSslKey SslUnsafeKey
 #else
+#define XSsl QSsl
 #define XSslCertificate QSslCertificate
 #define XSslKey QSslKey
 #endif
@@ -69,12 +77,12 @@ gnutls_x509_privkey_t qsslkey_to_key(const XSslKey &qkey, int *errnumber);
 gnutls_x509_crt_t qsslcert_to_crt(const XSslCertificate &qcert, int *errnumber);
 
 XSslCertificate crt_to_qsslcert(gnutls_x509_crt_t crt, int *errnumber);
-XSslKey key_to_qsslkey(gnutls_x509_privkey_t key, QSsl::KeyAlgorithm algo, int *errnumber);
+XSslKey key_to_qsslkey(gnutls_x509_privkey_t key, XSsl::KeyAlgorithm algo, int *errnumber);
 
 #if QT_VERSION >= 0x050000
-gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(QSsl::AlternativeNameEntryType qtype);
+gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(XSsl::AlternativeNameEntryType qtype);
 #else
-gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(QSsl::AlternateNameEntryType qtype);
+gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(XSsl::AlternateNameEntryType qtype);
 #endif
 
 QT_END_NAMESPACE_CERTIFICATE

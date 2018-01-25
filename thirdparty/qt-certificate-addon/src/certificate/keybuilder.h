@@ -50,8 +50,10 @@
 #include "certificate_global.h"
 
 #ifdef UNSAFE
+#define XSsl SslUnsafe
 #define XSslKey SslUnsafeKey
 #else
+#define XSsl QSsl
 #define XSslKey QSslKey
 #endif
 
@@ -68,7 +70,7 @@ public:
         StrengthUltra
     };
 
-    static XSslKey generate( QSsl::KeyAlgorithm algo, KeyStrength strength );
+    static XSslKey generate( XSsl::KeyAlgorithm algo, KeyStrength strength );
 
 private:
     KeyBuilder() {}

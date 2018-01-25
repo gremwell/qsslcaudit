@@ -53,9 +53,11 @@
 #include "certificate_global.h"
 
 #ifdef UNSAFE
+#define XSsl SslUnsafe
 #define XSslCertificate SslUnsafeCertificate
 #define XSslKey SslUnsafeKey
 #else
+#define XSsl QSsl
 #define XSslCertificate QSslCertificate
 #define XSslKey QSslKey
 #endif
@@ -88,9 +90,9 @@ public:
     QStringList nameEntryInfo(const QByteArray &attribute);
 
 #if QT_VERSION >= 0x050000
-    bool addSubjectAlternativeNameEntry(QSsl::AlternativeNameEntryType type, const QByteArray &value);
+    bool addSubjectAlternativeNameEntry(XSsl::AlternativeNameEntryType type, const QByteArray &value);
 #else
-    bool addSubjectAlternativeNameEntry(QSsl::AlternateNameEntryType type, const QByteArray &value);
+    bool addSubjectAlternativeNameEntry(XSsl::AlternateNameEntryType type, const QByteArray &value);
 #endif
 
     CertificateRequest signedRequest(const XSslKey &key);

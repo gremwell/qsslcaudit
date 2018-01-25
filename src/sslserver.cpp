@@ -33,7 +33,7 @@ SslServer::SslServer(QObject *parent) : QTcpServer(parent),
     m_sslLocalCertificate(),
     m_sslCertsChain(),
     m_sslPrivateKey(),
-    m_sslProtocol(QSsl::UnknownProtocol),
+    m_sslProtocol(XSsl::UnknownProtocol),
     m_sslCiphers(XSslConfiguration::supportedCiphers()),
     m_sslEllipticCurves(XSslConfiguration::supportedEllipticCurves()),
     m_startTlsProtocol(SslServer::StartTlsUnknownProtocol)
@@ -87,7 +87,7 @@ const XSslKey &SslServer::getSslPrivateKey() const
     return m_sslPrivateKey;
 }
 
-QSsl::SslProtocol SslServer::getSslProtocol() const
+XSsl::SslProtocol SslServer::getSslProtocol() const
 {
     return m_sslProtocol;
 }
@@ -97,7 +97,7 @@ void SslServer::setSslLocalCertificate(const XSslCertificate &certificate)
     m_sslLocalCertificate = certificate;
 }
 
-bool SslServer::setSslLocalCertificate(const QString &path, QSsl::EncodingFormat format)
+bool SslServer::setSslLocalCertificate(const QString &path, XSsl::EncodingFormat format)
 {
     QFile certificateFile(path);
 
@@ -116,7 +116,7 @@ void SslServer::setSslLocalCertificateChain(const QList<XSslCertificate> &chain)
     m_sslCertsChain = chain;
 }
 
-bool SslServer::setSslLocalCertificateChain(const QString &path, QSsl::EncodingFormat format)
+bool SslServer::setSslLocalCertificateChain(const QString &path, XSsl::EncodingFormat format)
 {
     QFile certificateFile(path);
 
@@ -136,18 +136,18 @@ void SslServer::setSslPrivateKey(const XSslKey &key)
     m_sslPrivateKey = key;
 }
 
-bool SslServer::setSslPrivateKey(const QString &fileName, QSsl::KeyAlgorithm algorithm, QSsl::EncodingFormat format, const QByteArray &passPhrase)
+bool SslServer::setSslPrivateKey(const QString &fileName, XSsl::KeyAlgorithm algorithm, XSsl::EncodingFormat format, const QByteArray &passPhrase)
 {
     QFile keyFile(fileName);
 
     if (!keyFile.open(QIODevice::ReadOnly))
         return false;
 
-    m_sslPrivateKey = XSslKey(keyFile.readAll(), algorithm, format, QSsl::PrivateKey, passPhrase);
+    m_sslPrivateKey = XSslKey(keyFile.readAll(), algorithm, format, XSsl::PrivateKey, passPhrase);
     return true;
 }
 
-void SslServer::setSslProtocol(const QSsl::SslProtocol protocol)
+void SslServer::setSslProtocol(const XSsl::SslProtocol protocol)
 {
     m_sslProtocol = protocol;
 }

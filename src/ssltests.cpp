@@ -31,7 +31,7 @@ bool SslTest01::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(QSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::TlsV1_0OrLater);
 
     return true;
 }
@@ -61,7 +61,7 @@ bool SslTest02::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(QSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::TlsV1_0OrLater);
 
     return true;
 }
@@ -79,7 +79,7 @@ bool SslTest03::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(QSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::TlsV1_0OrLater);
 
     return true;
 }
@@ -114,7 +114,7 @@ bool SslTest04::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(QSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::TlsV1_0OrLater);
 
     return true;
 }
@@ -137,7 +137,7 @@ bool SslTest05::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(QSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::TlsV1_0OrLater);
 
     return true;
 }
@@ -171,7 +171,7 @@ bool SslTest06::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(QSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::TlsV1_0OrLater);
 
     return true;
 }
@@ -194,7 +194,7 @@ bool SslTest07::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(QSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::TlsV1_0OrLater);
 
     return true;
 }
@@ -202,7 +202,7 @@ bool SslTest07::prepare(const SslUserSettings &settings)
 
 void SslTest08::setProtoAndCiphers()
 {
-    QSsl::SslProtocol proto = QSsl::SslV2;
+    XSsl::SslProtocol proto = XSsl::SslV2;
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
 
     setSslCiphers(ciphers);
@@ -212,7 +212,7 @@ void SslTest08::setProtoAndCiphers()
 
 void SslTest09::setProtoAndCiphers()
 {
-    QSsl::SslProtocol proto = QSsl::SslV3;
+    XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
 
     setSslCiphers(ciphers);
@@ -222,7 +222,7 @@ void SslTest09::setProtoAndCiphers()
 
 void SslTest10::setProtoAndCiphers()
 {
-    QSsl::SslProtocol proto = QSsl::SslV3;
+    XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers;
     QStringList opensslCiphers = ciphers_export_str.split(":");
 
@@ -240,7 +240,7 @@ void SslTest10::setProtoAndCiphers()
 
 void SslTest11::setProtoAndCiphers()
 {
-    QSsl::SslProtocol proto = QSsl::SslV3;
+    XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers;
     QStringList opensslCiphers = ciphers_low_str.split(":");
 
@@ -258,7 +258,7 @@ void SslTest11::setProtoAndCiphers()
 
 void SslTest12::setProtoAndCiphers()
 {
-    QSsl::SslProtocol proto = QSsl::SslV3;
+    XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers;
     QStringList opensslCiphers = ciphers_medium_str.split(":");
 

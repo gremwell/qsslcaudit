@@ -39,11 +39,22 @@
 #ifndef CERTIFICATEREQUEST_H
 #define CERTIFICATEREQUEST_H
 
+#ifdef UNSAFE
+#include "sslunsafe.h"
+#else
 #include <QtNetwork/QSsl>
+#endif
+
 #include <QtCore/qshareddata.h>
 
 #include "certificate_global.h"
 #include "certificate.h"
+
+#ifdef UNSAFE
+#define XSsl SslUnsafe
+#else
+#define XSsl QSsl
+#endif
 
 class QIODevice;
 
@@ -57,7 +68,7 @@ class Q_CERTIFICATE_EXPORT CertificateRequest
 public:
     CertificateRequest();
     CertificateRequest(const CertificateRequest &other);
-    CertificateRequest(QIODevice *io, QSsl::EncodingFormat format=QSsl::Pem);
+    CertificateRequest(QIODevice *io, XSsl::EncodingFormat format=XSsl::Pem);
     ~CertificateRequest();
 
     CertificateRequest &operator=(const CertificateRequest &other);

@@ -11,9 +11,11 @@
 #endif
 
 #ifdef UNSAFE
+#define XSsl SslUnsafe
 #define XSslCertificate SslUnsafeCertificate
 #define XSslKey SslUnsafeKey
 #else
+#define XSsl QSsl
 #define XSslCertificate QSslCertificate
 #define XSslKey QSslKey
 #endif
@@ -23,12 +25,12 @@ class SslCertGen
 public:
     SslCertGen();
 
-    static XSslCertificate certFromFile(const QString &path, QSsl::EncodingFormat format = QSsl::Pem);
+    static XSslCertificate certFromFile(const QString &path, XSsl::EncodingFormat format = XSsl::Pem);
 
-    static QList<XSslCertificate> certChainFromFile(const QString &path, QSsl::EncodingFormat format = QSsl::Pem);
+    static QList<XSslCertificate> certChainFromFile(const QString &path, XSsl::EncodingFormat format = XSsl::Pem);
 
-    static XSslKey keyFromFile(const QString &path, QSsl::KeyAlgorithm algorithm = QSsl::Rsa,
-                               QSsl::EncodingFormat format = QSsl::Pem, const QByteArray &passPhrase = QByteArray());
+    static XSslKey keyFromFile(const QString &path, XSsl::KeyAlgorithm algorithm = XSsl::Rsa,
+                               XSsl::EncodingFormat format = XSsl::Pem, const QByteArray &passPhrase = QByteArray());
 
     static QPair<XSslCertificate, XSslKey> genSignedCert(const QString &domain, const XSslKey &key = XSslKey());
 

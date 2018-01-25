@@ -154,7 +154,7 @@ XSslCertificate crt_to_qsslcert(gnutls_x509_crt_t crt, int *errnumber)
     return XSslCertificate(ba);
 }
 
-XSslKey key_to_qsslkey(gnutls_x509_privkey_t key, QSsl::KeyAlgorithm algo, int *errnumber)
+XSslKey key_to_qsslkey(gnutls_x509_privkey_t key, XSsl::KeyAlgorithm algo, int *errnumber)
 {
     QByteArray ba(4096, 0);
     size_t size = ba.size();
@@ -167,12 +167,12 @@ XSslKey key_to_qsslkey(gnutls_x509_privkey_t key, QSsl::KeyAlgorithm algo, int *
 }
 
 #if QT_VERSION >= 0x050000
-gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(QSsl::AlternativeNameEntryType qtype)
+gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(XSsl::AlternativeNameEntryType qtype)
 {
     switch(qtype) {
-    case QSsl::EmailEntry:
+    case XSsl::EmailEntry:
         return GNUTLS_SAN_RFC822NAME;
-    case QSsl::DnsEntry:
+    case XSsl::DnsEntry:
         return GNUTLS_SAN_DNSNAME;
     default:
         qWarning("Unknown alternative name type %d", int(qtype));
@@ -180,12 +180,12 @@ gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(QSsl::Alternativ
     return GNUTLS_SAN_OTHERNAME;
 }
 #else
-gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(QSsl::AlternateNameEntryType qtype)
+gnutls_x509_subject_alt_name_t qssl_altnameentrytype_to_altname(XSsl::AlternateNameEntryType qtype)
 {
     switch(qtype) {
-    case QSsl::EmailEntry:
+    case XSsl::EmailEntry:
         return GNUTLS_SAN_RFC822NAME;
-    case QSsl::DnsEntry:
+    case XSsl::DnsEntry:
         return GNUTLS_SAN_DNSNAME;
     default:
         qWarning("Unknown alternative name type %d", int(qtype));

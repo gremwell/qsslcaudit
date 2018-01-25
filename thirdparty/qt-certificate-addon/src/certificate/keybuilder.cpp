@@ -61,7 +61,7 @@ QT_BEGIN_NAMESPACE_CERTIFICATE
   Note that this method can take a considerable length of time to execute, so in
   gui applications it should be run in a worker thread.
  */
-XSslKey KeyBuilder::generate( QSsl::KeyAlgorithm algo, KeyStrength strength )
+XSslKey KeyBuilder::generate( XSsl::KeyAlgorithm algo, KeyStrength strength )
 {
     ensure_gnutls_init();
 
@@ -84,11 +84,11 @@ XSslKey KeyBuilder::generate( QSsl::KeyAlgorithm algo, KeyStrength strength )
         sec = GNUTLS_SEC_PARAM_NORMAL;
     }
 
-    uint bits = gnutls_sec_param_to_pk_bits((algo == QSsl::Rsa) ? GNUTLS_PK_RSA : GNUTLS_PK_DSA, sec);
+    uint bits = gnutls_sec_param_to_pk_bits((algo == XSsl::Rsa) ? GNUTLS_PK_RSA : GNUTLS_PK_DSA, sec);
     gnutls_x509_privkey_t key;
     gnutls_x509_privkey_init(&key);
 
-    int errnumber = gnutls_x509_privkey_generate(key, (algo == QSsl::Rsa) ? GNUTLS_PK_RSA : GNUTLS_PK_DSA, bits, 0u);
+    int errnumber = gnutls_x509_privkey_generate(key, (algo == XSsl::Rsa) ? GNUTLS_PK_RSA : GNUTLS_PK_DSA, bits, 0u);
     if (GNUTLS_E_SUCCESS != errnumber) {
         qWarning("Failed to generate key %s", gnutls_strerror(errnumber));
         gnutls_x509_privkey_deinit(key);
