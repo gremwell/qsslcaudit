@@ -51,6 +51,8 @@
 #define XSslEllipticCurve QSslEllipticCurve
 #endif
 
+class XSslSocket;
+
 class SslServer : public QTcpServer
 {
     Q_OBJECT
@@ -77,16 +79,27 @@ public:
     void setSslCiphers(const QList<XSslCipher> &ciphers);
     void setSslEllipticCurves(const QVector<XSslEllipticCurve> &ecurves);
 
+    enum StartTlsProtocol {
+        StartTlsFtp,
+        StartTlsSmtp,
+        StartTlsUnknownProtocol = -1
+    };
+
+    void setStartTlsProto(const SslServer::StartTlsProtocol protocol);
+
 protected:
     void incomingConnection(qintptr socketDescriptor) override final;
 
 private:
+    void handleStartTls(XSslSocket *const socket);
+
     XSslCertificate m_sslLocalCertificate;
     QList<XSslCertificate> m_sslCertsChain;
     XSslKey m_sslPrivateKey;
     QSsl::SslProtocol m_sslProtocol;
     QList<XSslCipher> m_sslCiphers;
     QVector<XSslEllipticCurve> m_sslEllipticCurves;
+    SslServer::StartTlsProtocol m_startTlsProtocol;
 
 };
 

@@ -7,6 +7,7 @@ SET( qsslcauditSources
     ssltest.cpp
     ssltests.cpp
     sslusersettings.cpp
+    starttls.cpp
     main.cpp
     )
 
@@ -20,6 +21,7 @@ SET( qsslcauditHeaders
     ssltest.h
     ssltests.h
     sslusersettings.h
+    starttls.h
     )
 
 add_definitions(-DUNSAFE)

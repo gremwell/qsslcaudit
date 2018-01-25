@@ -59,6 +59,8 @@ void SslCAudit::runTest(const SslTest *test)
 
     sslServer.setSslCiphers(test->sslCiphers());
 
+    sslServer.setStartTlsProto(settings.getStartTlsProtocol());
+
     if (sslServer.listen(listenAddress, listenPort)) {
         VERBOSE(QString("listening on %1:%2").arg(listenAddress.toString()).arg(listenPort));
     } else {

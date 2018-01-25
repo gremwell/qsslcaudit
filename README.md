@@ -146,6 +146,8 @@ Please note that some options are ignored in certain tests or are essential to o
 
 `--forward` in case TLS/SSL connection successfully established (usually this means that MitM attack is possible), forward connection (*non-SSL*) to the specified host:port. This can be used to intercept client-provided data (i.e. credentials in POST requests).
 
+`--starttls` prior initiating TLS/SSL connection the tool performs specified "START TLS" sequence (supported protocols are displayed in help message).
+
 `--show-ciphers` shows ciphers provided by loaded OpenSSL library. This is useful to check which version (official or custom) of OpenSSL is used.
 
 `--user-cn` this option value will be used as CN (common name, server name) value of the certificate, presented to client.

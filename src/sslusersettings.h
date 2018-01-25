@@ -3,6 +3,8 @@
 
 #include <QHostAddress>
 
+#include "sslserver.h"
+
 #ifdef UNSAFE
 #include "sslunsafecertificate.h"
 #else
@@ -59,6 +61,9 @@ public:
     QHostAddress getForwardHostAddr() const;
     quint16 getForwardHostPort() const;
 
+    bool setStartTlsProtocol(const QString &proto);
+    SslServer::StartTlsProtocol getStartTlsProtocol() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -70,6 +75,7 @@ private:
     QString userCaKeyPath;
     QString forwardAddr;
     QList<XSslCertificate> peerCerts;
+    SslServer::StartTlsProtocol startTlsProtocol;
 
 };
 

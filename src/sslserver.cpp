@@ -17,6 +17,8 @@
  */
 
 #include "sslserver.h"
+#include "debug.h"
+#include "starttls.h"
 
 #include <QFile>
 
@@ -33,7 +35,8 @@ SslServer::SslServer(QObject *parent) : QTcpServer(parent),
     m_sslPrivateKey(),
     m_sslProtocol(QSsl::UnknownProtocol),
     m_sslCiphers(XSslConfiguration::supportedCiphers()),
-    m_sslEllipticCurves(XSslConfiguration::supportedEllipticCurves())
+    m_sslEllipticCurves(XSslConfiguration::supportedEllipticCurves()),
+    m_startTlsProtocol(SslServer::StartTlsUnknownProtocol)
 {
 }
 
@@ -69,7 +72,7 @@ void SslServer::incomingConnection(qintptr socketDescriptor)
 
     sslSocket->setSslConfiguration(sslConf);
 
-    // here is the place for STARTTLS
+    handleStartTls(sslSocket);
 
     sslSocket->startServerEncryption();
 }
@@ -157,4 +160,23 @@ void SslServer::setSslCiphers(const QList<XSslCipher> &ciphers)
 void SslServer::setSslEllipticCurves(const QVector<XSslEllipticCurve> &ecurves)
 {
     m_sslEllipticCurves = ecurves;
+}
+
+void SslServer::setStartTlsProto(const SslServer::StartTlsProtocol protocol)
+{
+    m_startTlsProtocol = protocol;
+}
+
+void SslServer::handleStartTls(XSslSocket *const socket)
+{
+    switch (m_startTlsProtocol) {
+    case SslServer::StartTlsFtp:
+        handleStartTlsFtp(socket);
+        break;
+    case SslServer::StartTlsSmtp:
+        handleStartTlsSmtp(socket);
+        break;
+    default:
+        break;
+    }
 }

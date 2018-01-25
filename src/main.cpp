@@ -69,6 +69,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption showciphersOption(QStringList() << "show-ciphers",
                                     "show ciphers provided by loaded openssl library");
     parser.addOption(showciphersOption);
+    QCommandLineOption starttlsOption(QStringList() << "starttls",
+                                    "exchange specific STARTTLS messages before starting secure connection", "ftp|smtp");
+    parser.addOption(starttlsOption);
 
     parser.process(a);
 
@@ -152,6 +155,12 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     }
     if (parser.isSet(forwardOption)) {
         settings->setForwardAddr(parser.value(forwardOption));
+    }
+    if (parser.isSet(starttlsOption)) {
+        if (!settings->setStartTlsProtocol(parser.value(starttlsOption))) {
+            RED("unsupported STARTTLS protocol");
+            exit(-1);
+        }
     }
 }
 

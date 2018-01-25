@@ -201,3 +201,22 @@ quint16 SslUserSettings::getForwardHostPort() const
     QUrl url = QUrl::fromUserInput(forwardAddr);
     return url.port();
 }
+
+bool SslUserSettings::setStartTlsProtocol(const QString &proto)
+{
+    if (proto == QString("ftp")) {
+        startTlsProtocol = SslServer::StartTlsFtp;
+        return true;
+    } else if (proto == QString("smtp")) {
+        startTlsProtocol = SslServer::StartTlsSmtp;
+        return true;
+    } else {
+        startTlsProtocol = SslServer::StartTlsUnknownProtocol;
+        return false;
+    }
+}
+
+SslServer::StartTlsProtocol SslUserSettings::getStartTlsProtocol() const
+{
+    return startTlsProtocol;
+}
