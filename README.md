@@ -44,6 +44,8 @@ Packages for Ubuntu 16.04: `cmake qtbase5-dev libgnutls-dev libssl-dev`.
 
 Packages for Fedora 26 (not supported yet): `cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
 
+Packages for Kali (rolling@01-2018): `cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`. Probably, you will need to explicitly remove `libssl-dev`.
+
 Once you have `qsslcaudit` source code repository and packages installed, do the following:
 
 * Create build directory
