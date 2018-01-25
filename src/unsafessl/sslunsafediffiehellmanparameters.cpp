@@ -57,14 +57,14 @@ SslUnsafeDiffieHellmanParameters::SslUnsafeDiffieHellmanParameters()
     \sa isValid()
     \sa QSslConfiguration
 */
-SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(const QByteArray &encoded, QSsl::EncodingFormat encoding)
+SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(const QByteArray &encoded, SslUnsafe::EncodingFormat encoding)
 {
     SslUnsafeDiffieHellmanParameters result;
     switch (encoding) {
-    case QSsl::Der:
+    case SslUnsafe::Der:
         result.d->decodeDer(encoded);
         break;
-    case QSsl::Pem:
+    case SslUnsafe::Pem:
         result.d->decodePem(encoded);
         break;
     }
@@ -85,7 +85,7 @@ SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(c
     \sa isValid()
     \sa QSslConfiguration
 */
-SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(QIODevice *device, QSsl::EncodingFormat encoding)
+SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(QIODevice *device, SslUnsafe::EncodingFormat encoding)
 {
     if (device)
         return fromEncoded(device->readAll(), encoding);

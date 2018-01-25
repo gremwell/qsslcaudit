@@ -1,5 +1,5 @@
 
-//#include "qssl_p.h"
+#include "sslunsafe_p.h"
 #include "sslunsafeconfiguration.h"
 #include "sslunsafeconfiguration_p.h"
 #include "sslunsafesocket.h"
@@ -7,10 +7,10 @@
 #include "qmutex.h"
 #include "qdebug.h"
 
-const QSsl::SslOptions SslUnsafeConfigurationPrivate::defaultSslOptions = QSsl::SslOptionDisableEmptyFragments
-                                                                    |QSsl::SslOptionDisableLegacyRenegotiation
-                                                                    |QSsl::SslOptionDisableCompression
-                                                                    |QSsl::SslOptionDisableSessionPersistence;
+const SslUnsafe::SslOptions SslUnsafeConfigurationPrivate::defaultSslOptions = SslUnsafe::SslOptionDisableEmptyFragments
+                                                                    |SslUnsafe::SslOptionDisableLegacyRenegotiation
+                                                                    |SslUnsafe::SslOptionDisableCompression
+                                                                    |SslUnsafe::SslOptionDisableSessionPersistence;
 
 const char SslUnsafeConfiguration::ALPNProtocolHTTP2[] = "h2";
 const char SslUnsafeConfiguration::NextProtocolSpdy3_0[] = "spdy/3";
@@ -67,7 +67,7 @@ bool SslUnsafeConfiguration::operator==(const SslUnsafeConfiguration &other) con
 
 bool SslUnsafeConfiguration::isNull() const
 {
-    return (d->protocol == QSsl::SecureProtocols &&
+    return (d->protocol == SslUnsafe::SecureProtocols &&
             d->peerVerifyMode == SslUnsafeSocket::AutoVerifyPeer &&
             d->peerVerifyDepth == 0 &&
             d->allowRootCertOnDemandLoading == true &&
@@ -89,12 +89,12 @@ bool SslUnsafeConfiguration::isNull() const
             d->nextProtocolNegotiationStatus == SslUnsafeConfiguration::NextProtocolNegotiationNone);
 }
 
-QSsl::SslProtocol SslUnsafeConfiguration::protocol() const
+SslUnsafe::SslProtocol SslUnsafeConfiguration::protocol() const
 {
     return d->protocol;
 }
 
-void SslUnsafeConfiguration::setProtocol(QSsl::SslProtocol protocol)
+void SslUnsafeConfiguration::setProtocol(SslUnsafe::SslProtocol protocol)
 {
     d->protocol = protocol;
 }
@@ -162,7 +162,7 @@ SslUnsafeCipher SslUnsafeConfiguration::sessionCipher() const
     return d->sessionCipher;
 }
 
-QSsl::SslProtocol SslUnsafeConfiguration::sessionProtocol() const
+SslUnsafe::SslProtocol SslUnsafeConfiguration::sessionProtocol() const
 {
     return d->sessionProtocol;
 }
@@ -209,7 +209,7 @@ QList<SslUnsafeCertificate> SslUnsafeConfiguration::systemCaCertificates()
     return SslUnsafeSocketPrivate::systemCaCertificates();
 }
 
-void SslUnsafeConfiguration::setSslOption(QSsl::SslOption option, bool on)
+void SslUnsafeConfiguration::setSslOption(SslUnsafe::SslOption option, bool on)
 {
     if (on)
         d->sslOptions |= option;
@@ -218,7 +218,7 @@ void SslUnsafeConfiguration::setSslOption(QSsl::SslOption option, bool on)
     //d->sslOptions.setFlag(option, on);
 }
 
-bool SslUnsafeConfiguration::testSslOption(QSsl::SslOption option) const
+bool SslUnsafeConfiguration::testSslOption(SslUnsafe::SslOption option) const
 {
     return d->sslOptions & option;
 }

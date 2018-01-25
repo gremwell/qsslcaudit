@@ -69,7 +69,7 @@ public:
     static QList<SslUnsafeCertificate> defaultCaCertificates();
     static QList<SslUnsafeCertificate> systemCaCertificates();
     static void setDefaultCaCertificates(const QList<SslUnsafeCertificate> &certs);
-    static bool addDefaultCaCertificates(const QString &path, QSsl::EncodingFormat format,
+    static bool addDefaultCaCertificates(const QString &path, SslUnsafe::EncodingFormat format,
                                          QRegExp::PatternSyntax syntax);
     static void addDefaultCaCertificate(const SslUnsafeCertificate &cert);
     static void addDefaultCaCertificates(const QList<SslUnsafeCertificate> &certs);
@@ -112,7 +112,7 @@ public:
     virtual void disconnectFromHost() = 0;
     virtual void disconnected() = 0;
     virtual SslUnsafeCipher sessionCipher() const = 0;
-    virtual QSsl::SslProtocol sessionProtocol() const = 0;
+    virtual SslUnsafe::SslProtocol sessionProtocol() const = 0;
     virtual void continueHandshake() = 0;
 
     static bool rootCertOnDemandLoadingSupported();

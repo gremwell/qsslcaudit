@@ -25,7 +25,7 @@
     later call isNull() to see if \a device contained a certificate,
     and if this certificate was loaded successfully.
 */
-SslUnsafeCertificate::SslUnsafeCertificate(QIODevice *device, QSsl::EncodingFormat format)
+SslUnsafeCertificate::SslUnsafeCertificate(QIODevice *device, SslUnsafe::EncodingFormat format)
     : d(new SslUnsafeCertificatePrivate)
 {
     SslUnsafeSocketPrivate::ensureInitialized();
@@ -39,7 +39,7 @@ SslUnsafeCertificate::SslUnsafeCertificate(QIODevice *device, QSsl::EncodingForm
     later call isNull() to see if \a data contained a certificate,
     and if this certificate was loaded successfully.
 */
-SslUnsafeCertificate::SslUnsafeCertificate(const QByteArray &data, QSsl::EncodingFormat format)
+SslUnsafeCertificate::SslUnsafeCertificate(const QByteArray &data, SslUnsafe::EncodingFormat format)
     : d(new SslUnsafeCertificatePrivate)
 {
     SslUnsafeSocketPrivate::ensureInitialized();
@@ -248,7 +248,7 @@ QByteArray SslUnsafeCertificate::digest(QCryptographicHash::Algorithm algorithm)
 
 #if QT_DEPRECATED_SINCE(5,0)
 /*!
-  \fn QMultiMap<QSsl::AlternateNameEntryType, QString> SslUnsafeCertificate::alternateSubjectNames() const
+  \fn QMultiMap<SslUnsafe::AlternateNameEntryType, QString> SslUnsafeCertificate::alternateSubjectNames() const
   \obsolete
 
   Use SslUnsafeCertificate::subjectAlternativeNames();
@@ -256,7 +256,7 @@ QByteArray SslUnsafeCertificate::digest(QCryptographicHash::Algorithm algorithm)
 #endif
 
 /*!
-  \fn QMultiMap<QSsl::AlternativeNameEntryType, QString> SslUnsafeCertificate::subjectAlternativeNames() const
+  \fn QMultiMap<SslUnsafe::AlternativeNameEntryType, QString> SslUnsafeCertificate::subjectAlternativeNames() const
 
   Returns the list of alternative subject names for this
   certificate. The alternative names typically contain host
@@ -349,7 +349,7 @@ QByteArray SslUnsafeCertificate::digest(QCryptographicHash::Algorithm algorithm)
     \sa fromData()
 */
 QList<SslUnsafeCertificate> SslUnsafeCertificate::fromPath(const QString &path,
-                                                 QSsl::EncodingFormat format,
+                                                 SslUnsafe::EncodingFormat format,
                                                  QRegExp::PatternSyntax syntax)
 {
     // $, (,), *, +, ., ?, [, ,], ^, {, | and }.
@@ -379,7 +379,7 @@ QList<SslUnsafeCertificate> SslUnsafeCertificate::fromPath(const QString &path,
         if (QFileInfo(sourcePath).isFile()) {
             QFile file(sourcePath);
             QIODevice::OpenMode openMode = QIODevice::ReadOnly;
-            if (format == QSsl::Pem)
+            if (format == SslUnsafe::Pem)
                 openMode |= QIODevice::Text;
             if (file.open(openMode))
                 return SslUnsafeCertificate::fromData(file.readAll(), format);
@@ -405,7 +405,7 @@ QList<SslUnsafeCertificate> SslUnsafeCertificate::fromPath(const QString &path,
 
         QFile file(filePath);
         QIODevice::OpenMode openMode = QIODevice::ReadOnly;
-        if (format == QSsl::Pem)
+        if (format == SslUnsafe::Pem)
             openMode |= QIODevice::Text;
         if (file.open(openMode))
             certs += SslUnsafeCertificate::fromData(file.readAll(), format);
@@ -420,7 +420,7 @@ QList<SslUnsafeCertificate> SslUnsafeCertificate::fromPath(const QString &path,
 
     \sa fromData()
 */
-QList<SslUnsafeCertificate> SslUnsafeCertificate::fromDevice(QIODevice *device, QSsl::EncodingFormat format)
+QList<SslUnsafeCertificate> SslUnsafeCertificate::fromDevice(QIODevice *device, SslUnsafe::EncodingFormat format)
 {
     if (!device) {
         qWarning() << "SslUnsafeCertificate::fromDevice: cannot read from a null device";
@@ -436,9 +436,9 @@ QList<SslUnsafeCertificate> SslUnsafeCertificate::fromDevice(QIODevice *device, 
 
     \sa fromDevice()
 */
-QList<SslUnsafeCertificate> SslUnsafeCertificate::fromData(const QByteArray &data, QSsl::EncodingFormat format)
+QList<SslUnsafeCertificate> SslUnsafeCertificate::fromData(const QByteArray &data, SslUnsafe::EncodingFormat format)
 {
-    return (format == QSsl::Pem)
+    return (format == SslUnsafe::Pem)
         ? SslUnsafeCertificatePrivate::certificatesFromPem(data)
         : SslUnsafeCertificatePrivate::certificatesFromDer(data);
 }

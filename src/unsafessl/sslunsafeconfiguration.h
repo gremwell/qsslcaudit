@@ -5,7 +5,7 @@
 #include <QtCore/qshareddata.h>
 
 #include "sslunsafesocket.h"
-#include <QtNetwork/qssl.h>
+#include "sslunsafe.h"
 
 #ifndef QT_NO_SSL
 
@@ -37,8 +37,8 @@ public:
 
     bool isNull() const;
 
-    QSsl::SslProtocol protocol() const;
-    void setProtocol(QSsl::SslProtocol protocol);
+    SslUnsafe::SslProtocol protocol() const;
+    void setProtocol(SslUnsafe::SslProtocol protocol);
 
     // Verification
     SslUnsafeSocket::PeerVerifyMode peerVerifyMode() const;
@@ -57,7 +57,7 @@ public:
     SslUnsafeCertificate peerCertificate() const;
     QList<SslUnsafeCertificate> peerCertificateChain() const;
     SslUnsafeCipher sessionCipher() const;
-    QSsl::SslProtocol sessionProtocol() const;
+    SslUnsafe::SslProtocol sessionProtocol() const;
 
     // Private keys, for server sockets
     SslUnsafeKey privateKey() const;
@@ -73,8 +73,8 @@ public:
     void setCaCertificates(const QList<SslUnsafeCertificate> &certificates);
     static QList<SslUnsafeCertificate> systemCaCertificates();
 
-    void setSslOption(QSsl::SslOption option, bool on);
-    bool testSslOption(QSsl::SslOption option) const;
+    void setSslOption(SslUnsafe::SslOption option, bool on);
+    bool testSslOption(SslUnsafe::SslOption option) const;
 
     QByteArray sessionTicket() const;
     void setSessionTicket(const QByteArray &sessionTicket);

@@ -5,7 +5,7 @@
 #include <QtCore/qnamespace.h>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qsharedpointer.h>
-#include <QtNetwork/qssl.h>
+#include "sslunsafe.h"
 
 
 #ifndef QT_NO_SSL
@@ -19,15 +19,15 @@ class SslUnsafeKey
 {
 public:
     SslUnsafeKey();
-    SslUnsafeKey(const QByteArray &encoded, QSsl::KeyAlgorithm algorithm,
-            QSsl::EncodingFormat format = QSsl::Pem,
-            QSsl::KeyType type = QSsl::PrivateKey,
+    SslUnsafeKey(const QByteArray &encoded, SslUnsafe::KeyAlgorithm algorithm,
+            SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
+            SslUnsafe::KeyType type = SslUnsafe::PrivateKey,
             const QByteArray &passPhrase = QByteArray());
-    SslUnsafeKey(QIODevice *device, QSsl::KeyAlgorithm algorithm,
-            QSsl::EncodingFormat format = QSsl::Pem,
-            QSsl::KeyType type = QSsl::PrivateKey,
+    SslUnsafeKey(QIODevice *device, SslUnsafe::KeyAlgorithm algorithm,
+            SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
+            SslUnsafe::KeyType type = SslUnsafe::PrivateKey,
             const QByteArray &passPhrase = QByteArray());
-    explicit SslUnsafeKey(Qt::HANDLE handle, QSsl::KeyType type = QSsl::PrivateKey);
+    explicit SslUnsafeKey(Qt::HANDLE handle, SslUnsafe::KeyType type = SslUnsafe::PrivateKey);
     SslUnsafeKey(const SslUnsafeKey &other);
 #ifdef Q_COMPILER_RVALUE_REFS
     SslUnsafeKey &operator=(SslUnsafeKey &&other) Q_DECL_NOTHROW { swap(other); return *this; }
@@ -41,8 +41,8 @@ public:
     void clear();
 
     int length() const;
-    QSsl::KeyType type() const;
-    QSsl::KeyAlgorithm algorithm() const;
+    SslUnsafe::KeyType type() const;
+    SslUnsafe::KeyAlgorithm algorithm() const;
 
     QByteArray toPem(const QByteArray &passPhrase = QByteArray()) const;
     QByteArray toDer(const QByteArray &passPhrase = QByteArray()) const;

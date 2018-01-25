@@ -23,13 +23,13 @@ SslUnsafeKey::SslUnsafeKey()
 */
 QByteArray SslUnsafeKeyPrivate::pemHeader() const
 {
-    if (type == QSsl::PublicKey)
+    if (type == SslUnsafe::PublicKey)
         return QByteArrayLiteral("-----BEGIN PUBLIC KEY-----");
-    else if (algorithm == QSsl::Rsa)
+    else if (algorithm == SslUnsafe::Rsa)
         return QByteArrayLiteral("-----BEGIN RSA PRIVATE KEY-----");
-    else if (algorithm == QSsl::Dsa)
+    else if (algorithm == SslUnsafe::Dsa)
         return QByteArrayLiteral("-----BEGIN DSA PRIVATE KEY-----");
-    else if (algorithm == QSsl::Ec)
+    else if (algorithm == SslUnsafe::Ec)
         return QByteArrayLiteral("-----BEGIN EC PRIVATE KEY-----");
 
     Q_UNREACHABLE();
@@ -41,13 +41,13 @@ QByteArray SslUnsafeKeyPrivate::pemHeader() const
 */
 QByteArray SslUnsafeKeyPrivate::pemFooter() const
 {
-    if (type == QSsl::PublicKey)
+    if (type == SslUnsafe::PublicKey)
         return QByteArrayLiteral("-----END PUBLIC KEY-----");
-    else if (algorithm == QSsl::Rsa)
+    else if (algorithm == SslUnsafe::Rsa)
         return QByteArrayLiteral("-----END RSA PRIVATE KEY-----");
-    else if (algorithm == QSsl::Dsa)
+    else if (algorithm == SslUnsafe::Dsa)
         return QByteArrayLiteral("-----END DSA PRIVATE KEY-----");
-    else if (algorithm == QSsl::Ec)
+    else if (algorithm == SslUnsafe::Ec)
         return QByteArrayLiteral("-----END EC PRIVATE KEY-----");
 
     Q_UNREACHABLE();
@@ -152,13 +152,13 @@ QByteArray SslUnsafeKeyPrivate::derFromPem(const QByteArray &pem, QMap<QByteArra
     After construction, use isNull() to check if \a encoded contained
     a valid key.
 */
-SslUnsafeKey::SslUnsafeKey(const QByteArray &encoded, QSsl::KeyAlgorithm algorithm,
-                 QSsl::EncodingFormat encoding, QSsl::KeyType type, const QByteArray &passPhrase)
+SslUnsafeKey::SslUnsafeKey(const QByteArray &encoded, SslUnsafe::KeyAlgorithm algorithm,
+                 SslUnsafe::EncodingFormat encoding, SslUnsafe::KeyType type, const QByteArray &passPhrase)
     : d(new SslUnsafeKeyPrivate)
 {
     d->type = type;
     d->algorithm = algorithm;
-    if (encoding == QSsl::Der)
+    if (encoding == SslUnsafe::Der)
         d->decodeDer(encoded);
     else
         d->decodePem(encoded, passPhrase);
@@ -175,8 +175,8 @@ SslUnsafeKey::SslUnsafeKey(const QByteArray &encoded, QSsl::KeyAlgorithm algorit
     After construction, use isNull() to check if \a device provided
     a valid key.
 */
-SslUnsafeKey::SslUnsafeKey(QIODevice *device, QSsl::KeyAlgorithm algorithm, QSsl::EncodingFormat encoding,
-                 QSsl::KeyType type, const QByteArray &passPhrase)
+SslUnsafeKey::SslUnsafeKey(QIODevice *device, SslUnsafe::KeyAlgorithm algorithm, SslUnsafe::EncodingFormat encoding,
+                 SslUnsafe::KeyType type, const QByteArray &passPhrase)
     : d(new SslUnsafeKeyPrivate)
 {
     QByteArray encoded;
@@ -184,7 +184,7 @@ SslUnsafeKey::SslUnsafeKey(QIODevice *device, QSsl::KeyAlgorithm algorithm, QSsl
         encoded = device->readAll();
     d->type = type;
     d->algorithm = algorithm;
-    if (encoding == QSsl::Der)
+    if (encoding == SslUnsafe::Der)
         d->decodeDer(encoded);
     else
         d->decodePem(encoded, passPhrase);
@@ -198,20 +198,20 @@ SslUnsafeKey::SslUnsafeKey(QIODevice *device, QSsl::KeyAlgorithm algorithm, QSsl
     SslUnsafeKey will take ownership for this key and you must not
     free the key using the native library.
 */
-SslUnsafeKey::SslUnsafeKey(Qt::HANDLE handle, QSsl::KeyType type)
+SslUnsafeKey::SslUnsafeKey(Qt::HANDLE handle, SslUnsafe::KeyType type)
     : d(new SslUnsafeKeyPrivate)
 {
 #ifndef QT_NO_OPENSSL
     EVP_PKEY *evpKey = reinterpret_cast<EVP_PKEY *>(handle);
     if (!evpKey || !d->fromEVP_PKEY(evpKey)) {
         d->opaque = evpKey;
-        d->algorithm = QSsl::Opaque;
+        d->algorithm = SslUnsafe::Opaque;
     } else {
         q_EVP_PKEY_free(evpKey);
     }
 #else
     d->opaque = handle;
-    d->algorithm = QSsl::Opaque;
+    d->algorithm = SslUnsafe::Opaque;
 #endif
     d->type = type;
     d->isNull = !d->opaque;
@@ -282,7 +282,7 @@ int SslUnsafeKey::length() const
 /*!
     Returns the type of the key (i.e., PublicKey or PrivateKey).
 */
-QSsl::KeyType SslUnsafeKey::type() const
+SslUnsafe::KeyType SslUnsafeKey::type() const
 {
     return d->type;
 }
@@ -290,7 +290,7 @@ QSsl::KeyType SslUnsafeKey::type() const
 /*!
     Returns the key algorithm.
 */
-QSsl::KeyAlgorithm SslUnsafeKey::algorithm() const
+SslUnsafe::KeyAlgorithm SslUnsafeKey::algorithm() const
 {
     return d->algorithm;
 }
@@ -303,11 +303,11 @@ QSsl::KeyAlgorithm SslUnsafeKey::algorithm() const
 */
 QByteArray SslUnsafeKey::toDer(const QByteArray &passPhrase) const
 {
-    if (d->isNull || d->algorithm == QSsl::Opaque)
+    if (d->isNull || d->algorithm == SslUnsafe::Opaque)
         return QByteArray();
 
     // Encrypted DER is nonsense, see QTBUG-41038.
-    if (d->type == QSsl::PrivateKey && !passPhrase.isEmpty())
+    if (d->type == SslUnsafe::PrivateKey && !passPhrase.isEmpty())
         return QByteArray();
 
 #ifndef QT_NO_OPENSSL
@@ -359,7 +359,7 @@ bool SslUnsafeKey::operator==(const SslUnsafeKey &other) const
         return false;
     if (length() != other.length())
         return false;
-    if (algorithm() == QSsl::Opaque)
+    if (algorithm() == SslUnsafe::Opaque)
         return handle() == other.handle();
     return toDer() == other.toDer();
 }
@@ -376,9 +376,9 @@ QDebug operator<<(QDebug debug, const SslUnsafeKey &key)
     QDebugStateSaver saver(debug);
     debug.resetFormat().nospace();
     debug << "SslUnsafeKey("
-          << (key.type() == QSsl::PublicKey ? "PublicKey" : "PrivateKey")
-          << ", " << (key.algorithm() == QSsl::Opaque ? "OPAQUE" :
-                      (key.algorithm() == QSsl::Rsa ? "RSA" : ((key.algorithm() == QSsl::Dsa) ? "DSA" : "EC")))
+          << (key.type() == SslUnsafe::PublicKey ? "PublicKey" : "PrivateKey")
+          << ", " << (key.algorithm() == SslUnsafe::Opaque ? "OPAQUE" :
+                      (key.algorithm() == SslUnsafe::Rsa ? "RSA" : ((key.algorithm() == SslUnsafe::Dsa) ? "DSA" : "EC")))
           << ", " << key.length()
           << ')';
     return debug;

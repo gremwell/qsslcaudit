@@ -15,7 +15,7 @@ class SslUnsafeKeyPrivate
 {
 public:
     inline SslUnsafeKeyPrivate()
-        : algorithm(QSsl::Opaque)
+        : algorithm(SslUnsafe::Opaque)
         , opaque(0)
     {
         clear(false);
@@ -42,8 +42,8 @@ public:
     Qt::HANDLE handle() const;
 
     bool isNull;
-    QSsl::KeyType type;
-    QSsl::KeyAlgorithm algorithm;
+    SslUnsafe::KeyType type;
+    SslUnsafe::KeyAlgorithm algorithm;
 
     enum Cipher {
         DesCbc,

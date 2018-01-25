@@ -52,9 +52,9 @@ public:
 
 #ifdef QT_NO_OPENSSL
     bool subjectMatchesIssuer;
-    QSsl::KeyAlgorithm publicKeyAlgorithm;
+    SslUnsafe::KeyAlgorithm publicKeyAlgorithm;
     QByteArray publicKeyDerData;
-    QMultiMap<QSsl::AlternativeNameEntryType, QString> subjectAlternativeNames;
+    QMultiMap<SslUnsafe::AlternativeNameEntryType, QString> subjectAlternativeNames;
     QList<QSslCertificateExtension> extensions;
 
     QByteArray derData;
@@ -64,11 +64,11 @@ public:
 #endif
     X509 *x509;
 
-    void init(const QByteArray &data, QSsl::EncodingFormat format);
+    void init(const QByteArray &data, SslUnsafe::EncodingFormat format);
 
     static QByteArray asn1ObjectId(ASN1_OBJECT *object);
     static QByteArray asn1ObjectName(ASN1_OBJECT *object);
-    static QByteArray QByteArray_from_X509(X509 *x509, QSsl::EncodingFormat format);
+    static QByteArray QByteArray_from_X509(X509 *x509, SslUnsafe::EncodingFormat format);
     static QString text_from_X509(X509 *x509);
     static SslUnsafeCertificate SslUnsafeCertificate_from_X509(X509 *x509);
     static QList<SslUnsafeCertificate> certificatesFromPem(const QByteArray &pem, int count = -1);

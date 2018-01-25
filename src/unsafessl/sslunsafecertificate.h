@@ -13,7 +13,7 @@
 #include <QtCore/qregexp.h>
 #include <QtCore/qsharedpointer.h>
 #include <QtCore/qmap.h>
-#include <QtNetwork/qssl.h>
+#include "sslunsafe.h"
 
 #ifndef QT_NO_SSL
 
@@ -44,8 +44,8 @@ public:
         EmailAddress
     };
 
-    explicit SslUnsafeCertificate(QIODevice *device, QSsl::EncodingFormat format = QSsl::Pem);
-    explicit SslUnsafeCertificate(const QByteArray &data = QByteArray(), QSsl::EncodingFormat format = QSsl::Pem);
+    explicit SslUnsafeCertificate(QIODevice *device, SslUnsafe::EncodingFormat format = SslUnsafe::Pem);
+    explicit SslUnsafeCertificate(const QByteArray &data = QByteArray(), SslUnsafe::EncodingFormat format = SslUnsafe::Pem);
     SslUnsafeCertificate(const SslUnsafeCertificate &other);
     ~SslUnsafeCertificate();
 #ifdef Q_COMPILER_RVALUE_REFS
@@ -83,10 +83,10 @@ public:
     QList<QByteArray> subjectInfoAttributes() const;
     QList<QByteArray> issuerInfoAttributes() const;
 #if QT_DEPRECATED_SINCE(5,0)
-    QT_DEPRECATED inline QMultiMap<QSsl::AlternateNameEntryType, QString>
+    QT_DEPRECATED inline QMultiMap<SslUnsafe::AlternateNameEntryType, QString>
                   alternateSubjectNames() const { return subjectAlternativeNames(); }
 #endif
-    QMultiMap<QSsl::AlternativeNameEntryType, QString> subjectAlternativeNames() const;
+    QMultiMap<SslUnsafe::AlternativeNameEntryType, QString> subjectAlternativeNames() const;
     QDateTime effectiveDate() const;
     QDateTime expiryDate() const;
     SslUnsafeKey publicKey() const;
@@ -97,12 +97,12 @@ public:
     QString toText() const;
 
     static QList<SslUnsafeCertificate> fromPath(
-        const QString &path, QSsl::EncodingFormat format = QSsl::Pem,
+        const QString &path, SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
         QRegExp::PatternSyntax syntax = QRegExp::FixedString);
     static QList<SslUnsafeCertificate> fromDevice(
-        QIODevice *device, QSsl::EncodingFormat format = QSsl::Pem);
+        QIODevice *device, SslUnsafe::EncodingFormat format = SslUnsafe::Pem);
     static QList<SslUnsafeCertificate> fromData(
-        const QByteArray &data, QSsl::EncodingFormat format = QSsl::Pem);
+        const QByteArray &data, SslUnsafe::EncodingFormat format = SslUnsafe::Pem);
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
     static QList<SslUnsafeError> verify(const QList<SslUnsafeCertificate> &certificateChain, const QString &hostName = QString());

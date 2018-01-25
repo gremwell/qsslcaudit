@@ -1,5 +1,5 @@
 
-//#include "qssl_p.h"
+#include "sslunsafe_p.h"
 #include "sslunsafesocket_openssl_symbols_p.h"
 #include "sslunsafecertificate_p.h"
 #include "sslunsafekey_p.h"
@@ -138,9 +138,9 @@ QList<QByteArray> SslUnsafeCertificate::issuerInfoAttributes() const
     return d->issuerInfo.uniqueKeys();
 }
 
-QMultiMap<QSsl::AlternativeNameEntryType, QString> SslUnsafeCertificate::subjectAlternativeNames() const
+QMultiMap<SslUnsafe::AlternativeNameEntryType, QString> SslUnsafeCertificate::subjectAlternativeNames() const
 {
-    QMultiMap<QSsl::AlternativeNameEntryType, QString> result;
+    QMultiMap<SslUnsafe::AlternativeNameEntryType, QString> result;
 
     if (!d->x509)
         return result;
@@ -162,9 +162,9 @@ QMultiMap<QSsl::AlternativeNameEntryType, QString> SslUnsafeCertificate::subject
             const char *altNameStr = reinterpret_cast<const char *>(q_ASN1_STRING_data(genName->d.ia5));
             const QString altName = QString::fromLatin1(altNameStr, len);
             if (genName->type == GEN_DNS)
-                result.insert(QSsl::DnsEntry, altName);
+                result.insert(SslUnsafe::DnsEntry, altName);
             else if (genName->type == GEN_EMAIL)
-                result.insert(QSsl::EmailEntry, altName);
+                result.insert(SslUnsafe::EmailEntry, altName);
         }
         q_sk_pop_free((STACK*)altNames, reinterpret_cast<void(*)(void*)>(q_sk_free));
     }
@@ -194,23 +194,23 @@ SslUnsafeKey SslUnsafeCertificate::publicKey() const
 
     SslUnsafeKey key;
 
-    key.d->type = QSsl::PublicKey;
+    key.d->type = SslUnsafe::PublicKey;
     X509_PUBKEY *xkey = d->x509->cert_info->key;
     EVP_PKEY *pkey = q_X509_PUBKEY_get(xkey);
     Q_ASSERT(pkey);
 
     if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_RSA) {
         key.d->rsa = q_EVP_PKEY_get1_RSA(pkey);
-        key.d->algorithm = QSsl::Rsa;
+        key.d->algorithm = SslUnsafe::Rsa;
         key.d->isNull = false;
     } else if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_DSA) {
         key.d->dsa = q_EVP_PKEY_get1_DSA(pkey);
-        key.d->algorithm = QSsl::Dsa;
+        key.d->algorithm = SslUnsafe::Dsa;
         key.d->isNull = false;
 #ifndef OPENSSL_NO_EC
     } else if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_EC) {
         key.d->ec = q_EVP_PKEY_get1_EC_KEY(pkey);
-        key.d->algorithm = QSsl::Ec;
+        key.d->algorithm = SslUnsafe::Ec;
         key.d->isNull = false;
 #endif
     } else if (q_EVP_PKEY_type(pkey->type) == EVP_PKEY_DH) {
@@ -444,14 +444,14 @@ QByteArray SslUnsafeCertificate::toPem() const
 {
     if (!d->x509)
         return QByteArray();
-    return d->QByteArray_from_X509(d->x509, QSsl::Pem);
+    return d->QByteArray_from_X509(d->x509, SslUnsafe::Pem);
 }
 
 QByteArray SslUnsafeCertificate::toDer() const
 {
     if (!d->x509)
         return QByteArray();
-    return d->QByteArray_from_X509(d->x509, QSsl::Der);
+    return d->QByteArray_from_X509(d->x509, SslUnsafe::Der);
 }
 
 QString SslUnsafeCertificate::toText() const
@@ -464,10 +464,10 @@ QString SslUnsafeCertificate::toText() const
 #define BEGINCERTSTRING "-----BEGIN CERTIFICATE-----"
 #define ENDCERTSTRING "-----END CERTIFICATE-----"
 
-void SslUnsafeCertificatePrivate::init(const QByteArray &data, QSsl::EncodingFormat format)
+void SslUnsafeCertificatePrivate::init(const QByteArray &data, SslUnsafe::EncodingFormat format)
 {
     if (!data.isEmpty()) {
-        const QList<SslUnsafeCertificate> certs = (format == QSsl::Pem)
+        const QList<SslUnsafeCertificate> certs = (format == SslUnsafe::Pem)
             ? certificatesFromPem(data, 1)
             : certificatesFromDer(data, 1);
         if (!certs.isEmpty()) {
@@ -478,8 +478,8 @@ void SslUnsafeCertificatePrivate::init(const QByteArray &data, QSsl::EncodingFor
     }
 }
 
-// ### refactor against QSsl::pemFromDer() etc. (to avoid redundant implementations)
-QByteArray SslUnsafeCertificatePrivate::QByteArray_from_X509(X509 *x509, QSsl::EncodingFormat format)
+// ### refactor against SslUnsafe::pemFromDer() etc. (to avoid redundant implementations)
+QByteArray SslUnsafeCertificatePrivate::QByteArray_from_X509(X509 *x509, SslUnsafe::EncodingFormat format)
 {
     if (!x509) {
         qWarning("SslUnsafeSocketBackendPrivate::X509_to_QByteArray: null X509");
@@ -496,7 +496,7 @@ QByteArray SslUnsafeCertificatePrivate::QByteArray_from_X509(X509 *x509, QSsl::E
     if (q_i2d_X509(x509, dataPu) < 0)
         return QByteArray();
 
-    if (format == QSsl::Der)
+    if (format == SslUnsafe::Der)
         return array;
 
     // Convert to Base64 - wrap at 64 characters.

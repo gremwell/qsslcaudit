@@ -2,7 +2,7 @@
 //#define SslUnsafeSocket_DEBUG
 //#define QT_DECRYPT_SSL_TRAFFIC
 
-//#include "qssl_p.h"
+#include "sslunsafe_p.h"
 #include "sslunsafeerror.h"
 #include "sslunsafesocket_openssl_p.h"
 #include "sslunsafesocket_openssl_symbols_p.h"
@@ -185,17 +185,17 @@ SslUnsafeCipher SslUnsafeSocketBackendPrivate::SslUnsafeCipher_from_SSL_CIPHER(S
 
         QString protoString = descriptionList.at(1).toString();
         ciph.d->protocolString = protoString;
-        ciph.d->protocol = QSsl::UnknownProtocol;
+        ciph.d->protocol = SslUnsafe::UnknownProtocol;
         if (protoString == QLatin1String("SSLv3"))
-            ciph.d->protocol = QSsl::SslV3;
+            ciph.d->protocol = SslUnsafe::SslV3;
         else if (protoString == QLatin1String("SSLv2"))
-            ciph.d->protocol = QSsl::SslV2;
+            ciph.d->protocol = SslUnsafe::SslV2;
         else if (protoString == QLatin1String("TLSv1"))
-            ciph.d->protocol = QSsl::TlsV1_0;
+            ciph.d->protocol = SslUnsafe::TlsV1_0;
         else if (protoString == QLatin1String("TLSv1.1"))
-            ciph.d->protocol = QSsl::TlsV1_1;
+            ciph.d->protocol = SslUnsafe::TlsV1_1;
         else if (protoString == QLatin1String("TLSv1.2"))
-            ciph.d->protocol = QSsl::TlsV1_2;
+            ciph.d->protocol = SslUnsafe::TlsV1_2;
 
         if (descriptionList.at(2).startsWith(QLatin1String("Kx=")))
             ciph.d->keyExchangeMethod = descriptionList.at(2).mid(3).toString();
@@ -261,52 +261,52 @@ int q_X509Callback(int ok, X509_STORE_CTX *ctx)
     return 1;
 }
 
-long SslUnsafeSocketBackendPrivate::setupOpenSslOptions(QSsl::SslProtocol protocol, QSsl::SslOptions sslOptions)
+long SslUnsafeSocketBackendPrivate::setupOpenSslOptions(SslUnsafe::SslProtocol protocol, SslUnsafe::SslOptions sslOptions)
 {
     long options;
-    if (protocol == QSsl::TlsV1SslV3)
+    if (protocol == SslUnsafe::TlsV1SslV3)
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2;
-    else if (protocol == QSsl::SecureProtocols)
+    else if (protocol == SslUnsafe::SecureProtocols)
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3;
-    else if (protocol == QSsl::TlsV1_0OrLater)
+    else if (protocol == SslUnsafe::TlsV1_0OrLater)
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3;
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
     // Choosing Tlsv1_1OrLater or TlsV1_2OrLater on OpenSSL < 1.0.1
     // will cause an error in SslUnsafeContext::fromConfiguration, meaning
     // we will never get here.
-    else if (protocol == QSsl::TlsV1_1OrLater)
+    else if (protocol == SslUnsafe::TlsV1_1OrLater)
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1;
-    else if (protocol == QSsl::TlsV1_2OrLater)
+    else if (protocol == SslUnsafe::TlsV1_2OrLater)
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1;
 #endif
     else
         options = SSL_OP_ALL;
 
     // This option is disabled by default, so we need to be able to clear it
-    if (sslOptions & QSsl::SslOptionDisableEmptyFragments)
+    if (sslOptions & SslUnsafe::SslOptionDisableEmptyFragments)
         options |= SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
     else
         options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 
 #ifdef SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
     // This option is disabled by default, so we need to be able to clear it
-    if (sslOptions & QSsl::SslOptionDisableLegacyRenegotiation)
+    if (sslOptions & SslUnsafe::SslOptionDisableLegacyRenegotiation)
         options &= ~SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION;
     else
         options |= SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION;
 #endif
 
 #ifdef SSL_OP_NO_TICKET
-    if (sslOptions & QSsl::SslOptionDisableSessionTickets)
+    if (sslOptions & SslUnsafe::SslOptionDisableSessionTickets)
         options |= SSL_OP_NO_TICKET;
 #endif
 #ifdef SSL_OP_NO_COMPRESSION
-    if (sslOptions & QSsl::SslOptionDisableCompression)
+    if (sslOptions & SslUnsafe::SslOptionDisableCompression)
         options |= SSL_OP_NO_COMPRESSION;
 #endif
 
 #if 0
-    if (!(sslOptions & QSsl::SslOptionDisableServerCipherPreference))
+    if (!(sslOptions & SslUnsafe::SslOptionDisableServerCipherPreference))
         options |= SSL_OP_CIPHER_SERVER_PREFERENCE;
 #endif
 
@@ -339,9 +339,9 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
         return false;
     }
 
-    if (configuration.protocol != QSsl::SslV2 &&
-        configuration.protocol != QSsl::SslV3 &&
-        configuration.protocol != QSsl::UnknownProtocol &&
+    if (configuration.protocol != SslUnsafe::SslV2 &&
+        configuration.protocol != SslUnsafe::SslV3 &&
+        configuration.protocol != SslUnsafe::UnknownProtocol &&
         mode == SslUnsafeSocket::SslClientMode && q_SSLeay() >= 0x00090806fL) {
         // Set server hostname on TLS extension. RFC4366 section 3.1 requires it in ACE format.
         QString tlsHostName = verificationPeerName.isEmpty() ? q->peerName() : verificationPeerName;
@@ -351,7 +351,7 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
         // only send the SNI header if the URL is valid and not an IP
         if (!ace.isEmpty()
             && !QHostAddress().setAddress(tlsHostName)
-            && !(configuration.sslOptions & QSsl::SslOptionDisableServerNameIndication)) {
+            && !(configuration.sslOptions & SslUnsafe::SslOptionDisableServerNameIndication)) {
             // We don't send the trailing dot from the host header if present see
             // https://tools.ietf.org/html/rfc6066#section-3
             if (ace.endsWith('.'))
@@ -659,7 +659,7 @@ QList<SslUnsafeCertificate> SslUnsafeSocketPrivate::systemCaCertificates()
                 if(!pc)
                     break;
                 QByteArray der((const char *)(pc->pbCertEncoded), static_cast<int>(pc->cbCertEncoded));
-                SslUnsafeCertificate cert(der, QSsl::Der);
+                SslUnsafeCertificate cert(der, SslUnsafe::Der);
                 systemCerts.append(cert);
             }
             ptrCertCloseStore(hSystemStore, 0);
@@ -670,21 +670,21 @@ QList<SslUnsafeCertificate> SslUnsafeSocketPrivate::systemCaCertificates()
     QDir currentDir;
     QStringList nameFilters;
     QList<QByteArray> directories;
-    QSsl::EncodingFormat platformEncodingFormat;
+    SslUnsafe::EncodingFormat platformEncodingFormat;
 # ifndef Q_OS_ANDROID
     directories = unixRootCertDirectories();
     nameFilters << QLatin1String("*.pem") << QLatin1String("*.crt");
-    platformEncodingFormat = QSsl::Pem;
+    platformEncodingFormat = SslUnsafe::Pem;
 # else
     // Q_OS_ANDROID
     QByteArray ministroPath = qgetenv("MINISTRO_SSL_CERTS_PATH"); // Set by Ministro
     directories << ministroPath;
     nameFilters << QLatin1String("*.der");
-    platformEncodingFormat = QSsl::Der;
+    platformEncodingFormat = SslUnsafe::Der;
     if (ministroPath.isEmpty()) {
         QList<QByteArray> certificateData = fetchSslCertificateData();
         for (int i = 0; i < certificateData.size(); ++i) {
-            systemCerts.append(SslUnsafeCertificate::fromData(certificateData.at(i), QSsl::Der));
+            systemCerts.append(SslUnsafeCertificate::fromData(certificateData.at(i), SslUnsafe::Der));
         }
     } else
 # endif //Q_OS_ANDROID
@@ -702,8 +702,8 @@ QList<SslUnsafeCertificate> SslUnsafeSocketPrivate::systemCaCertificates()
         for (const QString& file : const_cast<const QSet<QString>&>(certFiles)) //qAsConst(certFiles))
             systemCerts.append(SslUnsafeCertificate::fromPath(file, platformEncodingFormat));
 # ifndef Q_OS_ANDROID
-        systemCerts.append(SslUnsafeCertificate::fromPath(QLatin1String("/etc/pki/tls/certs/ca-bundle.crt"), QSsl::Pem)); // Fedora, Mandriva
-        systemCerts.append(SslUnsafeCertificate::fromPath(QLatin1String("/usr/local/share/certs/ca-root-nss.crt"), QSsl::Pem)); // FreeBSD's ca_root_nss
+        systemCerts.append(SslUnsafeCertificate::fromPath(QLatin1String("/etc/pki/tls/certs/ca-bundle.crt"), SslUnsafe::Pem)); // Fedora, Mandriva
+        systemCerts.append(SslUnsafeCertificate::fromPath(QLatin1String("/usr/local/share/certs/ca-root-nss.crt"), SslUnsafe::Pem)); // FreeBSD's ca_root_nss
 # endif
     }
 #endif
@@ -1398,7 +1398,7 @@ void QWindowsCaRootFetcher::start()
                 qDebug() << " - UNTRUSTED SIMPLE CHAIN" << i << "reason:" << chain->rgpChain[i]->TrustStatus.dwErrorStatus;
             for (unsigned int j = 0; j < chain->rgpChain[i]->cElement; j++) {
                 SslUnsafeCertificate foundCert(QByteArray((const char *)chain->rgpChain[i]->rgpElement[j]->pCertContext->pbCertEncoded
-                    , chain->rgpChain[i]->rgpElement[j]->pCertContext->cbCertEncoded), QSsl::Der);
+                    , chain->rgpChain[i]->rgpElement[j]->pCertContext->cbCertEncoded), SslUnsafe::Der);
                 qDebug() << "   - " << foundCert;
             }
         }
@@ -1415,7 +1415,7 @@ void QWindowsCaRootFetcher::start()
             if (finalChain->TrustStatus.dwErrorStatus == CERT_TRUST_NO_ERROR
                 && finalChain->cElement > 0) {
                     trustedRoot = SslUnsafeCertificate(QByteArray((const char *)finalChain->rgpElement[finalChain->cElement - 1]->pCertContext->pbCertEncoded
-                        , finalChain->rgpElement[finalChain->cElement - 1]->pCertContext->cbCertEncoded), QSsl::Der);
+                        , finalChain->rgpElement[finalChain->cElement - 1]->pCertContext->cbCertEncoded), SslUnsafe::Der);
             }
         }
         CertFreeCertificateChain(chain);
@@ -1469,26 +1469,26 @@ SslUnsafeCipher SslUnsafeSocketBackendPrivate::sessionCipher() const
     return sessionCipher ? SslUnsafeCipher_from_SSL_CIPHER(sessionCipher) : SslUnsafeCipher();
 }
 
-QSsl::SslProtocol SslUnsafeSocketBackendPrivate::sessionProtocol() const
+SslUnsafe::SslProtocol SslUnsafeSocketBackendPrivate::sessionProtocol() const
 {
     if (!ssl)
-        return QSsl::UnknownProtocol;
+        return SslUnsafe::UnknownProtocol;
     int ver = q_SSL_version(ssl);
 
     switch (ver) {
     case 0x2:
-        return QSsl::SslV2;
+        return SslUnsafe::SslV2;
     case 0x300:
-        return QSsl::SslV3;
+        return SslUnsafe::SslV3;
     case 0x301:
-        return QSsl::TlsV1_0;
+        return SslUnsafe::TlsV1_0;
     case 0x302:
-        return QSsl::TlsV1_1;
+        return SslUnsafe::TlsV1_1;
     case 0x303:
-        return QSsl::TlsV1_2;
+        return SslUnsafe::TlsV1_2;
     }
 
-    return QSsl::UnknownProtocol;
+    return SslUnsafe::UnknownProtocol;
 }
 
 void SslUnsafeSocketBackendPrivate::continueHandshake()
@@ -1536,12 +1536,12 @@ void SslUnsafeSocketBackendPrivate::continueHandshake()
 #endif
 
     // Cache this SSL session inside the SslUnsafeContext
-    if (!(configuration.sslOptions & QSsl::SslOptionDisableSessionSharing)) {
+    if (!(configuration.sslOptions & SslUnsafe::SslOptionDisableSessionSharing)) {
         if (!sslContextPointer->cacheSession(ssl)) {
             sslContextPointer.clear(); // we could not cache the session
         } else {
             // Cache the session for permanent usage as well
-            if (!(configuration.sslOptions & QSsl::SslOptionDisableSessionPersistence)) {
+            if (!(configuration.sslOptions & SslUnsafe::SslOptionDisableSessionPersistence)) {
                 if (!sslContextPointer->sessionASN1().isEmpty())
                     configuration.sslSession = sslContextPointer->sessionASN1();
                 configuration.sslSessionTicketLifeTimeHint = sslContextPointer->sessionTicketLifeTimeHint();
@@ -1585,7 +1585,7 @@ void SslUnsafeSocketBackendPrivate::continueHandshake()
     if (q_SSLeay() >= 0x10002000L && mode == SslUnsafeSocket::SslClientMode) {
         EVP_PKEY *key;
         if (q_SSL_get_server_tmp_key(ssl, &key))
-            configuration.ephemeralServerKey = SslUnsafeKey(key, QSsl::PublicKey);
+            configuration.ephemeralServerKey = SslUnsafeKey(key, SslUnsafe::PublicKey);
     }
 #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L ...
 

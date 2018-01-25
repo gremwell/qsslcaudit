@@ -4,7 +4,7 @@
 
 #include <QtCore/qstring.h>
 #include <QtCore/qscopedpointer.h>
-#include <QtNetwork/qssl.h>
+#include "sslunsafe.h"
 
 
 #ifndef QT_NO_SSL
@@ -15,7 +15,7 @@ class SslUnsafeCipher
 public:
     SslUnsafeCipher();
     explicit SslUnsafeCipher(const QString &name);
-    SslUnsafeCipher(const QString &name, QSsl::SslProtocol protocol);
+    SslUnsafeCipher(const QString &name, SslUnsafe::SslProtocol protocol);
     SslUnsafeCipher(const SslUnsafeCipher &other);
 #ifdef Q_COMPILER_RVALUE_REFS
     SslUnsafeCipher &operator=(SslUnsafeCipher &&other) Q_DECL_NOTHROW { swap(other); return *this; }
@@ -38,7 +38,7 @@ public:
     QString authenticationMethod() const;
     QString encryptionMethod() const;
     QString protocolString() const;
-    QSsl::SslProtocol protocol() const;
+    SslUnsafe::SslProtocol protocol() const;
 
 private:
     QScopedPointer<SslUnsafeCipherPrivate> d;

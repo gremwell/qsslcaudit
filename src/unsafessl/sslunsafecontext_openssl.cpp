@@ -3,7 +3,7 @@
 #include "sslunsafediffiehellmanparameters.h"
 #include <QtCore/qmutex.h>
 
-//#include "private/qssl_p.h"
+#include "sslunsafe_p.h"
 #include "sslunsafeerror.h"
 #include "sslunsafecontext_openssl_p.h"
 #include "sslunsafesocket_p.h"
@@ -53,7 +53,7 @@ void SslUnsafeContext::initSslContext(SslUnsafeContext *sslContext, SslUnsafeSoc
     bool unsupportedProtocol = false;
 init_context:
     switch (sslContext->sslConfiguration.protocol()) {
-    case QSsl::SslV2:
+    case SslUnsafe::SslV2:
 #ifndef OPENSSL_NO_SSL2
         sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv2_client_method() : q_SSLv2_server_method());
 #else
@@ -62,7 +62,7 @@ init_context:
         unsupportedProtocol = true;
 #endif
         break;
-    case QSsl::SslV3:
+    case SslUnsafe::SslV3:
 #ifndef OPENSSL_NO_SSL3_METHOD
         sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv3_client_method() : q_SSLv3_server_method());
 #else
@@ -71,19 +71,19 @@ init_context:
         unsupportedProtocol = true;
 #endif
         break;
-    case QSsl::SecureProtocols:
+    case SslUnsafe::SecureProtocols:
         // SSLv2 and SSLv3 will be disabled by SSL options
         // But we need q_SSLv23_server_method() otherwise AnyProtocol will be unable to connect on Win32.
-    case QSsl::TlsV1SslV3:
+    case SslUnsafe::TlsV1SslV3:
         // SSLv2 will will be disabled by SSL options
-    case QSsl::AnyProtocol:
+    case SslUnsafe::AnyProtocol:
     default:
         sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv23_client_method() : q_SSLv23_server_method());
         break;
-    case QSsl::TlsV1_0:
+    case SslUnsafe::TlsV1_0:
         sslContext->ctx = q_SSL_CTX_new(client ? q_TLSv1_client_method() : q_TLSv1_server_method());
         break;
-    case QSsl::TlsV1_1:
+    case SslUnsafe::TlsV1_1:
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
         sslContext->ctx = q_SSL_CTX_new(client ? q_TLSv1_1_client_method() : q_TLSv1_1_server_method());
 #else
@@ -92,7 +92,7 @@ init_context:
         unsupportedProtocol = true;
 #endif
         break;
-    case QSsl::TlsV1_2:
+    case SslUnsafe::TlsV1_2:
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
         sslContext->ctx = q_SSL_CTX_new(client ? q_TLSv1_2_client_method() : q_TLSv1_2_server_method());
 #else
@@ -101,12 +101,12 @@ init_context:
         unsupportedProtocol = true;
 #endif
         break;
-    case QSsl::TlsV1_0OrLater:
+    case SslUnsafe::TlsV1_0OrLater:
         // Specific protocols will be specified via SSL options.
         sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv23_client_method() : q_SSLv23_server_method());
         break;
-    case QSsl::TlsV1_1OrLater:
-    case QSsl::TlsV1_2OrLater:
+    case SslUnsafe::TlsV1_1OrLater:
+    case SslUnsafe::TlsV1_2OrLater:
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
         // Specific protocols will be specified via SSL options.
         sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv23_client_method() : q_SSLv23_server_method());
@@ -208,7 +208,7 @@ init_context:
             return;
         }
 
-        if (configuration.d->privateKey.algorithm() == QSsl::Opaque) {
+        if (configuration.d->privateKey.algorithm() == SslUnsafe::Opaque) {
             sslContext->pkey = reinterpret_cast<EVP_PKEY *>(configuration.d->privateKey.handle());
         } else {
             // Load private key
@@ -216,12 +216,12 @@ init_context:
             // before we were using EVP_PKEY_assign_R* functions and did not use EVP_PKEY_free.
             // this lead to a memory leak. Now we use the *_set1_* functions which do not
             // take ownership of the RSA/DSA key instance because the QSslKey already has ownership.
-            if (configuration.d->privateKey.algorithm() == QSsl::Rsa)
+            if (configuration.d->privateKey.algorithm() == SslUnsafe::Rsa)
                 q_EVP_PKEY_set1_RSA(sslContext->pkey, reinterpret_cast<RSA *>(configuration.d->privateKey.handle()));
-            else if (configuration.d->privateKey.algorithm() == QSsl::Dsa)
+            else if (configuration.d->privateKey.algorithm() == SslUnsafe::Dsa)
                 q_EVP_PKEY_set1_DSA(sslContext->pkey, reinterpret_cast<DSA *>(configuration.d->privateKey.handle()));
 #ifndef OPENSSL_NO_EC
-            else if (configuration.d->privateKey.algorithm() == QSsl::Ec)
+            else if (configuration.d->privateKey.algorithm() == SslUnsafe::Ec)
                 q_EVP_PKEY_set1_EC_KEY(sslContext->pkey, reinterpret_cast<EC_KEY *>(configuration.d->privateKey.handle()));
 #endif
         }
@@ -231,7 +231,7 @@ init_context:
             sslContext->errorCode = SslUnsafeError::UnspecifiedError;
             return;
         }
-        if (configuration.d->privateKey.algorithm() == QSsl::Opaque)
+        if (configuration.d->privateKey.algorithm() == SslUnsafe::Opaque)
             sslContext->pkey = 0; // Don't free the private key, it belongs to QSslKey
 
         // Check if the certificate matches the private key.
@@ -404,7 +404,7 @@ SSL* SslUnsafeContext::createSsl()
     q_SSL_clear(ssl);
 
     if (!session && !sessionASN1().isEmpty()
-            && !sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionPersistence)) {
+            && !sslConfiguration.testSslOption(SslUnsafe::SslOptionDisableSessionPersistence)) {
         const unsigned char *data = reinterpret_cast<const unsigned char *>(m_sessionASN1.constData());
         session = q_d2i_SSL_SESSION(0, &data, m_sessionASN1.size()); // refcount is 1 already, set by function above
     }
@@ -472,7 +472,7 @@ bool SslUnsafeContext::cacheSession(SSL* ssl)
     // cache the session the caller gave us and increase reference count
     session = q_SSL_get1_session(ssl);
 
-    if (session && !sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionPersistence)) {
+    if (session && !sslConfiguration.testSslOption(SslUnsafe::SslOptionDisableSessionPersistence)) {
         int sessionSize = q_i2d_SSL_SESSION(session, 0);
         if (sessionSize > 0) {
             m_sessionASN1.resize(sessionSize);

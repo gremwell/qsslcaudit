@@ -24,15 +24,15 @@ public:
     static SslUnsafeEllipticCurve fromShortName(const QString &name);
     static SslUnsafeEllipticCurve fromLongName(const QString &name);
 
-    Q_REQUIRED_RESULT Q_NETWORK_EXPORT QString shortName() const;
-    Q_REQUIRED_RESULT Q_NETWORK_EXPORT QString longName() const;
+    Q_REQUIRED_RESULT QString shortName() const;
+    Q_REQUIRED_RESULT QString longName() const;
 
     Q_DECL_CONSTEXPR bool isValid() const Q_DECL_NOTHROW
     {
         return id != 0;
     }
 
-    Q_NETWORK_EXPORT bool isTlsNamedCurve() const Q_DECL_NOTHROW;
+    bool isTlsNamedCurve() const Q_DECL_NOTHROW;
 
 private:
     int id;

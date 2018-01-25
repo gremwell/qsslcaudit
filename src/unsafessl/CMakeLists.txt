@@ -8,6 +8,8 @@ list(APPEND unsafessl_INCLUDE_DIRECTORIES
 )
 
 list(APPEND unsafessl_SOURCES
+    sslunsafe.cpp
+    sslunsafeasn1element.cpp
     sslunsafecertificate.cpp
     sslunsafecertificate_openssl.cpp
     sslunsafecertificateextension.cpp
@@ -17,6 +19,8 @@ list(APPEND unsafessl_SOURCES
     sslunsafediffiehellmanparameters.cpp
     sslunsafediffiehellmanparameters_openssl.cpp
     sslunsafeerror.cpp
+    sslunsafeellipticcurve.cpp
+    sslunsafeellipticcurve_openssl.cpp
     sslunsafekey_openssl.cpp
     sslunsafekey_p.cpp
     sslunsafemutexpool.cpp
@@ -28,6 +32,9 @@ list(APPEND unsafessl_SOURCES
 )
 
 list(APPEND unsafessl_HEADERS
+    sslunsafe.h
+    sslunsafe_p.h
+    sslunsafeasn1element_p.h
     sslunsafecertificateextension.h
     sslunsafecertificateextension_p.h
     sslunsafecertificate.h

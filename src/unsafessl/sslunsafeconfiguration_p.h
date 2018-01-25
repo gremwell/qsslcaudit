@@ -14,8 +14,8 @@ class SslUnsafeConfigurationPrivate: public QSharedData
 {
 public:
     SslUnsafeConfigurationPrivate()
-        : sessionProtocol(QSsl::UnknownProtocol),
-          protocol(QSsl::SecureProtocols),
+        : sessionProtocol(SslUnsafe::UnknownProtocol),
+          protocol(SslUnsafe::SecureProtocols),
           peerVerifyMode(SslUnsafeSocket::AutoVerifyPeer),
           peerVerifyDepth(0),
           allowRootCertOnDemandLoading(true),
@@ -35,11 +35,11 @@ public:
 
     SslUnsafeKey privateKey;
     SslUnsafeCipher sessionCipher;
-    QSsl::SslProtocol sessionProtocol;
+    SslUnsafe::SslProtocol sessionProtocol;
     QList<SslUnsafeCipher> ciphers;
     QList<SslUnsafeCertificate> caCertificates;
 
-    QSsl::SslProtocol protocol;
+    SslUnsafe::SslProtocol protocol;
     SslUnsafeSocket::PeerVerifyMode peerVerifyMode;
     int peerVerifyDepth;
     bool allowRootCertOnDemandLoading;
@@ -47,9 +47,9 @@ public:
 
     static bool peerSessionWasShared(const SslUnsafeConfiguration &configuration);
 
-    QSsl::SslOptions sslOptions;
+    SslUnsafe::SslOptions sslOptions;
 
-    static const QSsl::SslOptions defaultSslOptions;
+    static const SslUnsafe::SslOptions defaultSslOptions;
 
     QVector<SslUnsafeEllipticCurve> ellipticCurves;
 

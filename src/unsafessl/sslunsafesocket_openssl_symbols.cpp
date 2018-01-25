@@ -1,5 +1,5 @@
 
-//#include "qssl_p.h"
+#include "sslunsafe_p.h"
 #include "sslunsafesocket_openssl_symbols_p.h"
 
 # include <QtCore/qlibrary.h>

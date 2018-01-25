@@ -102,7 +102,7 @@ SslUnsafeCipher::SslUnsafeCipher(const QString &name)
     You can call isNull() after construction to check if \a name and
     \a protocol correctly identified a supported cipher.
 */
-SslUnsafeCipher::SslUnsafeCipher(const QString &name, QSsl::SslProtocol protocol)
+SslUnsafeCipher::SslUnsafeCipher(const QString &name, SslUnsafe::SslProtocol protocol)
     : d(new SslUnsafeCipherPrivate)
 {
     foreach (const SslUnsafeCipher &cipher, SslUnsafeConfiguration::supportedCiphers()) {
@@ -237,13 +237,13 @@ QString SslUnsafeCipher::protocolString() const
 }
 
 /*!
-    Returns the cipher's protocol type, or \l QSsl::UnknownProtocol if
+    Returns the cipher's protocol type, or \l SslUnsafe::UnknownProtocol if
     QSslCipher is unable to determine the protocol (protocolString() may
     contain more information).
 
     \sa protocolString()
 */
-QSsl::SslProtocol SslUnsafeCipher::protocol() const
+SslUnsafe::SslProtocol SslUnsafeCipher::protocol() const
 {
     return d->protocol;
 }

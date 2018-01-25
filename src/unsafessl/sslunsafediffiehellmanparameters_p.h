@@ -4,7 +4,7 @@
 //#include <QtNetwork/private/qtnetworkglobal_p.h>
 #include <QSharedData>
 
-#include "qsslkey.h"
+#include "sslunsafekey.h"
 #include "sslunsafediffiehellmanparameters.h"
 #include "sslunsafesocket_p.h" // includes wincrypt.h
 

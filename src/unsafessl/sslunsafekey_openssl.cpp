@@ -19,24 +19,24 @@ void SslUnsafeKeyPrivate::clear(bool deep)
     isNull = true;
     if (!SslUnsafeSocket::supportsSsl())
         return;
-    if (algorithm == QSsl::Rsa && rsa) {
+    if (algorithm == SslUnsafe::Rsa && rsa) {
         if (deep)
             q_RSA_free(rsa);
         rsa = 0;
     }
-    if (algorithm == QSsl::Dsa && dsa) {
+    if (algorithm == SslUnsafe::Dsa && dsa) {
         if (deep)
             q_DSA_free(dsa);
         dsa = 0;
     }
 #ifndef OPENSSL_NO_EC
-    if (algorithm == QSsl::Ec && ec) {
+    if (algorithm == SslUnsafe::Ec && ec) {
        if (deep)
             q_EC_KEY_free(ec);
        ec = 0;
     }
 #endif
-    if (algorithm == QSsl::Opaque && opaque) {
+    if (algorithm == SslUnsafe::Opaque && opaque) {
         if (deep)
             q_EVP_PKEY_free(opaque);
         opaque = 0;
@@ -50,8 +50,8 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
 
     if (pkey->type == EVP_PKEY_RSA) {
         isNull = false;
-        algorithm = QSsl::Rsa;
-        type = QSsl::PrivateKey;
+        algorithm = SslUnsafe::Rsa;
+        type = SslUnsafe::PrivateKey;
 
         rsa = q_RSA_new();
         memcpy(rsa, q_EVP_PKEY_get1_RSA(pkey), sizeof(RSA));
@@ -60,8 +60,8 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
     }
     else if (pkey->type == EVP_PKEY_DSA) {
         isNull = false;
-        algorithm = QSsl::Dsa;
-        type = QSsl::PrivateKey;
+        algorithm = SslUnsafe::Dsa;
+        type = SslUnsafe::PrivateKey;
 
         dsa = q_DSA_new();
         memcpy(dsa, q_EVP_PKEY_get1_DSA(pkey), sizeof(DSA));
@@ -71,8 +71,8 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
 #ifndef OPENSSL_NO_EC
     else if (pkey->type == EVP_PKEY_EC) {
         isNull = false;
-        algorithm = QSsl::Ec;
-        type = QSsl::PrivateKey;
+        algorithm = SslUnsafe::Ec;
+        type = SslUnsafe::PrivateKey;
         ec = q_EC_KEY_dup(q_EVP_PKEY_get1_EC_KEY(pkey));
 
         return true;
@@ -111,21 +111,21 @@ void SslUnsafeKeyPrivate::decodePem(const QByteArray &pem, const QByteArray &pas
 
     void *phrase = const_cast<char *>(passPhrase.constData());
 
-    if (algorithm == QSsl::Rsa) {
-        RSA *result = (type == QSsl::PublicKey)
+    if (algorithm == SslUnsafe::Rsa) {
+        RSA *result = (type == SslUnsafe::PublicKey)
             ? q_PEM_read_bio_RSA_PUBKEY(bio, &rsa, 0, phrase)
             : q_PEM_read_bio_RSAPrivateKey(bio, &rsa, 0, phrase);
         if (rsa && rsa == result)
             isNull = false;
-    } else if (algorithm == QSsl::Dsa) {
-        DSA *result = (type == QSsl::PublicKey)
+    } else if (algorithm == SslUnsafe::Dsa) {
+        DSA *result = (type == SslUnsafe::PublicKey)
             ? q_PEM_read_bio_DSA_PUBKEY(bio, &dsa, 0, phrase)
             : q_PEM_read_bio_DSAPrivateKey(bio, &dsa, 0, phrase);
         if (dsa && dsa == result)
             isNull = false;
 #ifndef OPENSSL_NO_EC
-    } else if (algorithm == QSsl::Ec) {
-        EC_KEY *result = (type == QSsl::PublicKey)
+    } else if (algorithm == SslUnsafe::Ec) {
+        EC_KEY *result = (type == SslUnsafe::PublicKey)
             ? q_PEM_read_bio_EC_PUBKEY(bio, &ec, 0, phrase)
             : q_PEM_read_bio_ECPrivateKey(bio, &ec, 0, phrase);
         if (ec && ec == result)
@@ -138,14 +138,14 @@ void SslUnsafeKeyPrivate::decodePem(const QByteArray &pem, const QByteArray &pas
 
 int SslUnsafeKeyPrivate::length() const
 {
-    if (isNull || algorithm == QSsl::Opaque)
+    if (isNull || algorithm == SslUnsafe::Opaque)
         return -1;
 
     switch (algorithm) {
-        case QSsl::Rsa: return q_BN_num_bits(rsa->n);
-        case QSsl::Dsa: return q_BN_num_bits(dsa->p);
+        case SslUnsafe::Rsa: return q_BN_num_bits(rsa->n);
+        case SslUnsafe::Dsa: return q_BN_num_bits(dsa->p);
 #ifndef OPENSSL_NO_EC
-        case QSsl::Ec: return q_EC_GROUP_get_degree(q_EC_KEY_get0_group(ec));
+        case SslUnsafe::Ec: return q_EC_GROUP_get_degree(q_EC_KEY_get0_group(ec));
 #endif
         default: return -1;
     }
@@ -153,7 +153,7 @@ int SslUnsafeKeyPrivate::length() const
 
 QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
 {
-    if (!SslUnsafeSocket::supportsSsl() || isNull || algorithm == QSsl::Opaque)
+    if (!SslUnsafeSocket::supportsSsl() || isNull || algorithm == SslUnsafe::Opaque)
         return QByteArray();
 
     BIO *bio = q_BIO_new(q_BIO_s_mem());
@@ -162,8 +162,8 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
 
     bool fail = false;
 
-    if (algorithm == QSsl::Rsa) {
-        if (type == QSsl::PublicKey) {
+    if (algorithm == SslUnsafe::Rsa) {
+        if (type == SslUnsafe::PublicKey) {
             if (!q_PEM_write_bio_RSA_PUBKEY(bio, rsa))
                 fail = true;
         } else {
@@ -175,8 +175,8 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
                 fail = true;
             }
         }
-    } else if (algorithm == QSsl::Dsa) {
-        if (type == QSsl::PublicKey) {
+    } else if (algorithm == SslUnsafe::Dsa) {
+        if (type == SslUnsafe::PublicKey) {
             if (!q_PEM_write_bio_DSA_PUBKEY(bio, dsa))
                 fail = true;
         } else {
@@ -189,8 +189,8 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
             }
         }
 #ifndef OPENSSL_NO_EC
-    } else if (algorithm == QSsl::Ec) {
-        if (type == QSsl::PublicKey) {
+    } else if (algorithm == SslUnsafe::Ec) {
+        if (type == SslUnsafe::PublicKey) {
             if (!q_PEM_write_bio_EC_PUBKEY(bio, ec))
                 fail = true;
         } else {
@@ -220,14 +220,14 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
 Qt::HANDLE SslUnsafeKeyPrivate::handle() const
 {
     switch (algorithm) {
-    case QSsl::Opaque:
+    case SslUnsafe::Opaque:
         return Qt::HANDLE(opaque);
-    case QSsl::Rsa:
+    case SslUnsafe::Rsa:
         return Qt::HANDLE(rsa);
-    case QSsl::Dsa:
+    case SslUnsafe::Dsa:
         return Qt::HANDLE(dsa);
 #ifndef OPENSSL_NO_EC
-    case QSsl::Ec:
+    case SslUnsafe::Ec:
         return Qt::HANDLE(ec);
 #endif
     default:

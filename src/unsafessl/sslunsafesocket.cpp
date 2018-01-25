@@ -2,8 +2,8 @@
 
 //#define SSLUNSAFESOCKET_DEBUG
 
-//#include "qssl_p.h"
-//#include "SslUnsafeSocket.h"
+#include "sslunsafe_p.h"
+#include "sslunsafesocket.h"
 
 #include "sslunsafesocket_openssl_p.h"
 
@@ -184,11 +184,11 @@ bool SslUnsafeSocket::isEncrypted() const
 }
 
 /*!
-    Returns the socket's SSL protocol. By default, \l QSsl::SecureProtocols is used.
+    Returns the socket's SSL protocol. By default, \l SslUnsafe::SecureProtocols is used.
 
     \sa setProtocol()
 */
-QSsl::SslProtocol SslUnsafeSocket::protocol() const
+SslUnsafe::SslProtocol SslUnsafeSocket::protocol() const
 {
     Q_D(const SslUnsafeSocket);
     return d->configuration.protocol;
@@ -199,7 +199,7 @@ QSsl::SslProtocol SslUnsafeSocket::protocol() const
     initiated handshake; calling this function on an already-encrypted socket
     will not affect the socket's protocol.
 */
-void SslUnsafeSocket::setProtocol(QSsl::SslProtocol protocol)
+void SslUnsafeSocket::setProtocol(SslUnsafe::SslProtocol protocol)
 {
     Q_D(SslUnsafeSocket);
     d->configuration.protocol = protocol;
@@ -597,7 +597,7 @@ void SslUnsafeSocket::setLocalCertificate(const SslUnsafeCertificate &certificat
     specified \a format.
 */
 void SslUnsafeSocket::setLocalCertificate(const QString &path,
-                                     QSsl::EncodingFormat format)
+                                     SslUnsafe::EncodingFormat format)
 {
     QFile file(path);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -707,7 +707,7 @@ SslUnsafeCipher SslUnsafeSocket::sessionCipher() const
     \sa protocol(), setProtocol()
     \since 5.4
 */
-QSsl::SslProtocol SslUnsafeSocket::sessionProtocol() const
+SslUnsafe::SslProtocol SslUnsafeSocket::sessionProtocol() const
 {
     Q_D(const SslUnsafeSocket);
     return d->sessionProtocol();
@@ -753,14 +753,14 @@ void SslUnsafeSocket::setPrivateKey(const SslUnsafeKey &key)
 
     \sa privateKey(), setLocalCertificate()
 */
-void SslUnsafeSocket::setPrivateKey(const QString &fileName, QSsl::KeyAlgorithm algorithm,
-                               QSsl::EncodingFormat format, const QByteArray &passPhrase)
+void SslUnsafeSocket::setPrivateKey(const QString &fileName, SslUnsafe::KeyAlgorithm algorithm,
+                               SslUnsafe::EncodingFormat format, const QByteArray &passPhrase)
 {
     Q_D(SslUnsafeSocket);
     QFile file(fileName);
     if (file.open(QIODevice::ReadOnly)) {
         d->configuration.privateKey = SslUnsafeKey(file.readAll(), algorithm,
-                                              format, QSsl::PrivateKey, passPhrase);
+                                              format, SslUnsafe::PrivateKey, passPhrase);
     }
 }
 
@@ -790,7 +790,7 @@ SslUnsafeKey SslUnsafeSocket::privateKey() const
 
   \sa addCaCertificate(), SslUnsafeCertificate::fromPath()
 */
-bool SslUnsafeSocket::addCaCertificates(const QString &path, QSsl::EncodingFormat format,
+bool SslUnsafeSocket::addCaCertificates(const QString &path, SslUnsafe::EncodingFormat format,
                                    QRegExp::PatternSyntax syntax)
 {
     Q_D(SslUnsafeSocket);
@@ -844,7 +844,7 @@ void SslUnsafeSocket::addCaCertificates(const QList<SslUnsafeCertificate> &certi
 
     \sa defaultCaCertificates(), addCaCertificates(), addDefaultCaCertificate()
 */
-bool SslUnsafeSocket::addDefaultCaCertificates(const QString &path, QSsl::EncodingFormat encoding,
+bool SslUnsafeSocket::addDefaultCaCertificates(const QString &path, SslUnsafe::EncodingFormat encoding,
                                           QRegExp::PatternSyntax syntax)
 {
     return SslUnsafeSocketPrivate::addDefaultCaCertificates(path, encoding, syntax);
@@ -1515,7 +1515,7 @@ void SslUnsafeSocketPrivate::setDefaultCaCertificates(const QList<SslUnsafeCerti
 /*!
     \internal
 */
-bool SslUnsafeSocketPrivate::addDefaultCaCertificates(const QString &path, QSsl::EncodingFormat format,
+bool SslUnsafeSocketPrivate::addDefaultCaCertificates(const QString &path, SslUnsafe::EncodingFormat format,
                                                  QRegExp::PatternSyntax syntax)
 {
     SslUnsafeSocketPrivate::ensureInitialized();
@@ -2067,7 +2067,7 @@ bool SslUnsafeSocketPrivate::isMatchingHostname(const SslUnsafeCertificate &cert
         }
     }
 
-    foreach (const QString &altName, cert.subjectAlternativeNames().values(QSsl::DnsEntry)) {
+    foreach (const QString &altName, cert.subjectAlternativeNames().values(SslUnsafe::DnsEntry)) {
         if (isMatchingHostname(altName.toLower(), peerName.toLower())) {
             return true;
         }

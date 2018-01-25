@@ -1,7 +1,7 @@
 #ifndef SSLUNSAFEDIFFIEHELLMANPARAMETERS_H
 #define SSLUNSAFEDIFFIEHELLMANPARAMETERS_H
 
-#include <QtNetwork/qssl.h>
+#include "sslunsafe.h"
 #include <QtCore/qnamespace.h>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qshareddata.h>
@@ -49,8 +49,8 @@ public:
 
     void swap(SslUnsafeDiffieHellmanParameters &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
 
-    static SslUnsafeDiffieHellmanParameters fromEncoded(const QByteArray &encoded, QSsl::EncodingFormat format = QSsl::Pem);
-    static SslUnsafeDiffieHellmanParameters fromEncoded(QIODevice *device, QSsl::EncodingFormat format = QSsl::Pem);
+    static SslUnsafeDiffieHellmanParameters fromEncoded(const QByteArray &encoded, SslUnsafe::EncodingFormat format = SslUnsafe::Pem);
+    static SslUnsafeDiffieHellmanParameters fromEncoded(QIODevice *device, SslUnsafe::EncodingFormat format = SslUnsafe::Pem);
 
     bool isEmpty() const Q_DECL_NOTHROW;
     bool isValid() const Q_DECL_NOTHROW;

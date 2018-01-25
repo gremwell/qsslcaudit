@@ -53,7 +53,7 @@ class SslUnsafeCipherPrivate
 public:
     SslUnsafeCipherPrivate()
         : isNull(true), supportedBits(0), bits(0),
-          exportable(false), protocol(QSsl::UnknownProtocol)
+          exportable(false), protocol(SslUnsafe::UnknownProtocol)
     {
     }
 
@@ -66,7 +66,7 @@ public:
     QString encryptionMethod;
     bool exportable;
     QString protocolString;
-    QSsl::SslProtocol protocol;
+    SslUnsafe::SslProtocol protocol;
 };
 
 QT_END_NAMESPACE

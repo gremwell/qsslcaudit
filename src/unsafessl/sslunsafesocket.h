@@ -3,7 +3,7 @@
 
 #include <QTcpSocket>
 
-#include <QSsl>
+#include "sslunsafe.h"
 //#include "sslunsafeconfiguration.h"
 
 #include "sslunsafecertificate.h"
@@ -53,8 +53,8 @@ public:
     SslMode mode() const;
     bool isEncrypted() const;
 
-    QSsl::SslProtocol protocol() const;
-    void setProtocol(QSsl::SslProtocol protocol);
+    SslUnsafe::SslProtocol protocol() const;
+    void setProtocol(SslUnsafe::SslProtocol protocol);
 
     SslUnsafeSocket::PeerVerifyMode peerVerifyMode() const;
     void setPeerVerifyMode(SslUnsafeSocket::PeerVerifyMode mode);
@@ -89,26 +89,26 @@ public:
     QList<SslUnsafeCertificate> localCertificateChain() const;
 
     void setLocalCertificate(const SslUnsafeCertificate &certificate);
-    void setLocalCertificate(const QString &fileName, QSsl::EncodingFormat format = QSsl::Pem);
+    void setLocalCertificate(const QString &fileName, SslUnsafe::EncodingFormat format = SslUnsafe::Pem);
     SslUnsafeCertificate localCertificate() const;
     SslUnsafeCertificate peerCertificate() const;
     QList<SslUnsafeCertificate> peerCertificateChain() const;
     SslUnsafeCipher sessionCipher() const;
-    QSsl::SslProtocol sessionProtocol() const;
+    SslUnsafe::SslProtocol sessionProtocol() const;
 
     // Private keys, for server sockets.
     void setPrivateKey(const SslUnsafeKey &key);
-    void setPrivateKey(const QString &fileName, QSsl::KeyAlgorithm algorithm = QSsl::Rsa,
-                       QSsl::EncodingFormat format = QSsl::Pem,
+    void setPrivateKey(const QString &fileName, SslUnsafe::KeyAlgorithm algorithm = SslUnsafe::Rsa,
+                       SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
                        const QByteArray &passPhrase = QByteArray());
     SslUnsafeKey privateKey() const;
 
     // CA settings.
-    bool addCaCertificates(const QString &path, QSsl::EncodingFormat format = QSsl::Pem,
+    bool addCaCertificates(const QString &path, SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
                            QRegExp::PatternSyntax syntax = QRegExp::FixedString);
     void addCaCertificate(const SslUnsafeCertificate &certificate);
     void addCaCertificates(const QList<SslUnsafeCertificate> &certificates);
-    static bool addDefaultCaCertificates(const QString &path, QSsl::EncodingFormat format = QSsl::Pem,
+    static bool addDefaultCaCertificates(const QString &path, SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
                                          QRegExp::PatternSyntax syntax = QRegExp::FixedString);
     static void addDefaultCaCertificate(const SslUnsafeCertificate &certificate);
     static void addDefaultCaCertificates(const QList<SslUnsafeCertificate> &certificates);
