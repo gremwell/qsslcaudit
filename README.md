@@ -15,6 +15,20 @@ If the tested application has some weaknesses in TLS/SSL implementation, there i
 
 # Installation
 
+## Note on OpenSSL 1.1.0
+
+OpenSSL 1.1.0 removed support for SSLv2 protocol, see https://www.openssl.org/news/changelog.html#x9
+
+Thus, compiling `qsslcaudit` with this version results in some (SSLv2-related) tests not working.
+
+Moreover, runtime linking with "unsafe" library version 1.0.yx with `qsslcaudit` compiled with OpenSSL 1.1.0x is not possible, as these versions are not binary compatible.
+
+For these reasons we advise you to compile `qsslcaudit` using OpenSSL versions 1.0.yx.
+
+Additional note: at the time of writing `qsslcaudit` can not be compiled with OpenSSL 1.1.0x.
+
+## Build Instructions
+
 At the time of writing there was no packages ready for popular Linux distributions. However, compilation from sources should be quite straightforward for engineer that wants to test TLS/SSL client.
 
 Some packages have to be installed in order to compile `qsslcaudit`:
@@ -24,11 +38,11 @@ Some packages have to be installed in order to compile `qsslcaudit`:
 * [OpenSSL](https://www.openssl.org/) library development package
 * [CMake](https://cmake.org/) tool
 
-Packages for ALT Linux: `cmake qt5-base-devel libgnutls-devel libssl-devel`
+Packages for ALT Linux (P8, Sisyphus@01-2018): `cmake qt5-base-devel libgnutls-devel libssl-devel`.
 
-Packages for Ubuntu 16.04: `cmake qtbase5-dev libgnutls-dev libssl-dev`
+Packages for Ubuntu 16.04: `cmake qtbase5-dev libgnutls-dev libssl-dev`.
 
-Packages for Fedora 27: `cmake qt5-qtbase-devel gnutls-devel openssl-devel`. Note that Fedora 27 is not supported yet.
+Packages for Fedora 26 (not supported yet): `cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
 
 Once you have `qsslcaudit` source code repository and packages installed, do the following:
 
