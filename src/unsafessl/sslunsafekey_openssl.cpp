@@ -21,24 +21,24 @@ void SslUnsafeKeyPrivate::clear(bool deep)
         return;
     if (algorithm == QSsl::Rsa && rsa) {
         if (deep)
-            uq_RSA_free(rsa);
+            q_RSA_free(rsa);
         rsa = 0;
     }
     if (algorithm == QSsl::Dsa && dsa) {
         if (deep)
-            uq_DSA_free(dsa);
+            q_DSA_free(dsa);
         dsa = 0;
     }
 #ifndef OPENSSL_NO_EC
     if (algorithm == QSsl::Ec && ec) {
        if (deep)
-            uq_EC_KEY_free(ec);
+            q_EC_KEY_free(ec);
        ec = 0;
     }
 #endif
     if (algorithm == QSsl::Opaque && opaque) {
         if (deep)
-            uq_EVP_PKEY_free(opaque);
+            q_EVP_PKEY_free(opaque);
         opaque = 0;
     }
 }
@@ -53,8 +53,8 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
         algorithm = QSsl::Rsa;
         type = QSsl::PrivateKey;
 
-        rsa = uq_RSA_new();
-        memcpy(rsa, uq_EVP_PKEY_get1_RSA(pkey), sizeof(RSA));
+        rsa = q_RSA_new();
+        memcpy(rsa, q_EVP_PKEY_get1_RSA(pkey), sizeof(RSA));
 
         return true;
     }
@@ -63,8 +63,8 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
         algorithm = QSsl::Dsa;
         type = QSsl::PrivateKey;
 
-        dsa = uq_DSA_new();
-        memcpy(dsa, uq_EVP_PKEY_get1_DSA(pkey), sizeof(DSA));
+        dsa = q_DSA_new();
+        memcpy(dsa, q_EVP_PKEY_get1_DSA(pkey), sizeof(DSA));
 
         return true;
     }
@@ -73,7 +73,7 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
         isNull = false;
         algorithm = QSsl::Ec;
         type = QSsl::PrivateKey;
-        ec = uq_EC_KEY_dup(uq_EVP_PKEY_get1_EC_KEY(pkey));
+        ec = q_EC_KEY_dup(q_EVP_PKEY_get1_EC_KEY(pkey));
 
         return true;
     }
@@ -105,7 +105,7 @@ void SslUnsafeKeyPrivate::decodePem(const QByteArray &pem, const QByteArray &pas
     if (!SslUnsafeSocket::supportsSsl())
         return;
 
-    BIO *bio = uq_BIO_new_mem_buf(const_cast<char *>(pem.data()), pem.size());
+    BIO *bio = q_BIO_new_mem_buf(const_cast<char *>(pem.data()), pem.size());
     if (!bio)
         return;
 
@@ -113,27 +113,27 @@ void SslUnsafeKeyPrivate::decodePem(const QByteArray &pem, const QByteArray &pas
 
     if (algorithm == QSsl::Rsa) {
         RSA *result = (type == QSsl::PublicKey)
-            ? uq_PEM_read_bio_RSA_PUBKEY(bio, &rsa, 0, phrase)
-            : uq_PEM_read_bio_RSAPrivateKey(bio, &rsa, 0, phrase);
+            ? q_PEM_read_bio_RSA_PUBKEY(bio, &rsa, 0, phrase)
+            : q_PEM_read_bio_RSAPrivateKey(bio, &rsa, 0, phrase);
         if (rsa && rsa == result)
             isNull = false;
     } else if (algorithm == QSsl::Dsa) {
         DSA *result = (type == QSsl::PublicKey)
-            ? uq_PEM_read_bio_DSA_PUBKEY(bio, &dsa, 0, phrase)
-            : uq_PEM_read_bio_DSAPrivateKey(bio, &dsa, 0, phrase);
+            ? q_PEM_read_bio_DSA_PUBKEY(bio, &dsa, 0, phrase)
+            : q_PEM_read_bio_DSAPrivateKey(bio, &dsa, 0, phrase);
         if (dsa && dsa == result)
             isNull = false;
 #ifndef OPENSSL_NO_EC
     } else if (algorithm == QSsl::Ec) {
         EC_KEY *result = (type == QSsl::PublicKey)
-            ? uq_PEM_read_bio_EC_PUBKEY(bio, &ec, 0, phrase)
-            : uq_PEM_read_bio_ECPrivateKey(bio, &ec, 0, phrase);
+            ? q_PEM_read_bio_EC_PUBKEY(bio, &ec, 0, phrase)
+            : q_PEM_read_bio_ECPrivateKey(bio, &ec, 0, phrase);
         if (ec && ec == result)
             isNull = false;
 #endif
     }
 
-    uq_BIO_free(bio);
+    q_BIO_free(bio);
 }
 
 int SslUnsafeKeyPrivate::length() const
@@ -142,10 +142,10 @@ int SslUnsafeKeyPrivate::length() const
         return -1;
 
     switch (algorithm) {
-        case QSsl::Rsa: return uq_BN_num_bits(rsa->n);
-        case QSsl::Dsa: return uq_BN_num_bits(dsa->p);
+        case QSsl::Rsa: return q_BN_num_bits(rsa->n);
+        case QSsl::Dsa: return q_BN_num_bits(dsa->p);
 #ifndef OPENSSL_NO_EC
-        case QSsl::Ec: return uq_EC_GROUP_get_degree(uq_EC_KEY_get0_group(ec));
+        case QSsl::Ec: return q_EC_GROUP_get_degree(q_EC_KEY_get0_group(ec));
 #endif
         default: return -1;
     }
@@ -156,7 +156,7 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
     if (!SslUnsafeSocket::supportsSsl() || isNull || algorithm == QSsl::Opaque)
         return QByteArray();
 
-    BIO *bio = uq_BIO_new(uq_BIO_s_mem());
+    BIO *bio = q_BIO_new(q_BIO_s_mem());
     if (!bio)
         return QByteArray();
 
@@ -164,26 +164,26 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
 
     if (algorithm == QSsl::Rsa) {
         if (type == QSsl::PublicKey) {
-            if (!uq_PEM_write_bio_RSA_PUBKEY(bio, rsa))
+            if (!q_PEM_write_bio_RSA_PUBKEY(bio, rsa))
                 fail = true;
         } else {
-            if (!uq_PEM_write_bio_RSAPrivateKey(
+            if (!q_PEM_write_bio_RSAPrivateKey(
                     bio, rsa,
                     // ### the cipher should be selectable in the API:
-                    passPhrase.isEmpty() ? (const EVP_CIPHER *)0 : uq_EVP_des_ede3_cbc(),
+                    passPhrase.isEmpty() ? (const EVP_CIPHER *)0 : q_EVP_des_ede3_cbc(),
                     const_cast<uchar *>((const uchar *)passPhrase.data()), passPhrase.size(), 0, 0)) {
                 fail = true;
             }
         }
     } else if (algorithm == QSsl::Dsa) {
         if (type == QSsl::PublicKey) {
-            if (!uq_PEM_write_bio_DSA_PUBKEY(bio, dsa))
+            if (!q_PEM_write_bio_DSA_PUBKEY(bio, dsa))
                 fail = true;
         } else {
-            if (!uq_PEM_write_bio_DSAPrivateKey(
+            if (!q_PEM_write_bio_DSAPrivateKey(
                     bio, dsa,
                     // ### the cipher should be selectable in the API:
-                    passPhrase.isEmpty() ? (const EVP_CIPHER *)0 : uq_EVP_des_ede3_cbc(),
+                    passPhrase.isEmpty() ? (const EVP_CIPHER *)0 : q_EVP_des_ede3_cbc(),
                     const_cast<uchar *>((const uchar *)passPhrase.data()), passPhrase.size(), 0, 0)) {
                 fail = true;
             }
@@ -191,13 +191,13 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
 #ifndef OPENSSL_NO_EC
     } else if (algorithm == QSsl::Ec) {
         if (type == QSsl::PublicKey) {
-            if (!uq_PEM_write_bio_EC_PUBKEY(bio, ec))
+            if (!q_PEM_write_bio_EC_PUBKEY(bio, ec))
                 fail = true;
         } else {
-            if (!uq_PEM_write_bio_ECPrivateKey(
+            if (!q_PEM_write_bio_ECPrivateKey(
                     bio, ec,
                     // ### the cipher should be selectable in the API:
-                    passPhrase.isEmpty() ? (const EVP_CIPHER *)0 : uq_EVP_des_ede3_cbc(),
+                    passPhrase.isEmpty() ? (const EVP_CIPHER *)0 : q_EVP_des_ede3_cbc(),
                     const_cast<uchar *>((const uchar *)passPhrase.data()), passPhrase.size(), 0, 0)) {
                 fail = true;
             }
@@ -210,10 +210,10 @@ QByteArray SslUnsafeKeyPrivate::toPem(const QByteArray &passPhrase) const
     QByteArray pem;
     if (!fail) {
         char *data;
-        long size = uq_BIO_get_mem_data(bio, &data);
+        long size = q_BIO_get_mem_data(bio, &data);
         pem = QByteArray(data, size);
     }
-    uq_BIO_free(bio);
+    q_BIO_free(bio);
     return pem;
 }
 
@@ -243,33 +243,33 @@ static QByteArray doCrypt(SslUnsafeKeyPrivate::Cipher cipher, const QByteArray &
 
     switch (cipher) {
     case SslUnsafeKeyPrivate::DesCbc:
-        type = uq_EVP_des_cbc();
+        type = q_EVP_des_cbc();
         break;
     case SslUnsafeKeyPrivate::DesEde3Cbc:
-        type = uq_EVP_des_ede3_cbc();
+        type = q_EVP_des_ede3_cbc();
         break;
     case SslUnsafeKeyPrivate::Rc2Cbc:
-        type = uq_EVP_rc2_cbc();
+        type = q_EVP_rc2_cbc();
         break;
     }
 
     QByteArray output;
     output.resize(data.size() + EVP_MAX_BLOCK_LENGTH);
-    uq_EVP_CIPHER_CTX_init(&ctx);
-    uq_EVP_CipherInit(&ctx, type, NULL, NULL, enc);
-    uq_EVP_CIPHER_CTX_set_key_length(&ctx, key.size());
+    q_EVP_CIPHER_CTX_init(&ctx);
+    q_EVP_CipherInit(&ctx, type, NULL, NULL, enc);
+    q_EVP_CIPHER_CTX_set_key_length(&ctx, key.size());
     if (cipher == SslUnsafeKeyPrivate::Rc2Cbc)
-        uq_EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_SET_RC2_KEY_BITS, 8 * key.size(), NULL);
-    uq_EVP_CipherInit(&ctx, NULL,
+        q_EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_SET_RC2_KEY_BITS, 8 * key.size(), NULL);
+    q_EVP_CipherInit(&ctx, NULL,
         reinterpret_cast<const unsigned char *>(key.constData()),
         reinterpret_cast<const unsigned char *>(iv.constData()), enc);
-    uq_EVP_CipherUpdate(&ctx,
+    q_EVP_CipherUpdate(&ctx,
         reinterpret_cast<unsigned char *>(output.data()), &len,
         reinterpret_cast<const unsigned char *>(data.constData()), data.size());
-    uq_EVP_CipherFinal(&ctx,
+    q_EVP_CipherFinal(&ctx,
         reinterpret_cast<unsigned char *>(output.data()) + len, &i);
     len += i;
-    uq_EVP_CIPHER_CTX_cleanup(&ctx);
+    q_EVP_CIPHER_CTX_cleanup(&ctx);
 
     return output.left(len);
 }

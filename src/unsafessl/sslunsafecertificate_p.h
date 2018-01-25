@@ -37,7 +37,7 @@ public:
     {
 #ifndef QT_NO_OPENSSL
         if (x509)
-            uq_X509_free(x509);
+            q_X509_free(x509);
 #endif
     }
 

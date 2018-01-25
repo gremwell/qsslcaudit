@@ -207,7 +207,7 @@ SslUnsafeKey::SslUnsafeKey(Qt::HANDLE handle, QSsl::KeyType type)
         d->opaque = evpKey;
         d->algorithm = QSsl::Opaque;
     } else {
-        uq_EVP_PKEY_free(evpKey);
+        q_EVP_PKEY_free(evpKey);
     }
 #else
     d->opaque = handle;

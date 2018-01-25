@@ -65,14 +65,14 @@ public:
           locksLocker(QMutex::Recursive)
     {
         QMutexLocker locker(&locksLocker);
-        int numLocks = uq_CRYPTO_num_locks();
+        int numLocks = q_CRYPTO_num_locks();
         locks = new QMutex *[numLocks];
         memset(locks, 0, numLocks * sizeof(QMutex *));
     }
     inline ~QOpenSslLocks()
     {
         QMutexLocker locker(&locksLocker);
-        for (int i = 0; i < uq_CRYPTO_num_locks(); ++i)
+        for (int i = 0; i < q_CRYPTO_num_locks(); ++i)
             delete locks[i];
         delete [] locks;
 
@@ -108,10 +108,10 @@ QString SslUnsafeSocketBackendPrivate::getErrorsFromOpenSsl()
 {
     QString errorString;
     unsigned long errNum;
-    while ((errNum = uq_ERR_get_error())) {
+    while ((errNum = q_ERR_get_error())) {
         if (! errorString.isEmpty())
             errorString.append(QLatin1String(", "));
-        const char *error = uq_ERR_error_string(errNum, NULL);
+        const char *error = q_ERR_error_string(errNum, NULL);
         errorString.append(QString::fromLatin1(error)); // error is ascii according to man ERR_error_string
     }
     return errorString;
@@ -139,7 +139,7 @@ static unsigned int q_ssl_psk_client_callback(SSL *ssl,
                                               char *identity, unsigned int max_identity_len,
                                               unsigned char *psk, unsigned int max_psk_len)
 {
-    SslUnsafeSocketBackendPrivate *d = reinterpret_cast<SslUnsafeSocketBackendPrivate *>(uq_SSL_get_ex_data(ssl, SslUnsafeSocketBackendPrivate::s_indexForSSLExtraData));
+    SslUnsafeSocketBackendPrivate *d = reinterpret_cast<SslUnsafeSocketBackendPrivate *>(q_SSL_get_ex_data(ssl, SslUnsafeSocketBackendPrivate::s_indexForSSLExtraData));
     Q_ASSERT(d);
     return d->tlsPskClientCallback(hint, identity, max_identity_len, psk, max_psk_len);
 }
@@ -148,7 +148,7 @@ static unsigned int q_ssl_psk_server_callback(SSL *ssl,
                                               const char *identity,
                                               unsigned char *psk, unsigned int max_psk_len)
 {
-    SslUnsafeSocketBackendPrivate *d = reinterpret_cast<SslUnsafeSocketBackendPrivate *>(uq_SSL_get_ex_data(ssl, SslUnsafeSocketBackendPrivate::s_indexForSSLExtraData));
+    SslUnsafeSocketBackendPrivate *d = reinterpret_cast<SslUnsafeSocketBackendPrivate *>(q_SSL_get_ex_data(ssl, SslUnsafeSocketBackendPrivate::s_indexForSSLExtraData));
     Q_ASSERT(d);
     return d->tlsPskServerCallback(identity, psk, max_psk_len);
 }
@@ -175,7 +175,7 @@ SslUnsafeCipher SslUnsafeSocketBackendPrivate::SslUnsafeCipher_from_SSL_CIPHER(S
     SslUnsafeCipher ciph;
 
     char buf [256];
-    QString descriptionOneLine = QString::fromLatin1(uq_SSL_CIPHER_description(cipher, buf, sizeof(buf)));
+    QString descriptionOneLine = QString::fromLatin1(q_SSL_CIPHER_description(cipher, buf, sizeof(buf)));
 
     const auto descriptionList = descriptionOneLine.splitRef(QLatin1Char(' '), QString::SkipEmptyParts);
     if (descriptionList.size() > 5) {
@@ -205,7 +205,7 @@ SslUnsafeCipher SslUnsafeSocketBackendPrivate::SslUnsafeCipher_from_SSL_CIPHER(S
             ciph.d->encryptionMethod = descriptionList.at(4).mid(4).toString();
         ciph.d->exportable = (descriptionList.size() > 6 && descriptionList.at(6) == QLatin1String("export"));
 
-        ciph.d->bits = uq_SSL_CIPHER_get_bits(cipher, &ciph.d->supportedBits);
+        ciph.d->bits = q_SSL_CIPHER_get_bits(cipher, &ciph.d->supportedBits);
     }
     return ciph;
 }
@@ -213,8 +213,8 @@ SslUnsafeCipher SslUnsafeSocketBackendPrivate::SslUnsafeCipher_from_SSL_CIPHER(S
 // static
 inline SslUnsafeErrorEntry SslUnsafeErrorEntry::fromStoreContext(X509_STORE_CTX *ctx) {
     SslUnsafeErrorEntry result = {
-        uq_X509_STORE_CTX_get_error(ctx),
-        uq_X509_STORE_CTX_get_error_depth(ctx)
+        q_X509_STORE_CTX_get_error(ctx),
+        q_X509_STORE_CTX_get_error_depth(ctx)
     };
     return result;
 }
@@ -228,16 +228,16 @@ struct SslUnsafeErrorList
 };
 Q_GLOBAL_STATIC(SslUnsafeErrorList, _q_sslErrorList)
 
-int uq_X509Callback(int ok, X509_STORE_CTX *ctx)
+int q_X509Callback(int ok, X509_STORE_CTX *ctx)
 {
     if (!ok) {
         // Store the error and at which depth the error was detected.
         _q_sslErrorList()->errors << SslUnsafeErrorEntry::fromStoreContext(ctx);
 #ifdef SslUnsafeSocket_DEBUG
         qDebug() << "verification error: dumping bad certificate";
-        qDebug() << SslUnsafeCertificatePrivate::SslUnsafeCertificate_from_X509(uq_X509_STORE_CTX_get_current_cert(ctx)).toPem();
+        qDebug() << SslUnsafeCertificatePrivate::SslUnsafeCertificate_from_X509(q_X509_STORE_CTX_get_current_cert(ctx)).toPem();
         qDebug() << "dumping chain";
-        const auto certs = SslUnsafeSocketBackendPrivate::STACKOFX509_to_SslUnsafeCertificates(uq_X509_STORE_CTX_get_chain(ctx));
+        const auto certs = SslUnsafeSocketBackendPrivate::STACKOFX509_to_SslUnsafeCertificates(q_X509_STORE_CTX_get_chain(ctx));
         for (const SslUnsafeCertificate &cert : certs) {
             qDebug() << "Issuer:" << "O=" << cert.issuerInfo(SslUnsafeCertificate::Organization)
                 << "CN=" << cert.issuerInfo(SslUnsafeCertificate::CommonName)
@@ -342,7 +342,7 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
     if (configuration.protocol != QSsl::SslV2 &&
         configuration.protocol != QSsl::SslV3 &&
         configuration.protocol != QSsl::UnknownProtocol &&
-        mode == SslUnsafeSocket::SslClientMode && uq_SSLeay() >= 0x00090806fL) {
+        mode == SslUnsafeSocket::SslClientMode && q_SSLeay() >= 0x00090806fL) {
         // Set server hostname on TLS extension. RFC4366 section 3.1 requires it in ACE format.
         QString tlsHostName = verificationPeerName.isEmpty() ? q->peerName() : verificationPeerName;
         if (tlsHostName.isEmpty())
@@ -356,7 +356,7 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
             // https://tools.ietf.org/html/rfc6066#section-3
             if (ace.endsWith('.'))
                 ace.chop(1);
-            if (!uq_SSL_ctrl(ssl, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, ace.data()))
+            if (!q_SSL_ctrl(ssl, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, ace.data()))
                 qWarning() << "could not set SSL_CTRL_SET_TLSEXT_HOSTNAME, Server Name Indication disabled";
         }
     }
@@ -365,8 +365,8 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
     errorList.clear();
 
     // Initialize memory BIOs for encryption and decryption.
-    readBio = uq_BIO_new(uq_BIO_s_mem());
-    writeBio = uq_BIO_new(uq_BIO_s_mem());
+    readBio = q_BIO_new(q_BIO_s_mem());
+    writeBio = q_BIO_new(q_BIO_s_mem());
     if (!readBio || !writeBio) {
         setErrorAndEmit(QAbstractSocket::SslInternalError,
                         SslUnsafeSocket::tr("Error creating SSL session: %1").arg(getErrorsFromOpenSsl()));
@@ -374,26 +374,26 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
     }
 
     // Assign the bios.
-    uq_SSL_set_bio(ssl, readBio, writeBio);
+    q_SSL_set_bio(ssl, readBio, writeBio);
 
     if (mode == SslUnsafeSocket::SslClientMode)
-        uq_SSL_set_connect_state(ssl);
+        q_SSL_set_connect_state(ssl);
     else
-        uq_SSL_set_accept_state(ssl);
+        q_SSL_set_accept_state(ssl);
 
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
     // Save a pointer to this object into the SSL structure.
-    if (uq_SSLeay() >= 0x10001000L)
-        uq_SSL_set_ex_data(ssl, s_indexForSSLExtraData, this);
+    if (q_SSLeay() >= 0x10001000L)
+        q_SSL_set_ex_data(ssl, s_indexForSSLExtraData, this);
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L && !defined(OPENSSL_NO_PSK)
     // Set the client callback for PSK
-    if (uq_SSLeay() >= 0x10001000L) {
+    if (q_SSLeay() >= 0x10001000L) {
         if (mode == SslUnsafeSocket::SslClientMode)
-            uq_SSL_set_psk_client_callback(ssl, &q_ssl_psk_client_callback);
+            q_SSL_set_psk_client_callback(ssl, &q_ssl_psk_client_callback);
         else if (mode == SslUnsafeSocket::SslServerMode)
-            uq_SSL_set_psk_server_callback(ssl, &q_ssl_psk_server_callback);
+            q_SSL_set_psk_server_callback(ssl, &q_ssl_psk_server_callback);
     }
 #endif
 
@@ -403,7 +403,7 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
 void SslUnsafeSocketBackendPrivate::destroySslContext()
 {
     if (ssl) {
-        uq_SSL_free(ssl);
+        q_SSL_free(ssl);
         ssl = 0;
     }
     sslContextPointer.clear();
@@ -414,9 +414,9 @@ void SslUnsafeSocketBackendPrivate::destroySslContext()
 */
 void SslUnsafeSocketPrivate::deinitialize()
 {
-    uq_CRYPTO_set_id_callback(0);
-    uq_CRYPTO_set_locking_callback(0);
-    uq_ERR_free_strings();
+    q_CRYPTO_set_id_callback(0);
+    q_CRYPTO_set_locking_callback(0);
+    q_ERR_free_strings();
 }
 
 /*!
@@ -433,7 +433,7 @@ bool SslUnsafeSocketPrivate::supportsSsl()
 
 bool SslUnsafeSocketPrivate::ensureLibraryLoaded()
 {
-    if (!uq_resolveOpenSslSymbols())
+    if (!q_resolveOpenSslSymbols())
         return false;
 
     // Check if the library itself needs to be initialized.
@@ -443,20 +443,20 @@ bool SslUnsafeSocketPrivate::ensureLibraryLoaded()
         s_libraryLoaded = true;
 
         // Initialize OpenSSL.
-        uq_CRYPTO_set_id_callback(id_function);
-        uq_CRYPTO_set_locking_callback(locking_function);
-        if (uq_SSL_library_init() != 1)
+        q_CRYPTO_set_id_callback(id_function);
+        q_CRYPTO_set_locking_callback(locking_function);
+        if (q_SSL_library_init() != 1)
             return false;
-        uq_SSL_load_error_strings();
-        uq_OpenSSL_add_all_algorithms();
+        q_SSL_load_error_strings();
+        q_OpenSSL_add_all_algorithms();
 
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
-        if (uq_SSLeay() >= 0x10001000L)
-            SslUnsafeSocketBackendPrivate::s_indexForSSLExtraData = uq_SSL_get_ex_new_index(0L, NULL, NULL, NULL, NULL);
+        if (q_SSLeay() >= 0x10001000L)
+            SslUnsafeSocketBackendPrivate::s_indexForSSLExtraData = q_SSL_get_ex_new_index(0L, NULL, NULL, NULL, NULL);
 #endif
 
         // Initialize OpenSSL's random seed.
-        if (!uq_RAND_status()) {
+        if (!q_RAND_status()) {
             qWarning("Random number generator not seeded, disabling SSL support");
             return false;
         }
@@ -537,7 +537,7 @@ long SslUnsafeSocketPrivate::sslLibraryVersionNumber()
     if (!supportsSsl())
         return 0;
 
-    return uq_SSLeay();
+    return q_SSLeay();
 }
 
 QString SslUnsafeSocketPrivate::sslLibraryVersionString()
@@ -545,7 +545,7 @@ QString SslUnsafeSocketPrivate::sslLibraryVersionString()
     if (!supportsSsl())
         return QString();
 
-    const char *versionString = uq_SSLeay_version(SSLEAY_VERSION);
+    const char *versionString = q_SSLeay_version(SSLEAY_VERSION);
     if (!versionString)
         return QString();
 
@@ -573,20 +573,20 @@ QString SslUnsafeSocketPrivate::sslLibraryBuildVersionString()
 */
 void SslUnsafeSocketPrivate::resetDefaultCiphers()
 {
-    SSL_CTX *myCtx = uq_SSL_CTX_new(uq_SSLv23_client_method());
-    SSL *mySsl = uq_SSL_new(myCtx);
+    SSL_CTX *myCtx = q_SSL_CTX_new(q_SSLv23_client_method());
+    SSL *mySsl = q_SSL_new(myCtx);
 
     // explicitly enable SSLv2 and SSLv3
-    uq_SSL_ctrl(mySsl, SSL_CTRL_CLEAR_OPTIONS, (SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3), NULL);
+    q_SSL_ctrl(mySsl, SSL_CTRL_CLEAR_OPTIONS, (SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3), NULL);
     // request *all* ciphers
-    uq_SSL_CTX_set_cipher_list(myCtx, "ALL");
+    q_SSL_CTX_set_cipher_list(myCtx, "ALL");
 
     QList<SslUnsafeCipher> ciphers;
     QList<SslUnsafeCipher> defaultCiphers;
 
-    STACK_OF(SSL_CIPHER) *supportedCiphers = uq_SSL_get_ciphers(mySsl);
-    for (int i = 0; i < uq_sk_SSL_CIPHER_num(supportedCiphers); ++i) {
-        if (SSL_CIPHER *cipher = uq_sk_SSL_CIPHER_value(supportedCiphers, i)) {
+    STACK_OF(SSL_CIPHER) *supportedCiphers = q_SSL_get_ciphers(mySsl);
+    for (int i = 0; i < q_sk_SSL_CIPHER_num(supportedCiphers); ++i) {
+        if (SSL_CIPHER *cipher = q_sk_SSL_CIPHER_value(supportedCiphers, i)) {
             SslUnsafeCipher ciph = SslUnsafeSocketBackendPrivate::SslUnsafeCipher_from_SSL_CIPHER(cipher);
             if (!ciph.isNull()) {
 #if 0
@@ -606,8 +606,8 @@ void SslUnsafeSocketPrivate::resetDefaultCiphers()
         }
     }
 
-    uq_SSL_CTX_free(myCtx);
-    uq_SSL_free(mySsl);
+    q_SSL_CTX_free(myCtx);
+    q_SSL_free(mySsl);
 
     setDefaultSupportedCiphers(ciphers);
     setDefaultCiphers(defaultCiphers);
@@ -618,11 +618,11 @@ void SslUnsafeSocketPrivate::resetDefaultEllipticCurves()
     QVector<SslUnsafeEllipticCurve> curves;
 
 #ifndef OPENSSL_NO_EC
-    const size_t curveCount = uq_EC_get_builtin_curves(NULL, 0);
+    const size_t curveCount = q_EC_get_builtin_curves(NULL, 0);
 
     QVarLengthArray<EC_builtin_curve> builtinCurves(static_cast<int>(curveCount));
 
-    if (uq_EC_get_builtin_curves(builtinCurves.data(), curveCount) == curveCount) {
+    if (q_EC_get_builtin_curves(builtinCurves.data(), curveCount) == curveCount) {
         curves.reserve(int(curveCount));
         for (size_t i = 0; i < curveCount; ++i) {
             SslUnsafeEllipticCurve curve;
@@ -767,9 +767,9 @@ void SslUnsafeSocketBackendPrivate::transmit()
             qint64 totalBytesWritten = 0;
             int nextDataBlockSize;
             while ((nextDataBlockSize = writeBuffer.nextDataBlockSize()) > 0) {
-                int writtenBytes = uq_SSL_write(ssl, writeBuffer.readPointer(), nextDataBlockSize);
+                int writtenBytes = q_SSL_write(ssl, writeBuffer.readPointer(), nextDataBlockSize);
                 if (writtenBytes <= 0) {
-                    int error = uq_SSL_get_error(ssl, writtenBytes);
+                    int error = q_SSL_get_error(ssl, writtenBytes);
                     //write can result in a want_write_error - not an error - continue transmitting
                     if (error == SSL_ERROR_WANT_WRITE) {
                         transmitting = true;
@@ -813,10 +813,10 @@ void SslUnsafeSocketBackendPrivate::transmit()
         // Check if we've got any data to be written to the socket.
         QVarLengthArray<char, 4096> data;
         int pendingBytes;
-        while (plainSocket->isValid() && (pendingBytes = uq_BIO_pending(writeBio)) > 0) {
+        while (plainSocket->isValid() && (pendingBytes = q_BIO_pending(writeBio)) > 0) {
             // Read encrypted data from the write BIO into a buffer.
             data.resize(pendingBytes);
-            int encryptedBytesRead = uq_BIO_read(writeBio, data.data(), pendingBytes);
+            int encryptedBytesRead = q_BIO_read(writeBio, data.data(), pendingBytes);
 
             // Write encrypted data from the buffer to the socket.
             qint64 actualWritten = plainSocket->write(data.constData(), encryptedBytesRead);
@@ -843,7 +843,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                 qDebug() << "SslUnsafeSocketBackendPrivate::transmit: read" << encryptedBytesRead << "encrypted bytes from the socket";
 #endif
                 // Write encrypted data from the buffer into the read BIO.
-                int writtenToBio = uq_BIO_write(readBio, data.constData(), encryptedBytesRead);
+                int writtenToBio = q_BIO_write(readBio, data.constData(), encryptedBytesRead);
 
                 // do the actual read() here and throw away the results.
                 if (writtenToBio > 0) {
@@ -901,7 +901,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
         ::memset(data.data(), 0, data.size());
         do {
             // Don't use SSL_pending(). It's very unreliable.
-            if ((readBytes = uq_SSL_read(ssl, data.data(), data.size())) > 0) {
+            if ((readBytes = q_SSL_read(ssl, data.data(), data.size())) > 0) {
 #ifdef SslUnsafeSocket_DEBUG
                 qDebug() << "SslUnsafeSocketBackendPrivate::transmit: decrypted" << readBytes << "bytes";
 #endif
@@ -916,7 +916,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
             }
 
             // Error.
-            switch (uq_SSL_get_error(ssl, readBytes)) {
+            switch (q_SSL_get_error(ssl, readBytes)) {
             case SSL_ERROR_WANT_READ:
             case SSL_ERROR_WANT_WRITE:
                 // Out of data.
@@ -1008,7 +1008,7 @@ bool SslUnsafeSocketBackendPrivate::startHandshake()
     // verification stage.
     QMutexLocker locker(&_q_sslErrorList()->mutex);
     _q_sslErrorList()->errors.clear();
-    int result = (mode == SslUnsafeSocket::SslClientMode) ? uq_SSL_connect(ssl) : uq_SSL_accept(ssl);
+    int result = (mode == SslUnsafeSocket::SslClientMode) ? q_SSL_connect(ssl) : q_SSL_accept(ssl);
 
     const auto &lastErrors = _q_sslErrorList()->errors;
     if (!lastErrors.isEmpty())
@@ -1029,7 +1029,7 @@ bool SslUnsafeSocketBackendPrivate::startHandshake()
 
     // Check if we're encrypted or not.
     if (result <= 0) {
-        switch (uq_SSL_get_error(ssl, result)) {
+        switch (q_SSL_get_error(ssl, result)) {
         case SSL_ERROR_WANT_READ:
         case SSL_ERROR_WANT_WRITE:
             // The handshake is not yet complete.
@@ -1165,11 +1165,11 @@ void SslUnsafeSocketBackendPrivate::storePeerCertificates()
     // chain includes the peer certificate; for servers, it doesn't. Both the
     // peer certificate and the chain may be empty if the peer didn't present
     // any certificate.
-    X509 *x509 = uq_SSL_get_peer_certificate(ssl);
+    X509 *x509 = q_SSL_get_peer_certificate(ssl);
     configuration.peerCertificate = SslUnsafeCertificatePrivate::SslUnsafeCertificate_from_X509(x509);
-    uq_X509_free(x509);
+    q_X509_free(x509);
     if (configuration.peerCertificateChain.isEmpty()) {
-        configuration.peerCertificateChain = STACKOFX509_to_SslUnsafeCertificates(uq_SSL_get_peer_cert_chain(ssl));
+        configuration.peerCertificateChain = STACKOFX509_to_SslUnsafeCertificates(q_SSL_get_peer_cert_chain(ssl));
         if (!configuration.peerCertificate.isNull() && mode == SslUnsafeSocket::SslServerMode)
             configuration.peerCertificateChain.prepend(configuration.peerCertificate);
     }
@@ -1431,7 +1431,7 @@ void SslUnsafeSocketBackendPrivate::disconnectFromHost()
 {
     if (ssl) {
         if (!shutdown) {
-            uq_SSL_shutdown(ssl);
+            q_SSL_shutdown(ssl);
             shutdown = true;
             transmit();
         }
@@ -1462,9 +1462,9 @@ SslUnsafeCipher SslUnsafeSocketBackendPrivate::sessionCipher() const
     // FIXME This is fairly evil, but needed to keep source level compatibility
     // with the OpenSSL 0.9.x implementation at maximum -- some other functions
     // don't take a const SSL_CIPHER* when they should
-    SSL_CIPHER *sessionCipher = const_cast<SSL_CIPHER *>(uq_SSL_get_current_cipher(ssl));
+    SSL_CIPHER *sessionCipher = const_cast<SSL_CIPHER *>(q_SSL_get_current_cipher(ssl));
 #else
-    SSL_CIPHER *sessionCipher = uq_SSL_get_current_cipher(ssl);
+    SSL_CIPHER *sessionCipher = q_SSL_get_current_cipher(ssl);
 #endif
     return sessionCipher ? SslUnsafeCipher_from_SSL_CIPHER(sessionCipher) : SslUnsafeCipher();
 }
@@ -1473,7 +1473,7 @@ QSsl::SslProtocol SslUnsafeSocketBackendPrivate::sessionProtocol() const
 {
     if (!ssl)
         return QSsl::UnknownProtocol;
-    int ver = uq_SSL_version(ssl);
+    int ver = q_SSL_version(ssl);
 
     switch (ver) {
     case 0x2:
@@ -1498,7 +1498,7 @@ void SslUnsafeSocketBackendPrivate::continueHandshake()
     if (readBufferMaxSize)
         plainSocket->setReadBufferSize(readBufferMaxSize);
 
-    if (uq_SSL_ctrl((ssl), SSL_CTRL_GET_SESSION_REUSED, 0, NULL))
+    if (q_SSL_ctrl((ssl), SSL_CTRL_GET_SESSION_REUSED, 0, NULL))
         configuration.peerSessionShared = true;
 
 #ifdef QT_DECRYPT_SSL_TRAFFIC
@@ -1559,8 +1559,8 @@ void SslUnsafeSocketBackendPrivate::continueHandshake()
         const unsigned char *proto = 0;
         unsigned int proto_len = 0;
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L
-        if (uq_SSLeay() >= 0x10002000L) {
-            uq_SSL_get0_alpn_selected(ssl, &proto, &proto_len);
+        if (q_SSLeay() >= 0x10002000L) {
+            q_SSL_get0_alpn_selected(ssl, &proto, &proto_len);
             if (proto_len && mode == SslUnsafeSocket::SslClientMode) {
                 // Client does not have a callback that sets it ...
                 configuration.nextProtocolNegotiationStatus = SslUnsafeConfiguration::NextProtocolNegotiationNegotiated;
@@ -1571,7 +1571,7 @@ void SslUnsafeSocketBackendPrivate::continueHandshake()
 #else
         {
 #endif
-            uq_SSL_get0_next_proto_negotiated(ssl, &proto, &proto_len);
+            q_SSL_get0_next_proto_negotiated(ssl, &proto, &proto_len);
         }
 
         if (proto_len)
@@ -1582,7 +1582,7 @@ void SslUnsafeSocketBackendPrivate::continueHandshake()
 #endif // OPENSSL_VERSION_NUMBER >= 0x1000100fL ...
 
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L
-    if (uq_SSLeay() >= 0x10002000L && mode == SslUnsafeSocket::SslClientMode) {
+    if (q_SSLeay() >= 0x10002000L && mode == SslUnsafeSocket::SslClientMode) {
         EVP_PKEY *key;
         if (q_SSL_get_server_tmp_key(ssl, &key))
             configuration.ephemeralServerKey = SslUnsafeKey(key, QSsl::PublicKey);
@@ -1601,8 +1601,8 @@ QList<SslUnsafeCertificate> SslUnsafeSocketBackendPrivate::STACKOFX509_to_SslUns
 {
     ensureInitialized();
     QList<SslUnsafeCertificate> certificates;
-    for (int i = 0; i < uq_sk_X509_num(x509); ++i) {
-        if (X509 *entry = uq_sk_X509_value(x509, i))
+    for (int i = 0; i < q_sk_X509_num(x509); ++i) {
+        if (X509 *entry = q_sk_X509_value(x509, i))
             certificates << SslUnsafeCertificatePrivate::SslUnsafeCertificate_from_X509(entry);
     }
     return certificates;
@@ -1617,7 +1617,7 @@ QList<SslUnsafeError> SslUnsafeSocketBackendPrivate::verify(const QList<SslUnsaf
     }
 
     // Setup the store with the default CA certificates
-    X509_STORE *certStore = uq_X509_STORE_new();
+    X509_STORE *certStore = q_X509_STORE_new();
     if (!certStore) {
         qWarning() << "Unable to create certificate store";
         errors << SslUnsafeError(SslUnsafeError::UnspecifiedError);
@@ -1643,22 +1643,22 @@ QList<SslUnsafeError> SslUnsafeSocketBackendPrivate::verify(const QList<SslUnsaf
         //
         // See also: SslUnsafeContext::fromConfiguration()
         if (caCertificate.expiryDate() >= now) {
-            uq_X509_STORE_add_cert(certStore, reinterpret_cast<X509 *>(caCertificate.handle()));
+            q_X509_STORE_add_cert(certStore, reinterpret_cast<X509 *>(caCertificate.handle()));
         }
     }
 
     QMutexLocker sslErrorListMutexLocker(&_q_sslErrorList()->mutex);
 
     // Register a custom callback to get all verification errors.
-    X509_STORE_set_verify_cb_func(certStore, uq_X509Callback);
+    X509_STORE_set_verify_cb_func(certStore, q_X509Callback);
 
     // Build the chain of intermediate certificates
     STACK_OF(X509) *intermediates = 0;
     if (certificateChain.length() > 1) {
-        intermediates = (STACK_OF(X509) *) uq_sk_new_null();
+        intermediates = (STACK_OF(X509) *) q_sk_new_null();
 
         if (!intermediates) {
-            uq_X509_STORE_free(certStore);
+            q_X509_STORE_free(certStore);
             errors << SslUnsafeError(SslUnsafeError::UnspecifiedError);
             return errors;
         }
@@ -1670,23 +1670,23 @@ QList<SslUnsafeError> SslUnsafeSocketBackendPrivate::verify(const QList<SslUnsaf
                 continue;
             }
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
-            uq_sk_push( (_STACK *)intermediates, reinterpret_cast<X509 *>(cert.handle()));
+            q_sk_push( (_STACK *)intermediates, reinterpret_cast<X509 *>(cert.handle()));
 #else
-            uq_sk_push( (STACK *)intermediates, reinterpret_cast<char *>(cert.handle()));
+            q_sk_push( (STACK *)intermediates, reinterpret_cast<char *>(cert.handle()));
 #endif
         }
     }
 
-    X509_STORE_CTX *storeContext = uq_X509_STORE_CTX_new();
+    X509_STORE_CTX *storeContext = q_X509_STORE_CTX_new();
     if (!storeContext) {
-        uq_X509_STORE_free(certStore);
+        q_X509_STORE_free(certStore);
         errors << SslUnsafeError(SslUnsafeError::UnspecifiedError);
         return errors;
     }
 
-    if (!uq_X509_STORE_CTX_init(storeContext, certStore, reinterpret_cast<X509 *>(certificateChain[0].handle()), intermediates)) {
-        uq_X509_STORE_CTX_free(storeContext);
-        uq_X509_STORE_free(certStore);
+    if (!q_X509_STORE_CTX_init(storeContext, certStore, reinterpret_cast<X509 *>(certificateChain[0].handle()), intermediates)) {
+        q_X509_STORE_CTX_free(storeContext);
+        q_X509_STORE_free(certStore);
         errors << SslUnsafeError(SslUnsafeError::UnspecifiedError);
         return errors;
     }
@@ -1694,13 +1694,13 @@ QList<SslUnsafeError> SslUnsafeSocketBackendPrivate::verify(const QList<SslUnsaf
     // Now we can actually perform the verification of the chain we have built.
     // We ignore the result of this function since we process errors via the
     // callback.
-    (void) uq_X509_verify_cert(storeContext);
+    (void) q_X509_verify_cert(storeContext);
 
-    uq_X509_STORE_CTX_free(storeContext);
+    q_X509_STORE_CTX_free(storeContext);
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
-    uq_sk_free( (_STACK *) intermediates);
+    q_sk_free( (_STACK *) intermediates);
 #else
-    uq_sk_free( (STACK *) intermediates);
+    q_sk_free( (STACK *) intermediates);
 #endif
 
     // Now process the errors
@@ -1729,7 +1729,7 @@ QList<SslUnsafeError> SslUnsafeSocketBackendPrivate::verify(const QList<SslUnsaf
     for (const auto &error : const_cast<const QVector<SslUnsafeErrorEntry>&>(errorList)) //qAsConst(errorList))
         errors << _q_OpenSSL_to_SslUnsafeError(error.code, certificateChain.value(error.depth));
 
-    uq_X509_STORE_free(certStore);
+    q_X509_STORE_free(certStore);
 
     return errors;
 }
@@ -1752,13 +1752,13 @@ bool SslUnsafeSocketBackendPrivate::importPkcs12(QIODevice *device,
     if (pkcs12data.size() == 0)
         return false;
 
-    BIO *bio = uq_BIO_new_mem_buf(const_cast<char *>(pkcs12data.constData()), pkcs12data.size());
+    BIO *bio = q_BIO_new_mem_buf(const_cast<char *>(pkcs12data.constData()), pkcs12data.size());
 
     // Create the PKCS#12 object
-    PKCS12 *p12 = uq_d2i_PKCS12_bio(bio, 0);
+    PKCS12 *p12 = q_d2i_PKCS12_bio(bio, 0);
     if (!p12) {
-        qWarning() << "Unable to read PKCS#12 structure, " << uq_ERR_error_string(uq_ERR_get_error(), 0);
-        uq_BIO_free(bio);
+        qWarning() << "Unable to read PKCS#12 structure, " << q_ERR_error_string(q_ERR_get_error(), 0);
+        q_BIO_free(bio);
         return false;
     }
 
@@ -1767,21 +1767,21 @@ bool SslUnsafeSocketBackendPrivate::importPkcs12(QIODevice *device,
     X509 *x509;
     STACK_OF(X509) *ca = 0;
 
-    if (!uq_PKCS12_parse(p12, passPhrase.constData(), &pkey, &x509, &ca)) {
-        qWarning() << "Unable to parse PKCS#12 structure, %s", uq_ERR_error_string(uq_ERR_get_error(), 0);
-        uq_PKCS12_free(p12);
-        uq_BIO_free(bio);
+    if (!q_PKCS12_parse(p12, passPhrase.constData(), &pkey, &x509, &ca)) {
+        qWarning() << "Unable to parse PKCS#12 structure, %s", q_ERR_error_string(q_ERR_get_error(), 0);
+        q_PKCS12_free(p12);
+        q_BIO_free(bio);
         return false;
     }
 
     // Convert to Qt types
     if (!key->d->fromEVP_PKEY(pkey)) {
         qWarning() << "Unable to convert private key";
-        uq_sk_pop_free(reinterpret_cast<STACK *>(ca), reinterpret_cast<void(*)(void*)>(uq_sk_free));
-        uq_X509_free(x509);
-        uq_EVP_PKEY_free(pkey);
-        uq_PKCS12_free(p12);
-        uq_BIO_free(bio);
+        q_sk_pop_free(reinterpret_cast<STACK *>(ca), reinterpret_cast<void(*)(void*)>(q_sk_free));
+        q_X509_free(x509);
+        q_EVP_PKEY_free(pkey);
+        q_PKCS12_free(p12);
+        q_BIO_free(bio);
 
         return false;
     }
@@ -1792,11 +1792,11 @@ bool SslUnsafeSocketBackendPrivate::importPkcs12(QIODevice *device,
         *caCertificates = SslUnsafeSocketBackendPrivate::STACKOFX509_to_SslUnsafeCertificates(ca);
 
     // Clean up
-    uq_sk_pop_free(reinterpret_cast<STACK *>(ca), reinterpret_cast<void(*)(void*)>(uq_sk_free));
-    uq_X509_free(x509);
-    uq_EVP_PKEY_free(pkey);
-    uq_PKCS12_free(p12);
-    uq_BIO_free(bio);
+    q_sk_pop_free(reinterpret_cast<STACK *>(ca), reinterpret_cast<void(*)(void*)>(q_sk_free));
+    q_X509_free(x509);
+    q_EVP_PKEY_free(pkey);
+    q_PKCS12_free(p12);
+    q_BIO_free(bio);
 
     return true;
 }

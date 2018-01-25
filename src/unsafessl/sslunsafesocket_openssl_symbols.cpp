@@ -208,8 +208,8 @@ DEFINEFUNC3(int, SSL_set_ex_data, SSL *ssl, ssl, int idx, idx, void *arg, arg, r
 DEFINEFUNC2(void *, SSL_get_ex_data, const SSL *ssl, ssl, int idx, idx, return NULL, return)
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L && !defined(OPENSSL_NO_PSK)
-DEFINEFUNC2(void, SSL_set_psk_client_callback, SSL* ssl, ssl, uq_psk_client_callback_t callback, callback, return, DUMMYARG)
-DEFINEFUNC2(void, SSL_set_psk_server_callback, SSL* ssl, ssl, uq_psk_server_callback_t callback, callback, return, DUMMYARG)
+DEFINEFUNC2(void, SSL_set_psk_client_callback, SSL* ssl, ssl, q_psk_client_callback_t callback, callback, return, DUMMYARG)
+DEFINEFUNC2(void, SSL_set_psk_server_callback, SSL* ssl, ssl, q_psk_server_callback_t callback, callback, return, DUMMYARG)
 DEFINEFUNC2(int, SSL_CTX_use_psk_identity_hint, SSL_CTX* ctx, ctx, const char *hint, hint, return 0, return)
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
@@ -364,14 +364,14 @@ DEFINEFUNC2(PKCS12 *, d2i_PKCS12_bio, BIO *bio, bio, PKCS12 **pkcs12, pkcs12, re
 DEFINEFUNC(void, PKCS12_free, PKCS12 *pkcs12, pkcs12, return, DUMMYARG)
 
 #define RESOLVEFUNC(func) \
-    if (!(_uq_##func = _uq_PTR_##func(libs.first->resolve(#func)))     \
-        && !(_uq_##func = _uq_PTR_##func(libs.second->resolve(#func)))) \
+    if (!(_q_##func = _q_PTR_##func(libs.first->resolve(#func)))     \
+        && !(_q_##func = _q_PTR_##func(libs.second->resolve(#func)))) \
         sslUnsafeSocketCannotResolveSymbolWarning(#func);
 
 #if !defined QT_LINKED_OPENSSL
 
 #if 0 //!QT_CONFIG(library)
-bool uq_resolveOpenSslSymbols()
+bool q_resolveOpenSslSymbols()
 {
     qCWarning(lcSsl, "QSslSocket: unable to resolve symbols. Qt is configured without the "
                      "'library' feature, which means runtime resolving of libraries won't work.");
@@ -651,12 +651,12 @@ static QPair<QLibrary*, QLibrary*> loadOpenSsl()
 }
 #endif
 
-bool uq_resolveOpenSslSymbols()
+bool q_resolveOpenSslSymbols()
 {
     static bool symbolsResolved = false;
     static bool triedToResolveSymbols = false;
 #ifndef QT_NO_THREAD
-    QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&uq_SSL_library_init));
+    QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&q_SSL_library_init));
 #endif
     if (symbolsResolved)
         return true;
@@ -926,7 +926,7 @@ bool uq_resolveOpenSslSymbols()
     RESOLVEFUNC(EC_KEY_free)
     RESOLVEFUNC(EC_get_builtin_curves)
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L
-    if (uq_SSLeay() >= 0x10002000L)
+    if (q_SSLeay() >= 0x10002000L)
         RESOLVEFUNC(EC_curve_nist2nid)
 #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
 #endif // OPENSSL_NO_EC
@@ -936,7 +936,7 @@ bool uq_resolveOpenSslSymbols()
 
     delete libs.first;
     delete libs.second;
-    if (!_uq_SSLeay || uq_SSLeay() >= 0x10100000L) {
+    if (!_q_SSLeay || _q_SSLeay() >= 0x10100000L) {
         // OpenSSL 1.1 deprecated and removed SSLeay. We consider a failure to
         // resolve this symbol as a failure to resolve symbols.
         // The right operand of '||' above ... a bit of paranoia.
@@ -952,7 +952,7 @@ bool uq_resolveOpenSslSymbols()
 
 #else // !defined QT_LINKED_OPENSSL
 
-bool uq_resolveOpenSslSymbols()
+bool q_resolveOpenSslSymbols()
 {
 #ifdef QT_NO_OPENSSL
     return false;
@@ -965,7 +965,7 @@ bool uq_resolveOpenSslSymbols()
 // contributed by Jay Case of Sarvega, Inc.; http://sarvega.com/
 // Based on X509_cmp_time() for intitial buffer hacking.
 //==============================================================================
-QDateTime uq_getTimeFromASN1(const ASN1_TIME *aTime)
+QDateTime q_getTimeFromASN1(const ASN1_TIME *aTime)
 {
     size_t lTimeLength = aTime->length;
     char *pString = (char *) aTime->data;

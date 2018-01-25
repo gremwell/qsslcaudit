@@ -23,11 +23,11 @@ static bool isSafeDH(DH *dh)
     SslUnsafeSocketPrivate::ensureInitialized();
 
     // Mark p < 1024 bits as unsafe.
-    if (uq_BN_num_bits(dh->p) < 1024) {
+    if (q_BN_num_bits(dh->p) < 1024) {
         return false;
     }
 
-    if (uq_DH_check(dh, &status) != 1)
+    if (q_DH_check(dh, &status) != 1)
         return false;
 
     // From https://wiki.openssl.org/index.php/Diffie-Hellman_parameters:
@@ -41,8 +41,8 @@ static bool isSafeDH(DH *dh)
     //     Without the test, the IETF parameters would
     //     fail validation. For details, see Diffie-Hellman
     //     Parameter Check (when g = 2, must p mod 24 == 11?).
-    if (uq_BN_is_word(dh->g, DH_GENERATOR_2)) {
-        long residue = uq_BN_mod_word(dh->p, 24);
+    if (q_BN_is_word(dh->g, DH_GENERATOR_2)) {
+        long residue = q_BN_mod_word(dh->p, 24);
         if (residue == 11 || residue == 23)
             status &= ~DH_NOT_SUITABLE_GENERATOR;
     }
@@ -66,7 +66,7 @@ void SslUnsafeDiffieHellmanParametersPrivate::decodeDer(const QByteArray &der)
 
     SslUnsafeSocketPrivate::ensureInitialized();
 
-    DH *dh = uq_d2i_DHparams(NULL, &data, len);
+    DH *dh = q_d2i_DHparams(NULL, &data, len);
     if (dh) {
         if (isSafeDH(dh))
             derData = der;
@@ -76,7 +76,7 @@ void SslUnsafeDiffieHellmanParametersPrivate::decodeDer(const QByteArray &der)
         error = SslUnsafeDiffieHellmanParameters::InvalidInputDataError;
     }
 
-    uq_DH_free(dh);
+    q_DH_free(dh);
 }
 
 void SslUnsafeDiffieHellmanParametersPrivate::decodePem(const QByteArray &pem)
@@ -93,19 +93,19 @@ void SslUnsafeDiffieHellmanParametersPrivate::decodePem(const QByteArray &pem)
 
     SslUnsafeSocketPrivate::ensureInitialized();
 
-    BIO *bio = uq_BIO_new_mem_buf(const_cast<char *>(pem.data()), pem.size());
+    BIO *bio = q_BIO_new_mem_buf(const_cast<char *>(pem.data()), pem.size());
     if (!bio) {
         error = SslUnsafeDiffieHellmanParameters::InvalidInputDataError;
         return;
     }
 
     DH *dh = Q_NULLPTR;
-    uq_PEM_read_bio_DHparams(bio, &dh, 0, 0);
+    q_PEM_read_bio_DHparams(bio, &dh, 0, 0);
 
     if (dh) {
         if (isSafeDH(dh)) {
             char *buf = Q_NULLPTR;
-            int len = uq_i2d_DHparams(dh, reinterpret_cast<unsigned char **>(&buf));
+            int len = q_i2d_DHparams(dh, reinterpret_cast<unsigned char **>(&buf));
             if (len > 0)
                 derData = QByteArray(buf, len);
             else
@@ -117,6 +117,6 @@ void SslUnsafeDiffieHellmanParametersPrivate::decodePem(const QByteArray &pem)
         error = SslUnsafeDiffieHellmanParameters::InvalidInputDataError;
     }
 
-    uq_DH_free(dh);
-    uq_BIO_free(bio);
+    q_DH_free(dh);
+    q_BIO_free(bio);
 }
