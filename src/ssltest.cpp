@@ -43,44 +43,51 @@ SslTest *SslTest::createTest(int id)
 void SslCertificatesTest::report(const QList<XSslError> sslErrors,
                                  const QList<QAbstractSocket::SocketError> socketErrors,
                                  bool sslConnectionEstablished,
-                                 bool dataReceived) const
+                                 bool dataReceived)
 {
     if (dataReceived) {
         RED("test failed, client accepted fake certificate, data was intercepted");
+        setResult(-1);
         return;
     }
 
     if (sslConnectionEstablished && !dataReceived
             && !socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
         RED("test failed, client accepted fake certificate, but no data transmitted");
+        setResult(-1);
         return;
     }
 
     GREEN("test passed, client refused fake certificate");
+    setResult(0);
 }
 
 void SslProtocolsTest::report(const QList<XSslError> sslErrors,
                               const QList<QAbstractSocket::SocketError> socketErrors,
                               bool sslConnectionEstablished,
-                              bool dataReceived) const
+                              bool dataReceived)
 {
     if (dataReceived) {
         RED("test failed, client accepted fake certificate and weak protocol, data was intercepted");
+        setResult(-1);
         return;
     }
 
     if (sslConnectionEstablished && !dataReceived
             && !socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
         RED("test failed, client accepted fake certificate and weak protocol, but no data transmitted");
+        setResult(-1);
         return;
     }
 
     if (sslConnectionEstablished) {
         RED("test failed, client accepted weak protocol");
+        setResult(-1);
         return;
     }
 
     GREEN("test passed, client does not accept weak protocol");
+    setResult(0);
 }
 
 bool SslProtocolsTest::prepare(const SslUserSettings &settings)

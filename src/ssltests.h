@@ -7,7 +7,10 @@
 class SslTest01 : public SslCertificatesTest
 {
 public:
-    SslTest01() { setDescription("certificate trust test with user-supplied certificate"); }
+    SslTest01() {
+        setName("custom certificate trust");
+        setDescription("certificate trust test with user-supplied certificate");
+    }
     bool prepare(const SslUserSettings &settings);
 
 };
@@ -15,7 +18,10 @@ public:
 class SslTest02 : public SslCertificatesTest
 {
 public:
-    SslTest02() { setDescription("certificate trust test with self-signed certificate for user-supplied common name"); }
+    SslTest02() {
+        setName("self-signed certificate for target domain trust");
+        setDescription("certificate trust test with self-signed certificate for user-supplied common name");
+    }
     bool prepare(const SslUserSettings &settings);
 
 };
@@ -23,7 +29,10 @@ public:
 class SslTest03 : public SslCertificatesTest
 {
 public:
-    SslTest03() { setDescription("certificate trust test with self-signed certificate for www.example.com"); }
+    SslTest03() {
+        setName("self-signed certificate for invalid domain trust");
+        setDescription("certificate trust test with self-signed certificate for www.example.com");
+    }
     bool prepare(const SslUserSettings &settings);
 
 };
@@ -31,7 +40,10 @@ public:
 class SslTest04 : public SslCertificatesTest
 {
 public:
-    SslTest04() { setDescription("certificate trust test with user-supplied common name signed by user-supplied certificate"); }
+    SslTest04() {
+        setName("custom certificate for target domain trust");
+        setDescription("certificate trust test with user-supplied common name signed by user-supplied certificate");
+    }
     bool prepare(const SslUserSettings &settings);
 
 };
@@ -39,7 +51,10 @@ public:
 class SslTest05 : public SslCertificatesTest
 {
 public:
-    SslTest05() { setDescription("certificate trust test with www.example.com common name signed by user-supplied certificate"); }
+    SslTest05() {
+        setName("custom certificate for invalid domain trust");
+        setDescription("certificate trust test with www.example.com common name signed by user-supplied certificate");
+    }
     bool prepare(const SslUserSettings &settings);
 
 };
@@ -47,7 +62,10 @@ public:
 class SslTest06 : public SslCertificatesTest
 {
 public:
-    SslTest06() { setDescription("certificate trust test with user-supplied common name signed by user-supplied CA certificate"); }
+    SslTest06() {
+        setName("certificate for target domain signed by custom CA trust");
+        setDescription("certificate trust test with user-supplied common name signed by user-supplied CA certificate");
+    }
     bool prepare(const SslUserSettings &settings);
 
 };
@@ -55,7 +73,10 @@ public:
 class SslTest07 : public SslCertificatesTest
 {
 public:
-    SslTest07() { setDescription("certificate trust test with www.example.com common name signed by user-supplied CA certificate"); }
+    SslTest07() {
+        setName("certificate for invalid domain signed by custom CA trust");
+        setDescription("certificate trust test with www.example.com common name signed by user-supplied CA certificate");
+    }
     bool prepare(const SslUserSettings &settings);
 
 };
@@ -63,7 +84,10 @@ public:
 class SslTest08 : public SslProtocolsTest
 {
 public:
-    SslTest08() { setDescription("SSLv2 protocol support test"); }
+    SslTest08() {
+        setName("SSLv2 protocol support");
+        setDescription("test for SSLv2 protocol support");
+    }
     void setProtoAndCiphers();
 
 };
@@ -71,7 +95,10 @@ public:
 class SslTest09 : public SslProtocolsTest
 {
 public:
-    SslTest09() { setDescription("SSLv3 protocol support test"); }
+    SslTest09() {
+        setName("SSLv3 protocol support");
+        setDescription("test for SSLv3 protocol support");
+    }
     void setProtoAndCiphers();
 
 };
@@ -79,7 +106,10 @@ public:
 class SslTest10 : public SslProtocolsTest
 {
 public:
-    SslTest10() { setDescription("SSLv3 protocol and EXPORT grade ciphers support test"); }
+    SslTest10() {
+        setName("SSLv3 protocol and EXPORT grade ciphers support");
+        setDescription("test for SSLv3 protocol and EXPORT grade ciphers support");
+    }
     void setProtoAndCiphers();
 
 };
@@ -87,7 +117,10 @@ public:
 class SslTest11 : public SslProtocolsTest
 {
 public:
-    SslTest11() { setDescription("SSLv3 protocol and LOW grade ciphers support test"); }
+    SslTest11() {
+        setName("SSLv3 protocol and LOW grade ciphers support");
+        setDescription("test for SSLv3 protocol and LOW grade ciphers support");
+    }
     void setProtoAndCiphers();
 
 };
@@ -95,7 +128,10 @@ public:
 class SslTest12 : public SslProtocolsTest
 {
 public:
-    SslTest12() { setDescription("SSLv3 protocol and MEDIUM grade ciphers support test"); }
+    SslTest12() {
+        setName("SSLv3 protocol and MEDIUM grade ciphers support");
+        setDescription("test for SSLv3 protocol and MEDIUM grade ciphers support");
+    }
     void setProtoAndCiphers();
 
 };

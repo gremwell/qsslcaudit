@@ -30,7 +30,8 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QString appDescription = "A tool to test SSL clients behavior\n\n";
     appDescription += "SSL client tests:\n";
     for (int i = 0; i < allTests.size(); i++) {
-        appDescription += QString("\t%1: %2\n").arg(i + 1).arg(allTests.at(i)->description());
+        appDescription += QString("\t%1: %2\n").arg(i + 1).arg(allTests.at(i)->name());
+        appDescription += QString("\t   %1\n").arg(allTests.at(i)->description());
     }
 
     parser.setApplicationDescription(appDescription);

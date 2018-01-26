@@ -36,7 +36,8 @@ private slots:
     void sslHandshakeFinished();
 
 private:
-    void runTest(const SslTest *test);
+    void runTest(SslTest *test);
+    void printSummary();
 
     SslUserSettings settings;
     QList<SslTest *> sslTests;

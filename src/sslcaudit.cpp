@@ -43,7 +43,7 @@ void SslCAudit::setSslTests(const QList<SslTest *> &tests)
     sslTests = tests;
 }
 
-void SslCAudit::runTest(const SslTest *test)
+void SslCAudit::runTest(SslTest *test)
 {
     QHostAddress listenAddress = settings.getListenAddress();
     quint16 listenPort = settings.getListenPort();
@@ -155,6 +155,8 @@ void SslCAudit::run()
         VERBOSE("");
     }
 
+    printSummary();
+
     this->deleteLater();
     QThread::currentThread()->quit();
     qApp->exit();
@@ -219,4 +221,86 @@ void SslCAudit::handlePeerVerifyError(const XSslError &error)
 {
     VERBOSE("peer verify error:");
     VERBOSE("\t" + error.errorString());
+}
+
+static const int testColumnWidth = 64;
+static const int resultColumnWidth = 12;
+
+static void printTableHSeparator()
+{
+    QTextStream out(stdout);
+
+    out << "+";
+    for (int i = 0; i < testColumnWidth + 2; i++) {
+        out << "-";
+    }
+    out << "+";
+    for (int i = 0; i < resultColumnWidth + 2; i++) {
+        out << "-";
+    }
+    out << "+";
+    out << endl;
+}
+
+static void printTableHeaderLine(const QString &c1String, const QString &c2String)
+{
+    QTextStream out(stdout);
+
+    out.setFieldAlignment(QTextStream::AlignCenter);
+
+    out << "| ";
+    out << qSetFieldWidth(testColumnWidth);
+    out << c1String;
+    out << qSetFieldWidth(0);
+    out << " | ";
+    out << qSetFieldWidth(resultColumnWidth);
+    out << c2String;
+    out << qSetFieldWidth(0);
+    out << " |";
+    out << endl;
+}
+
+static void printTableLine(const QString &c1String, const QString &c2String)
+{
+    QTextStream out(stdout);
+
+    out << "| ";
+    out << qSetFieldWidth(testColumnWidth);
+    out.setFieldAlignment(QTextStream::AlignLeft);
+    out << c1String;
+    out << qSetFieldWidth(0);
+    out << " | ";
+    out << qSetFieldWidth(resultColumnWidth);
+    out.setFieldAlignment(QTextStream::AlignCenter);
+    out << c2String;
+    out << qSetFieldWidth(0);
+    out << " |";
+    out << endl;
+}
+
+void SslCAudit::printSummary()
+{
+    WHITE("tests results summary table:");
+
+    printTableHSeparator();
+    printTableHeaderLine("Test Name", "Result");
+    printTableHSeparator();
+
+    for (int i = 0; i < sslTests.size(); i++) {
+        QString testName = sslTests.at(i)->name();
+        QString result = "FAILED";
+
+        while (testName.length() > testColumnWidth) {
+            printTableLine(testName.left(testColumnWidth - 2), "");
+            testName = "  " + testName.mid(testColumnWidth - 2);
+        }
+
+        if (sslTests.at(i)->result() == 0) {
+            result = "PASSED";
+        }
+
+        printTableLine(testName, result);
+    }
+
+    printTableHSeparator();
 }

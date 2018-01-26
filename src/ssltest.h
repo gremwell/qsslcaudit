@@ -26,10 +26,16 @@ public:
     virtual void report(const QList<XSslError> sslErrors,
                         const QList<QAbstractSocket::SocketError> socketErrors,
                         bool sslConnectionEstablished,
-                        bool dataReceived) const = 0;
+                        bool dataReceived) = 0;
+
+    QString name() const { return m_name; }
+    void setName(const QString &name) { m_name = name; }
 
     QString description() const { return m_description; }
     void setDescription(const QString &descr) { m_description = descr; }
+
+    int result() const { return m_result; }
+    void setResult(int result) { m_result = result; }
 
     void setLocalCert(const QList<XSslCertificate> &chain) { m_localCertsChain = chain; }
     QList<XSslCertificate> localCert() const { return m_localCertsChain; }
@@ -44,7 +50,9 @@ public:
     QList<XSslCipher> sslCiphers() const { return m_sslCiphers; }
 
 private:
+    QString m_name;
     QString m_description;
+    int m_result;
     QList<XSslCertificate> m_localCertsChain;
     XSslKey m_privateKey;
     XSsl::SslProtocol m_sslProtocol;
@@ -58,7 +66,7 @@ public:
     virtual void report(const QList<XSslError> sslErrors,
                         const QList<QAbstractSocket::SocketError> socketErrors,
                         bool sslConnectionEstablished,
-                        bool dataReceived) const;
+                        bool dataReceived);
 
 };
 
@@ -69,7 +77,7 @@ public:
     virtual void report(const QList<XSslError> sslErrors,
                         const QList<QAbstractSocket::SocketError> socketErrors,
                         bool sslConnectionEstablished,
-                        bool dataReceived) const;
+                        bool dataReceived);
     virtual void setProtoAndCiphers() = 0;
 
 };
