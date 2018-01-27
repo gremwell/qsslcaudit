@@ -7,6 +7,7 @@
 
 #define DUMMYARG
 
+#if !defined QT_LINKED_OPENSSL
 // **************** Shared declarations ******************
 // ret func(arg)
 
@@ -105,7 +106,45 @@
         funcret _q_##func(a, b, c, d, e, f, g, h, i); \
     }
 // **************** Shared declarations ******************
+#else // !defined QT_LINKED_OPENSSL
 
+// **************** Static declarations ******************
+
+// ret func(arg)
+#  define DEFINEFUNC(ret, func, arg, a, err, funcret) \
+    ret q_##func(arg) { funcret func(a); }
+
+// ret func(arg1, arg2)
+#  define DEFINEFUNC2(ret, func, arg1, a, arg2, b, err, funcret) \
+    ret q_##func(arg1, arg2) { funcret func(a, b); }
+
+// ret func(arg1, arg2, arg3)
+#  define DEFINEFUNC3(ret, func, arg1, a, arg2, b, arg3, c, err, funcret) \
+    ret q_##func(arg1, arg2, arg3) { funcret func(a, b, c); }
+
+// ret func(arg1, arg2, arg3, arg4)
+#  define DEFINEFUNC4(ret, func, arg1, a, arg2, b, arg3, c, arg4, d, err, funcret) \
+    ret q_##func(arg1, arg2, arg3, arg4) { funcret func(a, b, c, d); }
+
+// ret func(arg1, arg2, arg3, arg4, arg5)
+#  define DEFINEFUNC5(ret, func, arg1, a, arg2, b, arg3, c, arg4, d, arg5, e, err, funcret) \
+    ret q_##func(arg1, arg2, arg3, arg4, arg5) { funcret func(a, b, c, d, e); }
+
+// ret func(arg1, arg2, arg3, arg4, arg6)
+#  define DEFINEFUNC6(ret, func, arg1, a, arg2, b, arg3, c, arg4, d, arg5, e, arg6, f, err, funcret) \
+    ret q_##func(arg1, arg2, arg3, arg4, arg5, arg6) { funcret func(a, b, c, d, e, f); }
+
+// ret func(arg1, arg2, arg3, arg4, arg6, arg7)
+#  define DEFINEFUNC7(ret, func, arg1, a, arg2, b, arg3, c, arg4, d, arg5, e, arg6, f, arg7, g, err, funcret) \
+    ret q_##func(arg1, arg2, arg3, arg4, arg5, arg6, arg7) { funcret func(a, b, c, d, e, f, g); }
+
+// ret func(arg1, arg2, arg3, arg4, arg6, arg7, arg8, arg9)
+#  define DEFINEFUNC9(ret, func, arg1, a, arg2, b, arg3, c, arg4, d, arg5, e, arg6, f, arg7, g, arg8, h, arg9, i, err, funcret) \
+    ret q_##func(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) { funcret func(a, b, c, d, e, f, g, h, i); }
+
+// **************** Static declarations ******************
+
+#endif // !defined QT_LINKED_OPENSSL
 
 bool q_resolveOpenSslSymbols();
 long q_ASN1_INTEGER_get(ASN1_INTEGER *a);
@@ -136,7 +175,7 @@ int q_BN_is_word(BIGNUM *a, BN_ULONG w);
 #define q_BN_is_word BN_is_word
 #endif // OPENSSL_VERSION_NUMBER >= 0x10100000L
 BN_ULONG q_BN_mod_word(const BIGNUM *a, BN_ULONG w);
-int q_BN_set_word(const BIGNUM *a, BN_ULONG w);
+int q_BN_set_word(BIGNUM *a, BN_ULONG w);
 void q_BN_free(BIGNUM *a);
 #ifndef OPENSSL_NO_EC
 const EC_GROUP* q_EC_KEY_get0_group(const EC_KEY* k);

@@ -54,7 +54,7 @@ DEFINEFUNC(int, BN_num_bits, const BIGNUM *a, a, return 0, return)
 DEFINEFUNC2(int, BN_is_word, BIGNUM *a, a, BN_ULONG w, w, return 0, return)
 #endif
 DEFINEFUNC2(BN_ULONG, BN_mod_word, const BIGNUM *a, a, BN_ULONG w, w, return static_cast<BN_ULONG>(-1), return)
-DEFINEFUNC2(int, BN_set_word, const BIGNUM *a, a, BN_ULONG w, w, return 0, return)
+DEFINEFUNC2(int, BN_set_word, BIGNUM *a, a, BN_ULONG w, w, return 0, return)
 DEFINEFUNC(void, BN_free, BIGNUM *a, a, return, DUMMYARG)
 #ifndef OPENSSL_NO_EC
 DEFINEFUNC(const EC_GROUP*, EC_KEY_get0_group, const EC_KEY* k, k, return 0, return)

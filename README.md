@@ -42,7 +42,7 @@ Packages for ALT Linux (P8, Sisyphus@01-2018): `cmake qt5-base-devel libgnutls-d
 
 Packages for Ubuntu 16.04: `cmake qtbase5-dev libgnutls-dev libssl-dev`.
 
-Packages for Fedora 26 (not supported yet): `cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
+Packages for Fedora 26: `cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
 
 Packages for Kali (rolling@01-2018): `cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`. Probably, you will need to explicitly remove `libssl-dev`.
 

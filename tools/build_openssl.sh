@@ -38,6 +38,8 @@ make
 
 cp -a libcrypto.so{,.1.0.0} $curdir
 cp -a libssl.so{,.1.0.0} $curdir
+ln -sf libssl.so{.1.0.0,.10}
+ln -sf libcrypto.so{.1.0.0,.10}
 cp -a apps/openssl $curdir
 
 popd
