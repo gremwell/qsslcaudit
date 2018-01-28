@@ -6,7 +6,12 @@
 
 SslTest::SslTest()
 {
-
+    m_sslErrors = QList<XSslError>();
+    m_socketErrors = QList<QAbstractSocket::SocketError>();
+    m_sslConnectionEstablished = false;
+    m_interceptedData = QByteArray();
+    m_result = -99;
+    m_report = QString("test results undefined");
 }
 
 SslTest *SslTest::createTest(int id)
@@ -40,53 +45,70 @@ SslTest *SslTest::createTest(int id)
     return NULL;
 }
 
-void SslCertificatesTest::report(const QList<XSslError> sslErrors,
-                                 const QList<QAbstractSocket::SocketError> socketErrors,
-                                 bool sslConnectionEstablished,
-                                 bool dataReceived)
+void SslTest::printReport()
 {
-    if (dataReceived) {
-        RED("test failed, client accepted fake certificate, data was intercepted");
+    if (m_result < 0) {
+        RED(m_report);
+    } else {
+        GREEN(m_report);
+    }
+}
+
+void SslCertificatesTest::calcResults()
+{
+    if (m_interceptedData.size() > 0) {
+        m_report = QString("test failed, client accepted fake certificate, data was intercepted");
         setResult(-1);
         return;
     }
 
-    if (sslConnectionEstablished && !dataReceived
-            && !socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
-        RED("test failed, client accepted fake certificate, but no data transmitted");
-        setResult(-1);
+    if (m_sslConnectionEstablished && (m_interceptedData.size() == 0)
+            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
+        m_report = QString("test failed, client accepted fake certificate, but no data transmitted");
+        setResult(-2);
         return;
     }
 
-    GREEN("test passed, client refused fake certificate");
+    if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
+            || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
+        m_report = QString("failure during SSL initialization");
+        setResult(-3);
+        return;
+    }
+
+    m_report = QString("test passed, client refused fake certificate");
     setResult(0);
 }
 
-void SslProtocolsTest::report(const QList<XSslError> sslErrors,
-                              const QList<QAbstractSocket::SocketError> socketErrors,
-                              bool sslConnectionEstablished,
-                              bool dataReceived)
+void SslProtocolsTest::calcResults()
 {
-    if (dataReceived) {
-        RED("test failed, client accepted fake certificate and weak protocol, data was intercepted");
+    if (m_interceptedData.size() > 0) {
+        m_report = QString("test failed, client accepted fake certificate and weak protocol, data was intercepted");
         setResult(-1);
         return;
     }
 
-    if (sslConnectionEstablished && !dataReceived
-            && !socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
-        RED("test failed, client accepted fake certificate and weak protocol, but no data transmitted");
-        setResult(-1);
+    if (m_sslConnectionEstablished && (m_interceptedData.size() == 0)
+            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
+        m_report = QString("test failed, client accepted fake certificate and weak protocol, but no data transmitted");
+        setResult(-2);
         return;
     }
 
-    if (sslConnectionEstablished) {
-        RED("test failed, client accepted weak protocol");
-        setResult(-1);
+    if (m_sslConnectionEstablished) {
+        m_report = QString("test failed, client accepted weak protocol");
+        setResult(-3);
         return;
     }
 
-    GREEN("test passed, client does not accept weak protocol");
+    if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
+            || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
+        m_report = QString("failure during SSL initialization");
+        setResult(-4);
+        return;
+    }
+
+    m_report = QString("test passed, client does not accept weak protocol");
     setResult(0);
 }
 

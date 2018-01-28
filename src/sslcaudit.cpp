@@ -68,23 +68,22 @@ void SslCAudit::runTest(SslTest *test)
         return;
     }
 
-    testSslErrors.clear();
-    testSocketErrors.clear();
-    testSslConnectionEstablished = false;
-    testDataReceived = false;
-
     if (sslServer.waitForNewConnection(-1)) {
         XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sslServer.nextPendingConnection());
 
         VERBOSE(QString("connection from: %1:%2").arg(sslSocket->peerAddress().toString()).arg(sslSocket->peerPort()));
 
-        QStringList sslInitErrors = sslServer.getSslInitErrors();
+        QStringList sslInitErrors = sslServer.getSslInitErrorsStr();
         if (sslInitErrors.size() > 0) {
             RED("failure during SSL initialization, test will not continue");
+
             for (int i = 0; i < sslInitErrors.size(); i++) {
                 VERBOSE("\t" + sslInitErrors.at(i));
             }
-            // TODO: set here corresponding error to test
+
+            test->addSocketErrors(sslServer.getSslInitErrors());
+            test->calcResults();
+
             return;
         }
 
@@ -111,9 +110,11 @@ void SslCAudit::runTest(SslTest *test)
                         break;
 
                     if (sslSocket->waitForReadyRead(100)) {
-                        testDataReceived = true;
+                        QByteArray data = sslSocket->readAll();
 
-                        proxy.write(sslSocket->readAll());
+                        test->addInterceptedData(data);
+
+                        proxy.write(data);
                     }
 
                     if (proxy.waitForReadyRead(100)) {
@@ -137,7 +138,7 @@ void SslCAudit::runTest(SslTest *test)
 
                 VERBOSE("received data: " + QString(message));
 
-                testDataReceived = true;
+                test->addInterceptedData(message);
 
                 sslSocket->disconnectFromHost();
                 sslSocket->waitForDisconnected();
@@ -150,9 +151,11 @@ void SslCAudit::runTest(SslTest *test)
         VERBOSE("could not establish encrypted connection (" + sslServer.errorString() + ")");
     }
 
+    test->calcResults();
+
     WHITE("report:");
 
-    test->report(testSslErrors, testSocketErrors, testSslConnectionEstablished, testDataReceived);
+    test->printReport();
 
     WHITE("test finished");
 }
@@ -161,7 +164,8 @@ void SslCAudit::run()
 {
     for (int i = 0; i < sslTests.size(); i++) {
         VERBOSE("");
-        runTest(sslTests.at(i));
+        currentTest = sslTests.at(i);
+        runTest(currentTest);
         VERBOSE("");
     }
 
@@ -181,8 +185,8 @@ void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)
             .arg(sslSocket->errorString())
             .arg(sslSocket->error()));
 
-    testSslErrors << sslSocket->sslErrors();
-    testSocketErrors << socketError;
+    currentTest->addSslErrors(sslSocket->sslErrors());
+    currentTest->addSocketErrors(QList<QAbstractSocket::SocketError>() << socketError);
 
     switch (socketError) {
     case QAbstractSocket::SslInvalidUserDataError:
@@ -210,7 +214,7 @@ void SslCAudit::handleSslErrors(const QList<XSslError> &errors)
         VERBOSE("\t" + error.errorString());
     }
 
-    testSslErrors << errors;
+    currentTest->addSslErrors(errors);
 }
 
 void SslCAudit::sslHandshakeFinished()
@@ -228,7 +232,7 @@ void SslCAudit::sslHandshakeFinished()
         }
     }
 
-    testSslConnectionEstablished = true;
+    currentTest->setSslConnectionStatus(true);
 }
 
 void SslCAudit::handlePeerVerifyError(const XSslError &error)

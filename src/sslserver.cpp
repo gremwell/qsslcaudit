@@ -75,6 +75,7 @@ void SslServer::incomingConnection(qintptr socketDescriptor)
     handleStartTls(sslSocket);
 
     m_sslInitErrors.clear();
+    m_sslInitErrorsStr.clear();
 
     // this is the only place to handle SSL initialization errors (in error slot)
     connect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
@@ -91,10 +92,16 @@ void SslServer::handleSocketError(QAbstractSocket::SocketError socketError)
 {
     XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sender());
 
-    m_sslInitErrors << sslSocket->errorString();
+    m_sslInitErrors << socketError;
+    m_sslInitErrorsStr << sslSocket->errorString();
 }
 
-const QStringList &SslServer::getSslInitErrors() const
+const QStringList &SslServer::getSslInitErrorsStr() const
+{
+    return m_sslInitErrorsStr;
+}
+
+const QList<QAbstractSocket::SocketError> &SslServer::getSslInitErrors() const
 {
     return m_sslInitErrors;
 }

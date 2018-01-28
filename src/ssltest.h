@@ -5,10 +5,12 @@
 #include "sslunsafecertificate.h"
 #include "sslunsafekey.h"
 #include "sslunsafecipher.h"
+#include "sslunsafeerror.h"
 #else
 #include <QSslCertificate>
 #include <QSslKey>
 #include <QSslCipher>
+#include <QSslError>
 #endif
 
 #include "sslusersettings.h"
@@ -22,11 +24,9 @@ public:
     static SslTest *createTest(int id);
 
     virtual bool prepare(const SslUserSettings &settings) = 0;
+    virtual void calcResults() = 0;
 
-    virtual void report(const QList<XSslError> sslErrors,
-                        const QList<QAbstractSocket::SocketError> socketErrors,
-                        bool sslConnectionEstablished,
-                        bool dataReceived) = 0;
+    void printReport();
 
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
@@ -49,24 +49,34 @@ public:
     void setSslCiphers(const QList<XSslCipher> ciphers) { m_sslCiphers = ciphers; }
     QList<XSslCipher> sslCiphers() const { return m_sslCiphers; }
 
+    void addSslErrors(const QList<XSslError> errors) { m_sslErrors << errors; }
+    void addSocketErrors(const QList<QAbstractSocket::SocketError> errors) { m_socketErrors << errors; }
+    void setSslConnectionStatus(bool isEstablished) { m_sslConnectionEstablished = isEstablished; }
+    void addInterceptedData(const QByteArray &data) { m_interceptedData.append(data); }
+
 private:
     QString m_name;
     QString m_description;
     int m_result;
+    QString m_report;
     QList<XSslCertificate> m_localCertsChain;
     XSslKey m_privateKey;
     XSsl::SslProtocol m_sslProtocol;
     QList<XSslCipher> m_sslCiphers;
 
+    QList<XSslError> m_sslErrors;
+    QList<QAbstractSocket::SocketError> m_socketErrors;
+    bool m_sslConnectionEstablished;
+    QByteArray m_interceptedData;
+
+    friend class SslCertificatesTest;
+    friend class SslProtocolsTest;
 };
 
 class SslCertificatesTest : public SslTest
 {
 public:
-    virtual void report(const QList<XSslError> sslErrors,
-                        const QList<QAbstractSocket::SocketError> socketErrors,
-                        bool sslConnectionEstablished,
-                        bool dataReceived);
+    virtual void calcResults();
 
 };
 
@@ -74,10 +84,7 @@ class SslProtocolsTest : public SslTest
 {
 public:
     virtual bool prepare(const SslUserSettings &settings);
-    virtual void report(const QList<XSslError> sslErrors,
-                        const QList<QAbstractSocket::SocketError> socketErrors,
-                        bool sslConnectionEstablished,
-                        bool dataReceived);
+    virtual void calcResults();
     virtual bool setProtoAndCiphers() = 0;
 
 };

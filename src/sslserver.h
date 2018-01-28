@@ -72,7 +72,8 @@ public:
 
     void setStartTlsProto(const SslServer::StartTlsProtocol protocol);
 
-    const QStringList &getSslInitErrors() const;
+    const QStringList &getSslInitErrorsStr() const;
+    const QList<QAbstractSocket::SocketError> &getSslInitErrors() const;
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override final;
@@ -88,7 +89,8 @@ private:
     QList<XSslCipher> m_sslCiphers;
     QVector<XSslEllipticCurve> m_sslEllipticCurves;
     SslServer::StartTlsProtocol m_startTlsProtocol;
-    QStringList m_sslInitErrors;
+    QStringList m_sslInitErrorsStr;
+    QList<QAbstractSocket::SocketError> m_sslInitErrors;
 
 };
 

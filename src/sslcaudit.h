@@ -41,11 +41,7 @@ private:
 
     SslUserSettings settings;
     QList<SslTest *> sslTests;
-
-    QList<XSslError> testSslErrors;
-    QList<QAbstractSocket::SocketError> testSocketErrors;
-    bool testSslConnectionEstablished;
-    bool testDataReceived;
+    SslTest *currentTest;
 
 };
 
