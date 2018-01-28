@@ -1,25 +1,71 @@
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the QtNetwork module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+
 #ifndef SSLUNSAFESOCKET_H
 #define SSLUNSAFESOCKET_H
 
-#include <QTcpSocket>
+#include "sslunsafenetworkglobal.h"
+#include <QtCore/qlist.h>
+#include <QtCore/qregexp.h>
+#ifndef QT_NO_SSL
+#   include <QtNetwork/qtcpsocket.h>
+#   include "sslunsafeerror.h"
+#endif
 
-#include "sslunsafe.h"
-//#include "sslunsafeconfiguration.h"
+QT_BEGIN_NAMESPACE
 
-#include "sslunsafecertificate.h"
-#include "sslunsafecipher.h"
 
+#ifndef QT_NO_SSL
+
+class QDir;
+class SslUnsafeCipher;
+class SslUnsafeCertificate;
 class SslUnsafeConfiguration;
+class SslUnsafeEllipticCurve;
 class SslUnsafePreSharedKeyAuthenticator;
-
-class QHostAddress;
 
 class SslUnsafeSocketPrivate;
 class SslUnsafeSocketBackendPrivate;
-class SslUnsafeSocket : public QTcpSocket
+class Q_NETWORK_EXPORT SslUnsafeSocket : public QTcpSocket
 {
     Q_OBJECT
-
 public:
     enum SslMode {
         UnencryptedMode,
@@ -36,6 +82,7 @@ public:
 
     explicit SslUnsafeSocket(QObject *parent = Q_NULLPTR);
     ~SslUnsafeSocket();
+    void resume() Q_DECL_OVERRIDE; // to continue after proxy authentication required, SSL errors etc.
 
     // Autostarting the SSL client handshake.
     void connectToHostEncrypted(const QString &hostName, quint16 port, OpenMode mode = ReadWrite, NetworkLayerProtocol protocol = AnyIPProtocol);
@@ -66,11 +113,12 @@ public:
     void setPeerVerifyName(const QString &hostName);
 
     // From QIODevice
-    qint64 bytesAvailable() const;
-    qint64 bytesToWrite() const;
-    bool canReadLine() const;
-    void close();
-    bool atEnd() const;
+    qint64 bytesAvailable() const Q_DECL_OVERRIDE;
+    qint64 bytesToWrite() const Q_DECL_OVERRIDE;
+    bool canReadLine() const Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
+    bool atEnd() const Q_DECL_OVERRIDE;
+    bool flush(); // ### Qt6: remove me (implementation moved to private flush())
     void abort();
 
     // From QAbstractSocket:
@@ -103,20 +151,39 @@ public:
                        const QByteArray &passPhrase = QByteArray());
     SslUnsafeKey privateKey() const;
 
+    // Cipher settings.
+#if QT_DEPRECATED_SINCE(5, 5)
+    QT_DEPRECATED_X("Use SslUnsafeConfiguration::ciphers()") QList<SslUnsafeCipher> ciphers() const;
+    QT_DEPRECATED_X("Use SslUnsafeConfiguration::setCiphers()") void setCiphers(const QList<SslUnsafeCipher> &ciphers);
+    QT_DEPRECATED void setCiphers(const QString &ciphers);
+    QT_DEPRECATED static void setDefaultCiphers(const QList<SslUnsafeCipher> &ciphers);
+    QT_DEPRECATED static QList<SslUnsafeCipher> defaultCiphers();
+    QT_DEPRECATED_X("Use SslUnsafeConfiguration::supportedCiphers()") static QList<SslUnsafeCipher> supportedCiphers();
+#endif // QT_DEPRECATED_SINCE(5, 5)
+
     // CA settings.
     bool addCaCertificates(const QString &path, SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
                            QRegExp::PatternSyntax syntax = QRegExp::FixedString);
     void addCaCertificate(const SslUnsafeCertificate &certificate);
     void addCaCertificates(const QList<SslUnsafeCertificate> &certificates);
+#if QT_DEPRECATED_SINCE(5, 5)
+    QT_DEPRECATED_X("Use SslUnsafeConfiguration::setCaCertificates()") void setCaCertificates(const QList<SslUnsafeCertificate> &certificates);
+    QT_DEPRECATED_X("Use SslUnsafeConfiguration::caCertificates()") QList<SslUnsafeCertificate> caCertificates() const;
+#endif // QT_DEPRECATED_SINCE(5, 5)
     static bool addDefaultCaCertificates(const QString &path, SslUnsafe::EncodingFormat format = SslUnsafe::Pem,
                                          QRegExp::PatternSyntax syntax = QRegExp::FixedString);
     static void addDefaultCaCertificate(const SslUnsafeCertificate &certificate);
     static void addDefaultCaCertificates(const QList<SslUnsafeCertificate> &certificates);
+#if QT_DEPRECATED_SINCE(5, 5)
+    QT_DEPRECATED static void setDefaultCaCertificates(const QList<SslUnsafeCertificate> &certificates);
+    QT_DEPRECATED static QList<SslUnsafeCertificate> defaultCaCertificates();
+    QT_DEPRECATED_X("Use SslUnsafeConfiguration::systemCaCertificates()") static QList<SslUnsafeCertificate> systemCaCertificates();
+#endif // QT_DEPRECATED_SINCE(5, 5)
 
     bool waitForConnected(int msecs = 30000) Q_DECL_OVERRIDE;
     bool waitForEncrypted(int msecs = 30000);
-    bool waitForReadyRead(int msecs = 30000);
-    bool waitForBytesWritten(int msecs = 30000);
+    bool waitForReadyRead(int msecs = 30000) Q_DECL_OVERRIDE;
+    bool waitForBytesWritten(int msecs = 30000) Q_DECL_OVERRIDE;
     bool waitForDisconnected(int msecs = 30000) Q_DECL_OVERRIDE;
 
     QList<SslUnsafeError> sslErrors() const;
@@ -129,12 +196,12 @@ public:
 
     void ignoreSslErrors(const QList<SslUnsafeError> &errors);
 
-public slots:
+public Q_SLOTS:
     void startClientEncryption();
     void startServerEncryption();
     void ignoreSslErrors();
 
-signals:
+Q_SIGNALS:
     void encrypted();
     void peerVerifyError(const SslUnsafeError &error);
     void sslErrors(const QList<SslUnsafeError> &errors);
@@ -143,8 +210,8 @@ signals:
     void preSharedKeyAuthenticationRequired(SslUnsafePreSharedKeyAuthenticator *authenticator);
 
 protected:
-    qint64 readData(char *data, qint64 maxlen);
-    qint64 writeData(const char *data, qint64 len);
+    qint64 readData(char *data, qint64 maxlen) Q_DECL_OVERRIDE;
+    qint64 writeData(const char *data, qint64 len) Q_DECL_OVERRIDE;
 
 private:
     QScopedPointer<SslUnsafeSocketBackendPrivate> d_ptr;
@@ -162,8 +229,15 @@ private:
     Q_PRIVATE_SLOT(d_func(), void _q_readChannelFinishedSlot())
     Q_PRIVATE_SLOT(d_func(), void _q_flushWriteBuffer())
     Q_PRIVATE_SLOT(d_func(), void _q_flushReadBuffer())
-
+    Q_PRIVATE_SLOT(d_func(), void _q_resumeImplementation())
+#if defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
+    Q_PRIVATE_SLOT(d_func(), void _q_caRootLoaded(SslUnsafeCertificate,SslUnsafeCertificate))
+#endif
     friend class SslUnsafeSocketBackendPrivate;
 };
+
+#endif // QT_NO_SSL
+
+QT_END_NAMESPACE
 
 #endif

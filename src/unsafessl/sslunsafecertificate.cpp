@@ -1,16 +1,128 @@
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the QtNetwork module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 
-//#include <QtNetwork/qtnetworkglobal.h>
+
+/*!
+    \class SslUnsafeCertificate
+    \brief The SslUnsafeCertificate class provides a convenient API for an X509 certificate.
+    \since 4.3
+
+    \reentrant
+    \ingroup network
+    \ingroup ssl
+    \ingroup shared
+    \inmodule QtNetwork
+
+    SslUnsafeCertificate stores an X509 certificate, and is commonly used
+    to verify the identity and store information about the local host,
+    a remotely connected peer, or a trusted third party Certificate
+    Authority.
+
+    There are many ways to construct a SslUnsafeCertificate. The most
+    common way is to call SslUnsafeSocket::peerCertificate(), which returns
+    a SslUnsafeCertificate object, or SslUnsafeSocket::peerCertificateChain(),
+    which returns a list of them. You can also load certificates from
+    a DER (binary) or PEM (Base64) encoded bundle, typically stored as
+    one or more local files, or in a Qt Resource.
+
+    You can call isNull() to check if your certificate is null. By default,
+    SslUnsafeCertificate constructs a null certificate. A null certificate is
+    invalid, but an invalid certificate is not necessarily null. If you want
+    to reset all contents in a certificate, call clear().
+
+    After loading a certificate, you can find information about the
+    certificate, its subject, and its issuer, by calling one of the
+    many accessor functions, including version(), serialNumber(),
+    issuerInfo() and subjectInfo(). You can call effectiveDate() and
+    expiryDate() to check when the certificate starts being
+    effective and when it expires.
+    The publicKey() function returns the certificate
+    subject's public key as a SslUnsafeKey. You can call issuerInfo() or
+    subjectInfo() to get detailed information about the certificate
+    issuer and its subject.
+
+    Internally, SslUnsafeCertificate is stored as an X509 structure. You
+    can access this handle by calling handle(), but the results are
+    likely to not be portable.
+
+    \sa SslUnsafeSocket, SslUnsafeKey, SslUnsafeCipher, SslUnsafeError
+*/
+
+/*!
+    \enum SslUnsafeCertificate::SubjectInfo
+
+    Describes keys that you can pass to SslUnsafeCertificate::issuerInfo() or
+    SslUnsafeCertificate::subjectInfo() to get information about the certificate
+    issuer or subject.
+
+    \value Organization "O" The name of the organization.
+
+    \value CommonName "CN" The common name; most often this is used to store
+    the host name.
+
+    \value LocalityName "L" The locality.
+
+    \value OrganizationalUnitName "OU" The organizational unit name.
+
+    \value CountryName "C" The country.
+
+    \value StateOrProvinceName "ST" The state or province.
+
+    \value DistinguishedNameQualifier The distinguished name qualifier
+
+    \value SerialNumber The certificate's serial number
+
+    \value EmailAddress The email address associated with the certificate
+*/
+
+#include "sslunsafenetworkglobal.h"
 #ifndef QT_NO_OPENSSL
 #include "sslunsafesocket_openssl_symbols_p.h"
 #endif
 #ifdef Q_OS_WINRT
-#include "SslUnsafeSocket_winrt_p.h"
+#include "sslunsafesocket_winrt_p.h"
 #endif
 #ifdef QT_SECURETRANSPORT
-#include "SslUnsafeSocket_mac_p.h"
+#include "sslunsafesocket_mac_p.h"
 #endif
 
-//#include "qssl_p.h"
+#include "sslunsafe_p.h"
 #include "sslunsafecertificate.h"
 #include "sslunsafecertificate_p.h"
 #include "sslunsafekey_p.h"
@@ -18,6 +130,8 @@
 #include <QtCore/qdir.h>
 #include <QtCore/qdiriterator.h>
 #include <QtCore/qfile.h>
+
+QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a SslUnsafeCertificate by reading \a format encoded data
@@ -303,7 +417,7 @@ QByteArray SslUnsafeCertificate::digest(QCryptographicHash::Algorithm algorithm)
 */
 
 /*!
-    \fn QSslKey SslUnsafeCertificate::publicKey() const
+    \fn SslUnsafeKey SslUnsafeCertificate::publicKey() const
     Returns the certificate subject's public key.
 */
 
@@ -344,7 +458,7 @@ QByteArray SslUnsafeCertificate::digest(QCryptographicHash::Algorithm algorithm)
 
     Example:
 
-    \snippet code/src_network_ssl_SslUnsafeCertificate.cpp 0
+    \snippet code/src_network_ssl_SslUnsafecertificate.cpp 0
 
     \sa fromData()
 */
@@ -423,7 +537,7 @@ QList<SslUnsafeCertificate> SslUnsafeCertificate::fromPath(const QString &path,
 QList<SslUnsafeCertificate> SslUnsafeCertificate::fromDevice(QIODevice *device, SslUnsafe::EncodingFormat format)
 {
     if (!device) {
-        qWarning() << "SslUnsafeCertificate::fromDevice: cannot read from a null device";
+        qCWarning(lcSsl, "SslUnsafeCertificate::fromDevice: cannot read from a null device");
         return QList<SslUnsafeCertificate>();
     }
     return fromData(device->readAll(), format);
@@ -489,9 +603,7 @@ bool SslUnsafeCertificate::importPkcs12(QIODevice *device,
 // These certificates are known to be fraudulent and were created during the comodo
 // compromise. See http://www.comodo.com/Comodo-Fraud-Incident-2011-03-23.html
 static const char *const certificate_blacklist[] = {
-    0
-};
-#if 0
+    #if 0
     "04:7e:cb:e9:fc:a5:5f:7b:d0:9e:ae:36:e1:0c:ae:1e", "mail.google.com", // Comodo
     "f5:c8:6a:f3:61:62:f1:3a:64:f5:4f:6d:c9:58:7c:06", "www.google.com", // Comodo
     "d7:55:8f:da:f5:f1:10:5b:b2:13:28:2b:70:77:29:a3", "login.yahoo.com", // Comodo
@@ -536,9 +648,9 @@ static const char *const certificate_blacklist[] = {
     "27:83",                                           "NIC Certifying Authority", // intermediate certificate from NIC India (2007)
     "27:92",                                           "NIC CA 2011", // intermediate certificate from NIC India (2011)
     "27:b1",                                           "NIC CA 2014", // intermediate certificate from NIC India (2014)
+    #endif
     0
 };
-#endif
 
 bool SslUnsafeCertificatePrivate::isBlacklisted(const SslUnsafeCertificate &certificate)
 {
@@ -612,3 +724,5 @@ QDebug operator<<(QDebug debug, SslUnsafeCertificate::SubjectInfo info)
     return debug;
 }
 #endif
+
+QT_END_NAMESPACE

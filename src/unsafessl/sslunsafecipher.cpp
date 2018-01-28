@@ -1,31 +1,37 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing/
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
 **
-** $QT_BEGIN_LICENSE:LGPL21$
+** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
 ** Software or, alternatively, in accordance with the terms contained in
 ** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see http://www.qt.io/terms-conditions. For further
-** information use the contact form at http://www.qt.io/contact-us.
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file. Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 **
-** As a special exception, The Qt Company gives you certain additional
-** rights. These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
 **
 ** $QT_END_LICENSE$
 **
@@ -33,8 +39,8 @@
 
 
 /*!
-    \class QSslCipher
-    \brief The QSslCipher class represents an SSL cryptographic cipher.
+    \class SslUnsafeCipher
+    \brief The SslUnsafeCipher class represents an SSL cryptographic cipher.
     \since 4.3
 
     \reentrant
@@ -43,12 +49,12 @@
     \ingroup shared
     \inmodule QtNetwork
 
-    QSslCipher stores information about one cryptographic cipher. It
-    is most commonly used with QSslSocket, either for configuring
+    SslUnsafeCipher stores information about one cryptographic cipher. It
+    is most commonly used with SslUnsafeSocket, either for configuring
     which ciphers the socket can use, or for displaying the socket's
     ciphers to the user.
 
-    \sa QSslSocket, QSslKey
+    \sa SslUnsafeSocket, SslUnsafeKey
 */
 
 #include "sslunsafecipher.h"
@@ -63,7 +69,7 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    Constructs an empty QSslCipher object.
+    Constructs an empty SslUnsafeCipher object.
 */
 SslUnsafeCipher::SslUnsafeCipher()
     : d(new SslUnsafeCipherPrivate)
@@ -73,10 +79,10 @@ SslUnsafeCipher::SslUnsafeCipher()
 /*!
     \since 5.3
 
-    Constructs a QSslCipher object for the cipher determined by \a
+    Constructs a SslUnsafeCipher object for the cipher determined by \a
     name. The constructor accepts only supported ciphers (i.e., the
     \a name must identify a cipher in the list of ciphers returned by
-    QSslSocket::supportedCiphers()).
+    SslUnsafeSocket::supportedCiphers()).
 
     You can call isNull() after construction to check if \a name
     correctly identified a supported cipher.
@@ -84,7 +90,8 @@ SslUnsafeCipher::SslUnsafeCipher()
 SslUnsafeCipher::SslUnsafeCipher(const QString &name)
     : d(new SslUnsafeCipherPrivate)
 {
-    foreach (const SslUnsafeCipher &cipher, SslUnsafeConfiguration::supportedCiphers()) {
+    const auto ciphers = SslUnsafeConfiguration::supportedCiphers();
+    for (const SslUnsafeCipher &cipher : ciphers) {
         if (cipher.name() == name) {
             *this = cipher;
             return;
@@ -93,11 +100,11 @@ SslUnsafeCipher::SslUnsafeCipher(const QString &name)
 }
 
 /*!
-    Constructs a QSslCipher object for the cipher determined by \a
+    Constructs a SslUnsafeCipher object for the cipher determined by \a
     name and \a protocol. The constructor accepts only supported
     ciphers (i.e., the \a name and \a protocol must identify a cipher
     in the list of ciphers returned by
-    QSslSocket::supportedCiphers()).
+    SslUnsafeSocket::supportedCiphers()).
 
     You can call isNull() after construction to check if \a name and
     \a protocol correctly identified a supported cipher.
@@ -105,7 +112,8 @@ SslUnsafeCipher::SslUnsafeCipher(const QString &name)
 SslUnsafeCipher::SslUnsafeCipher(const QString &name, SslUnsafe::SslProtocol protocol)
     : d(new SslUnsafeCipherPrivate)
 {
-    foreach (const SslUnsafeCipher &cipher, SslUnsafeConfiguration::supportedCiphers()) {
+    const auto ciphers = SslUnsafeConfiguration::supportedCiphers();
+    for (const SslUnsafeCipher &cipher : ciphers) {
         if (cipher.name() == name && cipher.protocol() == protocol) {
             *this = cipher;
             return;
@@ -123,7 +131,7 @@ SslUnsafeCipher::SslUnsafeCipher(const SslUnsafeCipher &other)
 }
 
 /*!
-    Destroys the QSslCipher object.
+    Destroys the SslUnsafeCipher object.
 */
 SslUnsafeCipher::~SslUnsafeCipher()
 {
@@ -140,7 +148,7 @@ SslUnsafeCipher &SslUnsafeCipher::operator=(const SslUnsafeCipher &other)
 }
 
 /*!
-    \fn void QSslCipher::swap(QSslCipher &other)
+    \fn void SslUnsafeCipher::swap(SslUnsafeCipher &other)
     \since 5.0
 
     Swaps this cipher instance with \a other. This function is very
@@ -157,7 +165,7 @@ bool SslUnsafeCipher::operator==(const SslUnsafeCipher &other) const
 }
 
 /*!
-    \fn bool QSslCipher::operator!=(const QSslCipher &other) const
+    \fn bool SslUnsafeCipher::operator!=(const SslUnsafeCipher &other) const
 
     Returns \c true if this cipher is not the same as \a other;
     otherwise, false is returned.
@@ -238,7 +246,7 @@ QString SslUnsafeCipher::protocolString() const
 
 /*!
     Returns the cipher's protocol type, or \l SslUnsafe::UnknownProtocol if
-    QSslCipher is unable to determine the protocol (protocolString() may
+    SslUnsafeCipher is unable to determine the protocol (protocolString() may
     contain more information).
 
     \sa protocolString()
@@ -253,7 +261,7 @@ QDebug operator<<(QDebug debug, const SslUnsafeCipher &cipher)
 {
     QDebugStateSaver saver(debug);
     debug.resetFormat().nospace().noquote();
-    debug << "QSslCipher(name=" << cipher.name()
+    debug << "SslUnsafeCipher(name=" << cipher.name()
           << ", bits=" << cipher.usedBits()
           << ", proto=" << cipher.protocolString()
           << ')';

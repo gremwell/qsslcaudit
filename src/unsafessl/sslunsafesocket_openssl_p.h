@@ -1,6 +1,70 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the QtNetwork module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/****************************************************************************
+**
+** In addition, as a special exception, the copyright holders listed above give
+** permission to link the code of its release of Qt with the OpenSSL project's
+** "OpenSSL" library (or modified versions of the "OpenSSL" library that use the
+** same license as the original version), and distribute the linked executables.
+**
+** You must comply with the GNU General Public License version 2 in all
+** respects for all of the code used other than the "OpenSSL" code.  If you
+** modify this file, you may extend this exception to your version of the file,
+** but you are not obligated to do so.  If you do not wish to do so, delete
+** this exception statement from your version of this file.
+**
+****************************************************************************/
+
 #ifndef SSLUNSAFESOCKET_OPENSSL_P_H
 #define SSLUNSAFESOCKET_OPENSSL_P_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 //#include <QtNetwork/private/qtnetworkglobal_p.h>
 #include "sslunsafesocket_p.h"
@@ -34,9 +98,11 @@
 #include <openssl/crypto.h>
 #include <openssl/tls1.h>
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
-typedef _STACK STACK;
+#if QT_FEATURE_opensslv11 //QT_CONFIG(opensslv11)
+#include <openssl/dh.h>
 #endif
+
+QT_BEGIN_NAMESPACE
 
 struct SslUnsafeErrorEntry {
     int code;
@@ -62,7 +128,7 @@ public:
     SSL_SESSION *session;
     QVector<SslUnsafeErrorEntry> errorList;
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
-    static int s_indexForSSLExtraData; // index used in SSL_get_ex_data to get the matching QSslSocketBackendPrivate
+    static int s_indexForSSLExtraData; // index used in SSL_get_ex_data to get the matching SslUnsafeSocketBackendPrivate
 #endif
 
     // Platform specific functions
@@ -79,9 +145,13 @@ public:
     void storePeerCertificates();
     unsigned int tlsPskClientCallback(const char *hint, char *identity, unsigned int max_identity_len, unsigned char *psk, unsigned int max_psk_len);
     unsigned int tlsPskServerCallback(const char *identity, unsigned char *psk, unsigned int max_psk_len);
+#ifdef Q_OS_WIN
+    void fetchCaRootForCert(const SslUnsafeCertificate &cert);
+    void _q_caRootLoaded(SslUnsafeCertificate,SslUnsafeCertificate) Q_DECL_OVERRIDE;
+#endif
 
-    static long setupOpenSslOptions(SslUnsafe::SslProtocol protocol, SslUnsafe::SslOptions sslOptions);
-    static SslUnsafeCipher SslUnsafeCipher_from_SSL_CIPHER(SSL_CIPHER *cipher);
+    Q_AUTOTEST_EXPORT static long setupOpenSslOptions(SslUnsafe::SslProtocol protocol, SslUnsafe::SslOptions sslOptions);
+    static SslUnsafeCipher SslUnsafeCipher_from_SSL_CIPHER(const SSL_CIPHER *cipher);
     static QList<SslUnsafeCertificate> STACKOFX509_to_SslUnsafeCertificates(STACK_OF(X509) *x509);
     static QList<SslUnsafeError> verify(const QList<SslUnsafeCertificate> &certificateChain, const QString &hostName);
     static QString getErrorsFromOpenSsl();
@@ -90,5 +160,24 @@ public:
                              QList<SslUnsafeCertificate> *caCertificates,
                              const QByteArray &passPhrase);
 };
+
+#ifdef Q_OS_WIN
+class QWindowsCaRootFetcher : public QObject
+{
+    Q_OBJECT;
+public:
+    QWindowsCaRootFetcher(const SslUnsafeCertificate &certificate, SslUnsafeSocket::SslMode sslMode);
+    ~QWindowsCaRootFetcher();
+public slots:
+    void start();
+signals:
+    void finished(SslUnsafeCertificate brokenChain, SslUnsafeCertificate caroot);
+private:
+    SslUnsafeCertificate cert;
+    SslUnsafeSocket::SslMode mode;
+};
+#endif
+
+QT_END_NAMESPACE
 
 #endif

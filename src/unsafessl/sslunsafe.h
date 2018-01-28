@@ -41,7 +41,7 @@
 #ifndef SSLUNSAFE_H
 #define SSLUNSAFE_H
 
-#include <QtNetwork/qtnetworkglobal.h>
+#include "sslunsafenetworkglobal.h"
 #include <QtCore/QFlags>
 
 QT_BEGIN_NAMESPACE

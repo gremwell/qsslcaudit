@@ -1,20 +1,61 @@
+/****************************************************************************
+**
+** Copyright (C) 2014 Governikus GmbH & Co. KG.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the QtNetwork module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
 #ifndef SSLUNSAFEPRESHAREDKEYAUTHENTICATOR_H
 #define SSLUNSAFEPRESHAREDKEYAUTHENTICATOR_H
 
-//#include <QtNetwork/qtnetworkglobal.h>
+#include "sslunsafenetworkglobal.h"
 #include <QtCore/QString>
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QMetaType>
+
+QT_BEGIN_NAMESPACE
 
 class SslUnsafePreSharedKeyAuthenticatorPrivate;
 
 class SslUnsafePreSharedKeyAuthenticator
 {
 public:
-    SslUnsafePreSharedKeyAuthenticator();
-    ~SslUnsafePreSharedKeyAuthenticator();
-    SslUnsafePreSharedKeyAuthenticator(const SslUnsafePreSharedKeyAuthenticator &authenticator);
-    SslUnsafePreSharedKeyAuthenticator &operator=(const SslUnsafePreSharedKeyAuthenticator &authenticator);
+    Q_NETWORK_EXPORT SslUnsafePreSharedKeyAuthenticator();
+    Q_NETWORK_EXPORT ~SslUnsafePreSharedKeyAuthenticator();
+    Q_NETWORK_EXPORT SslUnsafePreSharedKeyAuthenticator(const SslUnsafePreSharedKeyAuthenticator &authenticator);
+    Q_NETWORK_EXPORT SslUnsafePreSharedKeyAuthenticator &operator=(const SslUnsafePreSharedKeyAuthenticator &authenticator);
 
 #ifdef Q_COMPILER_RVALUE_REFS
     SslUnsafePreSharedKeyAuthenticator &operator=(SslUnsafePreSharedKeyAuthenticator &&other) Q_DECL_NOTHROW { swap(other); return *this; }
@@ -22,18 +63,18 @@ public:
 
     void swap(SslUnsafePreSharedKeyAuthenticator &other) Q_DECL_NOTHROW { qSwap(d, other.d); }
 
-    QByteArray identityHint() const;
+    Q_NETWORK_EXPORT QByteArray identityHint() const;
 
-    void setIdentity(const QByteArray &identity);
-    QByteArray identity() const;
-    int maximumIdentityLength() const;
+    Q_NETWORK_EXPORT void setIdentity(const QByteArray &identity);
+    Q_NETWORK_EXPORT QByteArray identity() const;
+    Q_NETWORK_EXPORT int maximumIdentityLength() const;
 
-    void setPreSharedKey(const QByteArray &preSharedKey);
-    QByteArray preSharedKey() const;
-    int maximumPreSharedKeyLength() const;
+    Q_NETWORK_EXPORT void setPreSharedKey(const QByteArray &preSharedKey);
+    Q_NETWORK_EXPORT QByteArray preSharedKey() const;
+    Q_NETWORK_EXPORT int maximumPreSharedKeyLength() const;
 
 private:
-    friend bool operator==(const SslUnsafePreSharedKeyAuthenticator &lhs, const SslUnsafePreSharedKeyAuthenticator &rhs);
+    friend Q_NETWORK_EXPORT bool operator==(const SslUnsafePreSharedKeyAuthenticator &lhs, const SslUnsafePreSharedKeyAuthenticator &rhs);
     friend class SslUnsafeSocketBackendPrivate;
 
     QSharedDataPointer<SslUnsafePreSharedKeyAuthenticatorPrivate> d;
@@ -45,6 +86,8 @@ inline bool operator!=(const SslUnsafePreSharedKeyAuthenticator &lhs, const SslU
 }
 
 Q_DECLARE_SHARED(SslUnsafePreSharedKeyAuthenticator)
+
+QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(SslUnsafePreSharedKeyAuthenticator)
 Q_DECLARE_METATYPE(SslUnsafePreSharedKeyAuthenticator*)

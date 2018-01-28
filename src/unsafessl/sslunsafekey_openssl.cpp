@@ -1,3 +1,43 @@
+/****************************************************************************
+**
+** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2016 Richard J. Moore <rich@kde.org>
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the QtNetwork module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
 
 #include "sslunsafekey.h"
 #include "sslunsafekey_p.h"
@@ -48,33 +88,30 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
     if (pkey == nullptr)
         return false;
 
-    if (pkey->type == EVP_PKEY_RSA) {
+#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+    const int keyType = q_EVP_PKEY_type(q_EVP_PKEY_base_id(pkey));
+#else
+    const int keyType = pkey->type;
+#endif
+    if (keyType == EVP_PKEY_RSA) {
         isNull = false;
         algorithm = SslUnsafe::Rsa;
         type = SslUnsafe::PrivateKey;
-
-        rsa = q_RSA_new();
-        memcpy(rsa, q_EVP_PKEY_get1_RSA(pkey), sizeof(RSA));
-
+        rsa = q_EVP_PKEY_get1_RSA(pkey);
         return true;
-    }
-    else if (pkey->type == EVP_PKEY_DSA) {
+    } else if (keyType == EVP_PKEY_DSA) {
         isNull = false;
         algorithm = SslUnsafe::Dsa;
         type = SslUnsafe::PrivateKey;
-
-        dsa = q_DSA_new();
-        memcpy(dsa, q_EVP_PKEY_get1_DSA(pkey), sizeof(DSA));
-
+        dsa = q_EVP_PKEY_get1_DSA(pkey);
         return true;
     }
 #ifndef OPENSSL_NO_EC
-    else if (pkey->type == EVP_PKEY_EC) {
+    else if (keyType == EVP_PKEY_EC) {
         isNull = false;
         algorithm = SslUnsafe::Ec;
         type = SslUnsafe::PrivateKey;
-        ec = q_EC_KEY_dup(q_EVP_PKEY_get1_EC_KEY(pkey));
-
+        ec = q_EVP_PKEY_get1_EC_KEY(pkey);
         return true;
     }
 #endif
@@ -142,8 +179,8 @@ int SslUnsafeKeyPrivate::length() const
         return -1;
 
     switch (algorithm) {
-        case SslUnsafe::Rsa: return q_BN_num_bits(rsa->n);
-        case SslUnsafe::Dsa: return q_BN_num_bits(dsa->p);
+        case SslUnsafe::Rsa: return q_RSA_bits(rsa);
+        case SslUnsafe::Dsa: return q_DSA_bits(dsa);
 #ifndef OPENSSL_NO_EC
         case SslUnsafe::Ec: return q_EC_GROUP_get_degree(q_EC_KEY_get0_group(ec));
 #endif
@@ -237,7 +274,13 @@ Qt::HANDLE SslUnsafeKeyPrivate::handle() const
 
 static QByteArray doCrypt(SslUnsafeKeyPrivate::Cipher cipher, const QByteArray &data, const QByteArray &key, const QByteArray &iv, int enc)
 {
-    EVP_CIPHER_CTX ctx;
+#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+    EVP_CIPHER_CTX *ctx = q_EVP_CIPHER_CTX_new();
+#else
+    EVP_CIPHER_CTX evpCipherContext;
+    EVP_CIPHER_CTX *ctx = &evpCipherContext;
+#endif
+
     const EVP_CIPHER* type = 0;
     int i = 0, len = 0;
 
@@ -255,21 +298,44 @@ static QByteArray doCrypt(SslUnsafeKeyPrivate::Cipher cipher, const QByteArray &
 
     QByteArray output;
     output.resize(data.size() + EVP_MAX_BLOCK_LENGTH);
-    q_EVP_CIPHER_CTX_init(&ctx);
-    q_EVP_CipherInit(&ctx, type, NULL, NULL, enc);
-    q_EVP_CIPHER_CTX_set_key_length(&ctx, key.size());
+
+#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+    q_EVP_CIPHER_CTX_reset(ctx);
+#else
+    q_EVP_CIPHER_CTX_init(ctx);
+#endif
+
+    q_EVP_CipherInit(ctx, type, NULL, NULL, enc);
+    q_EVP_CIPHER_CTX_set_key_length(ctx, key.size());
     if (cipher == SslUnsafeKeyPrivate::Rc2Cbc)
-        q_EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_SET_RC2_KEY_BITS, 8 * key.size(), NULL);
-    q_EVP_CipherInit(&ctx, NULL,
+        q_EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_SET_RC2_KEY_BITS, 8 * key.size(), NULL);
+
+#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+    // EVP_CipherInit in 1.1 resets the context thus making the calls above useless.
+    // We call EVP_CipherInit_ex instead.
+    q_EVP_CipherInit_ex(ctx, nullptr, nullptr,
+                        reinterpret_cast<const unsigned char *>(key.constData()),
+                        reinterpret_cast<const unsigned char *>(iv.constData()),
+                        enc);
+#else
+    q_EVP_CipherInit(ctx, NULL,
         reinterpret_cast<const unsigned char *>(key.constData()),
         reinterpret_cast<const unsigned char *>(iv.constData()), enc);
-    q_EVP_CipherUpdate(&ctx,
+#endif // opensslv11
+
+    q_EVP_CipherUpdate(ctx,
         reinterpret_cast<unsigned char *>(output.data()), &len,
         reinterpret_cast<const unsigned char *>(data.constData()), data.size());
-    q_EVP_CipherFinal(&ctx,
+    q_EVP_CipherFinal(ctx,
         reinterpret_cast<unsigned char *>(output.data()) + len, &i);
     len += i;
-    q_EVP_CIPHER_CTX_cleanup(&ctx);
+
+#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+    q_EVP_CIPHER_CTX_reset(ctx);
+    q_EVP_CIPHER_CTX_free(ctx);
+#else
+    q_EVP_CIPHER_CTX_cleanup(ctx);
+#endif
 
     return output.left(len);
 }
@@ -283,3 +349,5 @@ QByteArray SslUnsafeKeyPrivate::encrypt(Cipher cipher, const QByteArray &data, c
 {
     return doCrypt(cipher, data, key, iv, 1);
 }
+
+QT_END_NAMESPACE

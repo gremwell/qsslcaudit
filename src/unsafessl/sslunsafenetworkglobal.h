@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2011 Richard J. Moore <rich@kde.org>
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
@@ -37,42 +37,27 @@
 **
 ****************************************************************************/
 
-#ifndef SSLUNSAFECERTIFICATEEXTENSION_P_H
-#define SSLUNSAFECERTIFICATEEXTENSION_P_H
+#ifndef SSLUNSAFENETWORKGLOBAL_H
+#define SSLUNSAFENETWORKGLOBAL_H
 
-//
-//  W A R N I N G
-//  -------------
-//
-// This file is not part of the Qt API.  It exists purely as an
-// implementation detail.  This header file may change from version to
-// version without notice, or even be removed.
-//
-// We mean it.
-//
-
-//#include <QtNetwork/private/qtnetworkglobal_p.h>
-#include "sslunsafecertificateextension.h"
+#include <QtCore/qglobal.h>
+#ifndef OLDQT
+#include <QtNetwork/qtnetwork-config.h>
+#endif
 
 QT_BEGIN_NAMESPACE
 
-class SslUnsafeCertificateExtensionPrivate : public QSharedData
-{
-public:
-    inline SslUnsafeCertificateExtensionPrivate()
-        : critical(false),
-          supported(false)
-    {
-    }
-
-    QString oid;
-    QString name;
-    QVariant value;
-    bool critical;
-    bool supported;
-};
+#ifndef QT_STATIC
+#  if defined(QT_BUILD_NETWORK_LIB)
+#    define Q_NETWORK_EXPORT Q_DECL_EXPORT
+#  else
+#    define Q_NETWORK_EXPORT Q_DECL_IMPORT
+#  endif
+#else
+#  define Q_NETWORK_EXPORT
+#endif
 
 QT_END_NAMESPACE
 
-#endif // SslUnsafeCERTIFICATEEXTENSION_P_H
+#endif
 

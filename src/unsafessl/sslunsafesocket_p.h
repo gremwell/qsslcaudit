@@ -1,20 +1,99 @@
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the QtNetwork module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+
 #ifndef SSLUNSAFESOCKET_P_H
 #define SSLUNSAFESOCKET_P_H
 
 #include "sslunsafesocket.h"
 
-#include <qobject.h>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 //#include <QtNetwork/private/qtnetworkglobal_p.h>
-
+//#include <private/qtcpsocket_p.h>
 #include "sslunsafekey.h"
-
 #include "sslunsafeconfiguration_p.h"
-
+#ifndef QT_NO_OPENSSL
 #include "sslunsafecontext_openssl_p.h"
+#else
+class SslUnsafeContext;
+#endif
 
 #include <QtCore/qstringlist.h>
 
 #include "sslunsaferingbuffer_p.h"
+
+#if defined(Q_OS_MAC)
+#include <Security/SecCertificate.h>
+#include <CoreFoundation/CFArray.h>
+#elif defined(Q_OS_WIN)
+#include <QtCore/qt_windows.h>
+#ifndef Q_OS_WINRT
+#include <wincrypt.h>
+#endif // !Q_OS_WINRT
+#ifndef HCRYPTPROV_LEGACY
+#define HCRYPTPROV_LEGACY HCRYPTPROV
+#endif // !HCRYPTPROV_LEGACY
+#endif // Q_OS_WIN
+
+QT_BEGIN_NAMESPACE
+
+#if defined(Q_OS_MACX)
+    typedef CFDataRef (*PtrSecCertificateCopyData)(SecCertificateRef);
+    typedef OSStatus (*PtrSecTrustSettingsCopyCertificates)(int, CFArrayRef*);
+    typedef OSStatus (*PtrSecTrustCopyAnchorCertificates)(CFArrayRef*);
+#endif
+
+#if defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
+    typedef HCERTSTORE (WINAPI *PtrCertOpenSystemStoreW)(HCRYPTPROV_LEGACY, LPCWSTR);
+    typedef PCCERT_CONTEXT (WINAPI *PtrCertFindCertificateInStore)(HCERTSTORE, DWORD, DWORD, DWORD, const void*, PCCERT_CONTEXT);
+    typedef BOOL (WINAPI *PtrCertCloseStore)(HCERTSTORE, DWORD);
+#endif // Q_OS_WIN && !Q_OS_WINRT
 
 
 int qt_subtract_from_timeout(int timeout, int elapsed);
@@ -73,15 +152,22 @@ public:
                                          QRegExp::PatternSyntax syntax);
     static void addDefaultCaCertificate(const SslUnsafeCertificate &cert);
     static void addDefaultCaCertificates(const QList<SslUnsafeCertificate> &certs);
-    static bool isMatchingHostname(const SslUnsafeCertificate &cert, const QString &peerName);
-    static bool isMatchingHostname(const QString &cn, const QString &hostname);
+    Q_AUTOTEST_EXPORT static bool isMatchingHostname(const SslUnsafeCertificate &cert,
+                                                     const QString &peerName);
+    Q_AUTOTEST_EXPORT static bool isMatchingHostname(const QString &cn, const QString &hostname);
+
+#if defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
+    static PtrCertOpenSystemStoreW ptrCertOpenSystemStoreW;
+    static PtrCertFindCertificateInStore ptrCertFindCertificateInStore;
+    static PtrCertCloseStore ptrCertCloseStore;
+#endif // Q_OS_WIN && !Q_OS_WINRT
 
     // The socket itself, including private slots.
     QTcpSocket *plainSocket;
     void createPlainSocket(QIODevice::OpenMode openMode);
     static void pauseSocketNotifiers(SslUnsafeSocket*);
     static void resumeSocketNotifiers(SslUnsafeSocket*);
-    // ### The 2 methods below should be made member methods once the QSslContext class is made public
+    // ### The 2 methods below should be made member methods once the SslUnsafeContext class is made public
     static void checkSettingSslContext(SslUnsafeSocket*, QSharedPointer<SslUnsafeContext>);
     static QSharedPointer<SslUnsafeContext> sslContext(SslUnsafeSocket *socket);
     bool isPaused() const;
@@ -98,12 +184,16 @@ public:
     void _q_readChannelFinishedSlot();
     void _q_flushWriteBuffer();
     void _q_flushReadBuffer();
+    void _q_resumeImplementation();
+#if defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
+    virtual void _q_caRootLoaded(SslUnsafeCertificate,SslUnsafeCertificate) = 0;
+#endif
 
-    static QList<QByteArray> unixRootCertDirectories(); // used also by QSslContext
+    static QList<QByteArray> unixRootCertDirectories(); // used also by SslUnsafeContext
 
     virtual qint64 peek(char *data, qint64 maxSize);// Q_DECL_OVERRIDE;
     virtual QByteArray peek(qint64 maxSize);// Q_DECL_OVERRIDE;
-    virtual bool flush();
+    bool flush();// Q_DECL_OVERRIDE;
 
     // Platform specific functions
     virtual void startClientEncryption() = 0;
@@ -115,7 +205,7 @@ public:
     virtual SslUnsafe::SslProtocol sessionProtocol() const = 0;
     virtual void continueHandshake() = 0;
 
-    static bool rootCertOnDemandLoadingSupported();
+    Q_AUTOTEST_EXPORT static bool rootCertOnDemandLoadingSupported();
 
     // from qabstractsocket_p.h
     void setErrorAndEmit(QAbstractSocket::SocketError errorCode, const QString &errorString);
@@ -181,16 +271,20 @@ public:
 private:
     static bool ensureLibraryLoaded();
     static void ensureCiphersAndCertsLoaded();
+#if defined(Q_OS_ANDROID)
+    static QList<QByteArray> fetchSslCertificateData();
+#endif
 
     static bool s_libraryLoaded;
     static bool s_loadedCiphersAndCerts;
-
     // from qabstractsocket_p.h
     QAbstractSocket::SocketError socketError;
-
 protected:
     bool verifyErrorsHaveBeenIgnored();
     bool paused;
+    bool flushTriggered;
 };
+
+QT_END_NAMESPACE
 
 #endif

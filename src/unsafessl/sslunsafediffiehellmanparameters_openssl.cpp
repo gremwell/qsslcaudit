@@ -1,3 +1,42 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 Mikkel Krautz <mikkel@krautz.dk>
+** Copyright (C) 2016 Richard J. Moore <rich@kde.org>
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the QtNetwork module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 
 #include "sslunsafediffiehellmanparameters.h"
 #include "sslunsafediffiehellmanparameters_p.h"
@@ -12,8 +51,10 @@
 #include <QtCore/qdebug.h>
 #endif
 
-// For q_BN_is_word.
 #include <openssl/bn.h>
+#include <openssl/dh.h>
+
+QT_BEGIN_NAMESPACE
 
 static bool isSafeDH(DH *dh)
 {
@@ -22,13 +63,6 @@ static bool isSafeDH(DH *dh)
 
     SslUnsafeSocketPrivate::ensureInitialized();
 
-    // Mark p < 1024 bits as unsafe.
-    if (q_BN_num_bits(dh->p) < 1024) {
-        return false;
-    }
-
-    if (q_DH_check(dh, &status) != 1)
-        return false;
 
     // From https://wiki.openssl.org/index.php/Diffie-Hellman_parameters:
     //
@@ -41,11 +75,39 @@ static bool isSafeDH(DH *dh)
     //     Without the test, the IETF parameters would
     //     fail validation. For details, see Diffie-Hellman
     //     Parameter Check (when g = 2, must p mod 24 == 11?).
+#if QT_FEATURE_opensslv11 //QT_CONFIG(opensslv11)
+    // Mark p < 1024 bits as unsafe.
+    if (q_DH_bits(dh) < 1024)
+        return false;
+
+    if (q_DH_check(dh, &status) != 1)
+        return false;
+
+    const BIGNUM *p = nullptr;
+    const BIGNUM *q = nullptr;
+    const BIGNUM *g = nullptr;
+    q_DH_get0_pqg(dh, &p, &q, &g);
+
+    if (q_BN_is_word(const_cast<BIGNUM *>(g), DH_GENERATOR_2)) {
+        long residue = q_BN_mod_word(p, 24);
+        if (residue == 11 || residue == 23)
+            status &= ~DH_NOT_SUITABLE_GENERATOR;
+    }
+
+#else
+    // Mark p < 1024 bits as unsafe.
+    if (q_BN_num_bits(dh->p) < 1024)
+        return false;
+
+    if (q_DH_check(dh, &status) != 1)
+        return false;
+
     if (q_BN_is_word(dh->g, DH_GENERATOR_2)) {
         long residue = q_BN_mod_word(dh->p, 24);
         if (residue == 11 || residue == 23)
             status &= ~DH_NOT_SUITABLE_GENERATOR;
     }
+#endif
 
     bad |= DH_CHECK_P_NOT_PRIME;
     bad |= DH_CHECK_P_NOT_SAFE_PRIME;
@@ -120,3 +182,5 @@ void SslUnsafeDiffieHellmanParametersPrivate::decodePem(const QByteArray &pem)
     q_DH_free(dh);
     q_BIO_free(bio);
 }
+
+QT_END_NAMESPACE
