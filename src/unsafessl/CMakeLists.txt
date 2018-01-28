@@ -51,6 +51,7 @@ list(APPEND unsafessl_HEADERS
     sslunsafekey.h
     sslunsafekey_p.h
     sslunsafemutexpool_p.h
+    sslunsafenetworkglobal.h
     sslunsafepresharedkeyauthenticator.h
     sslunsafepresharedkeyauthenticator_p.h
     sslunsaferingbuffer_p.h
@@ -60,16 +61,30 @@ list(APPEND unsafessl_HEADERS
     sslunsafesocket_p.h
 )
 
+if (OPENSSL11_FOUND)
+    list(APPEND unsafessl_SOURCES
+        sslunsafecontext_openssl11.cpp
+        sslunsafesocket_openssl11.cpp
+        )
+    list(APPEND unsafessl_HEADERS
+        sslunsafesocket_openssl11_symbols_p.h
+        )
+else()
+    list(APPEND unsafessl_SOURCES
+        sslunsafecontext_opensslpre11.cpp
+        sslunsafesocket_opensslpre11.cpp
+        )
+    list(APPEND unsafessl_HEADERS
+        sslunsafesocket_opensslpre11_symbols_p.h
+        )
+endif()
+
 include_directories(${unsafessl_INCLUDE_DIRECTORIES})
 add_library(unsafessl STATIC ${unsafessl_SOURCES} ${unsafessl_HEADERS})
-set_target_properties(
-    unsafessl
-        PROPERTIES
-            AUTOMOC TRUE
-)
+set_target_properties(unsafessl PROPERTIES AUTOMOC TRUE)
 
 target_link_libraries(unsafessl Qt5::Core Qt5::Network)
-# Fedora builds Qt with "openssl-linked@ configuration
+# Fedora builds Qt with "openssl-linked" configuration
 if(EXISTS "/etc/redhat-release")
     target_link_libraries(unsafessl ssl crypto)
 endif()
