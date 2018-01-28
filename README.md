@@ -25,8 +25,6 @@ Moreover, runtime linking with "unsafe" library version 1.0.yx with `qsslcaudit`
 
 For these reasons we advise you to compile `qsslcaudit` using OpenSSL versions 1.0.yx.
 
-Additional note: at the time of writing `qsslcaudit` can not be compiled with OpenSSL 1.1.0x.
-
 ## Build Instructions
 
 At the time of writing there was no packages ready for popular Linux distributions. However, compilation from sources should be quite straightforward for engineer that wants to test TLS/SSL client.
