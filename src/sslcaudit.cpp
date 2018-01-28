@@ -155,7 +155,8 @@ void SslCAudit::run()
         VERBOSE("");
     }
 
-    printSummary();
+    if (sslTests.size() > 0)
+        printSummary();
 
     this->deleteLater();
     QThread::currentThread()->quit();
