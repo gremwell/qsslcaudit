@@ -88,7 +88,7 @@ public:
         setName("SSLv2 protocol support");
         setDescription("test for SSLv2 protocol support");
     }
-    void setProtoAndCiphers();
+    bool setProtoAndCiphers();
 
 };
 
@@ -99,7 +99,7 @@ public:
         setName("SSLv3 protocol support");
         setDescription("test for SSLv3 protocol support");
     }
-    void setProtoAndCiphers();
+    bool setProtoAndCiphers();
 
 };
 
@@ -110,7 +110,7 @@ public:
         setName("SSLv3 protocol and EXPORT grade ciphers support");
         setDescription("test for SSLv3 protocol and EXPORT grade ciphers support");
     }
-    void setProtoAndCiphers();
+    bool setProtoAndCiphers();
 
 };
 
@@ -121,7 +121,7 @@ public:
         setName("SSLv3 protocol and LOW grade ciphers support");
         setDescription("test for SSLv3 protocol and LOW grade ciphers support");
     }
-    void setProtoAndCiphers();
+    bool setProtoAndCiphers();
 
 };
 
@@ -132,7 +132,7 @@ public:
         setName("SSLv3 protocol and MEDIUM grade ciphers support");
         setDescription("test for SSLv3 protocol and MEDIUM grade ciphers support");
     }
-    void setProtoAndCiphers();
+    bool setProtoAndCiphers();
 
 };
 

@@ -117,7 +117,5 @@ bool SslProtocolsTest::prepare(const SslUserSettings &settings)
     setLocalCert(chain);
     setPrivateKey(key);
 
-    setProtoAndCiphers();
-
-    return true;
+    return setProtoAndCiphers();
 }

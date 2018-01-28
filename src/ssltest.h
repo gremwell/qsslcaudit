@@ -78,7 +78,7 @@ public:
                         const QList<QAbstractSocket::SocketError> socketErrors,
                         bool sslConnectionEstablished,
                         bool dataReceived);
-    virtual void setProtoAndCiphers() = 0;
+    virtual bool setProtoAndCiphers() = 0;
 
 };
 

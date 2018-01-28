@@ -200,27 +200,31 @@ bool SslTest07::prepare(const SslUserSettings &settings)
 }
 
 
-void SslTest08::setProtoAndCiphers()
+bool SslTest08::setProtoAndCiphers()
 {
     XSsl::SslProtocol proto = XSsl::SslV2;
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
 
     setSslCiphers(ciphers);
     setSslProtocol(proto);
+
+    return true;
 }
 
 
-void SslTest09::setProtoAndCiphers()
+bool SslTest09::setProtoAndCiphers()
 {
     XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
 
     setSslCiphers(ciphers);
     setSslProtocol(proto);
+
+    return true;
 }
 
 
-void SslTest10::setProtoAndCiphers()
+bool SslTest10::setProtoAndCiphers()
 {
     XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers;
@@ -232,13 +236,19 @@ void SslTest10::setProtoAndCiphers()
         if (!cipher.isNull())
             ciphers << cipher;
     }
+    if (ciphers.size() == 0) {
+        VERBOSE("no EXPORT ciphers available");
+        return false;
+    }
 
     setSslCiphers(ciphers);
     setSslProtocol(proto);
+
+    return true;
 }
 
 
-void SslTest11::setProtoAndCiphers()
+bool SslTest11::setProtoAndCiphers()
 {
     XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers;
@@ -250,13 +260,19 @@ void SslTest11::setProtoAndCiphers()
         if (!cipher.isNull())
             ciphers << cipher;
     }
+    if (ciphers.size() == 0) {
+        VERBOSE("no LOW ciphers available");
+        return false;
+    }
 
     setSslCiphers(ciphers);
     setSslProtocol(proto);
+
+    return true;
 }
 
 
-void SslTest12::setProtoAndCiphers()
+bool SslTest12::setProtoAndCiphers()
 {
     XSsl::SslProtocol proto = XSsl::SslV3;
     QList<XSslCipher> ciphers;
@@ -268,8 +284,14 @@ void SslTest12::setProtoAndCiphers()
         if (!cipher.isNull())
             ciphers << cipher;
     }
+    if (ciphers.size() == 0) {
+        VERBOSE("now MEDIUM ciphers available");
+        return false;
+    }
 
     setSslCiphers(ciphers);
     setSslProtocol(proto);
+
+    return true;
 }
 
