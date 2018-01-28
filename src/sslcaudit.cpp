@@ -18,8 +18,8 @@
 
 SslCAudit::SslCAudit(const SslUserSettings settings, QObject *parent) :
     QObject(parent),
-    sslTests(QList<SslTest *>()),
-    settings(settings)
+    settings(settings),
+    sslTests(QList<SslTest *>())
 {
     VERBOSE("SSL library used: " + XSslSocket::sslLibraryVersionString());
 }
@@ -182,6 +182,9 @@ void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)
         break;
     case QAbstractSocket::SslHandshakeFailedError:
         VERBOSE("\tThe SSL/TLS handshake failed, so the connection was closed.");
+        break;
+    default:
+        // just ignore all other errors
         break;
     }
 }
