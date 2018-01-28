@@ -78,6 +78,16 @@ void SslCAudit::runTest(SslTest *test)
 
         VERBOSE(QString("connection from: %1:%2").arg(sslSocket->peerAddress().toString()).arg(sslSocket->peerPort()));
 
+        QStringList sslInitErrors = sslServer.getSslInitErrors();
+        if (sslInitErrors.size() > 0) {
+            RED("failure during SSL initialization, test will not continue");
+            for (int i = 0; i < sslInitErrors.size(); i++) {
+                VERBOSE("\t" + sslInitErrors.at(i));
+            }
+            // TODO: set here corresponding error to test
+            return;
+        }
+
         if (!settings.getForwardHostAddr().isNull()) {
             // in case 'forward' option was set, we do the following:
             // - connect to the proxy;
