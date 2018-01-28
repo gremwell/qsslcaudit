@@ -226,5 +226,6 @@ void q_OPENSSL_add_all_algorithms_conf();
 long q_SSLeay();
 const char *q_SSLeay_version(int type);
 
+#define q_SSL_CTX_set_tmp_rsa(ctx, rsa) q_SSL_CTX_ctrl((ctx), SSL_CTRL_SET_TMP_RSA, 0, (char *)rsa)
 
 #endif // QSSLSOCKET_OPENSSL_PRE11_SYMBOLS_P_H

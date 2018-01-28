@@ -331,6 +331,7 @@ void q_RAND_seed(const void *a, int b);
 int q_RAND_status();
 RSA *q_RSA_new();
 void q_RSA_free(RSA *a);
+int q_RSA_generate_key_ex(RSA *a, int bits, BIGNUM *e, BN_GENCB *cb);
 int q_SSL_accept(SSL *a);
 int q_SSL_clear(SSL *a);
 char *q_SSL_CIPHER_description(const SSL_CIPHER *a, char *b, int c);
