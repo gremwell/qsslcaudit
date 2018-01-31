@@ -171,9 +171,6 @@ void SslCAudit::run()
         VERBOSE("");
     }
 
-    if (sslTests.size() > 0)
-        printSummary();
-
     emit sslTestsFinished();
 
     this->deleteLater();

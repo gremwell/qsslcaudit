@@ -210,7 +210,10 @@ int main(int argc, char *argv[])
     QObject::connect(thread, SIGNAL(started()), caudit, SLOT(run()));
     QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
-    QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){ qApp->exit(); });
+    QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){
+        caudit->printSummary();
+        qApp->exit();
+    });
 
     thread->start();
 

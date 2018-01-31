@@ -25,6 +25,7 @@ public:
     void setSslTests(const QList<SslTest *> &tests);
 
     static void showCiphers();
+    void printSummary();
 
 public slots:
     void run();
@@ -41,7 +42,6 @@ private slots:
 
 private:
     void runTest(SslTest *test);
-    void printSummary();
 
     SslUserSettings settings;
     QList<SslTest *> sslTests;
