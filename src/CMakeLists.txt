@@ -11,11 +11,6 @@ include_directories(
 add_executable(qsslcaudit.bin main.cpp)
 set_target_properties(qsslcaudit.bin PROPERTIES AUTOMOC TRUE)
 
-target_link_libraries(qsslcaudit.bin Qt5::Core Qt5::Network
-    qsslcaudit
-    qtcertificateaddon
-    unsafessl
-    ${GNUTLS_LIBRARIES}
-    )
+target_link_libraries(qsslcaudit.bin qsslcaudit)
 
 install(TARGETS qsslcaudit.bin RUNTIME DESTINATION bin)

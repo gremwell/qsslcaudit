@@ -33,4 +33,4 @@ list(APPEND qtcertificateaddon_HEADERS
 include_directories(${qtcertificateaddon_INCLUDE_DIRECTORIES} ${GNUTLS_INCLUDE_DIR})
 add_library(qtcertificateaddon STATIC ${qtcertificateaddon_SOURCES} ${qtcertificateaddon_HEADERS})
 set_target_properties(qtcertificateaddon PROPERTIES AUTOMOC TRUE)
-target_link_libraries(qtcertificateaddon Qt5::Core Qt5::Network)
+target_link_libraries(qtcertificateaddon Qt5::Core Qt5::Network ${GNUTLS_LIBRARIES})

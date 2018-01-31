@@ -32,8 +32,7 @@ include_directories(
 add_library(qsslcaudit STATIC ${qsslcauditSources} ${qsslcauditHeaders})
 set_target_properties(qsslcaudit PROPERTIES AUTOMOC TRUE)
 
-target_link_libraries(qsslcaudit Qt5::Core Qt5::Network
+target_link_libraries(qsslcaudit
     qtcertificateaddon
     unsafessl
-    ${GNUTLS_LIBRARIES}
     )
