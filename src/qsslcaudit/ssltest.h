@@ -54,6 +54,8 @@ public:
     void setSslConnectionStatus(bool isEstablished) { m_sslConnectionEstablished = isEstablished; }
     void addInterceptedData(const QByteArray &data) { m_interceptedData.append(data); }
 
+    const QByteArray &interceptedData() { return m_interceptedData; }
+
 private:
     QString m_name;
     QString m_description;
