@@ -23,6 +23,7 @@ SslUserSettings::SslUserSettings()
     userCaCertPath = "";
     userCaKeyPath = "";
     forwardAddr = "";
+    startTlsProtocol = SslServer::StartTlsUnknownProtocol;
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -108,6 +109,8 @@ QString SslUserSettings::getUserCertPath() const
 
 QList<XSslCertificate> SslUserSettings::getUserCert() const
 {
+    if (userCaCertPath.isEmpty())
+        return QList<XSslCertificate>();
     return SslCertGen::certChainFromFile(userCertPath);
 }
 
@@ -131,6 +134,8 @@ QString SslUserSettings::getUserKeyPath() const
 
 XSslKey SslUserSettings::getUserKey() const
 {
+    if (userKeyPath.isEmpty())
+        return XSslKey();
     return SslCertGen::keyFromFile(userKeyPath);
 }
 
@@ -154,6 +159,8 @@ QString SslUserSettings::getUserCaCertPath() const
 
 QList<XSslCertificate> SslUserSettings::getUserCaCert() const
 {
+    if (userCaCertPath.isEmpty())
+        return QList<XSslCertificate>();
     return SslCertGen::certChainFromFile(userCaCertPath);
 }
 
@@ -177,6 +184,8 @@ QString SslUserSettings::getUserCaKeyPath() const
 
 XSslKey SslUserSettings::getUserCaKey() const
 {
+    if (userCaKeyPath.isEmpty())
+        return XSslKey();
     return SslCertGen::keyFromFile(userCaKeyPath);
 }
 
@@ -192,12 +201,18 @@ QString SslUserSettings::getForwardAddr() const
 
 QHostAddress SslUserSettings::getForwardHostAddr() const
 {
+    if (forwardAddr.isEmpty())
+        return QHostAddress();
+
     QUrl url = QUrl::fromUserInput(forwardAddr);
     return QHostAddress(url.host());
 }
 
 quint16 SslUserSettings::getForwardHostPort() const
 {
+    if (forwardAddr.isEmpty())
+        return 0;
+
     QUrl url = QUrl::fromUserInput(forwardAddr);
     return url.port();
 }
