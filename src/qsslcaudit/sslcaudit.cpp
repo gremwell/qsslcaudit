@@ -68,6 +68,8 @@ void SslCAudit::runTest(SslTest *test)
         return;
     }
 
+    emit sslTestReady();
+
     if (sslServer.waitForNewConnection(-1)) {
         XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sslServer.nextPendingConnection());
 
@@ -172,9 +174,10 @@ void SslCAudit::run()
     if (sslTests.size() > 0)
         printSummary();
 
+    emit sslTestsFinished();
+
     this->deleteLater();
     QThread::currentThread()->quit();
-    qApp->exit();
 }
 
 void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)

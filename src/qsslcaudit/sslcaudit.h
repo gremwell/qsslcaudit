@@ -29,6 +29,10 @@ public:
 public slots:
     void run();
 
+signals:
+    void sslTestReady();
+    void sslTestsFinished();
+
 private slots:
     void handleSocketError(QAbstractSocket::SocketError socketError);
     void handleSslErrors(const QList<XSslError> &errors);

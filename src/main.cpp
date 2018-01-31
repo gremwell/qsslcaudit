@@ -209,6 +209,9 @@ int main(int argc, char *argv[])
     caudit->moveToThread(thread);
     QObject::connect(thread, SIGNAL(started()), caudit, SLOT(run()));
     QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
+    QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){ qApp->exit(); });
+
     thread->start();
 
     return a.exec();
