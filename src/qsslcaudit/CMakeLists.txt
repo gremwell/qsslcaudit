@@ -24,7 +24,6 @@ set(qsslcauditHeaders
     )
 
 include_directories(
-    .
     ${CMAKE_CURRENT_BINARY_DIR}
     ${THIRDPARTY_DIR}/qt-certificate-addon/src/certificate
     ${UNSAFESSL_DIR}

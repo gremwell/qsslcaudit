@@ -4,8 +4,6 @@ add_subdirectory(unsafessl)
 add_subdirectory(qsslcaudit)
 
 include_directories(
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${QSSLCAUDIT_DIR}
     ${UNSAFESSL_DIR}
     )
