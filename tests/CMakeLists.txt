@@ -7,3 +7,7 @@ include_directories(
 add_executable(tests_SslTest02 tests_SslTest02.cpp test.h)
 set_target_properties(tests_SslTest02 PROPERTIES AUTOMOC TRUE)
 target_link_libraries(tests_SslTest02 qsslcaudit)
+
+add_executable(tests_SslTest08 tests_SslTest08.cpp test.h)
+set_target_properties(tests_SslTest08 PROPERTIES AUTOMOC TRUE)
+target_link_libraries(tests_SslTest08 qsslcaudit)
