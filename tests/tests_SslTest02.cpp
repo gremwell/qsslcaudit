@@ -253,4 +253,4 @@ int main(int argc, char *argv[])
     return 0; //a.exec();
 }
 
-#include "tests02.moc"
+#include "tests_SslTest02.moc"
