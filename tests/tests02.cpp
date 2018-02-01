@@ -166,6 +166,56 @@ public slots:
 
 };
 
+// connect to localhost, but set server name to the same as for ssl server
+// do verify peer certificate
+// check for proper test result code
+class Test04 : public Test
+{
+    Q_OBJECT
+public:
+    int getId() { return 4; }
+
+    void setTestSettings()
+    {
+        testSettings.setUserCN("www.example.com");
+    }
+
+    void setSslTest() { targetTest = QString("SslTest02"); sslTest = new SslTest02; }
+
+public slots:
+
+    void run()
+    {
+        XSslSocket *socket = new XSslSocket;
+
+        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+
+        socket->connectToHostEncrypted("localhost", 8443, "www.example.com");
+
+        if (!socket->waitForEncrypted()) {
+            int res = QString::compare(socket->errorString(),
+                                       "The issuer certificate of a locally looked up certificate could not be found");
+            // we should wait until test finishes prior to querying for test results
+            while (sslTest->result() == -99)
+                QThread::msleep(50);
+
+            if ((res == 0) && (sslTest->result() == 0)) {
+                printTestSucceeded();
+            } else {
+                printTestFailed();
+            }
+
+        } else {
+            printTestFailed();
+        }
+        socket->disconnectFromHost();
+
+        this->deleteLater();
+        QThread::currentThread()->quit();
+    }
+
+};
+
 
 void launchTest(Test *autotest)
 {
@@ -193,6 +243,7 @@ int main(int argc, char *argv[])
             << new Test01
             << new Test02
             << new Test03
+            << new Test04
                ;
 
     while (autotests.size() > 0) {
