@@ -109,6 +109,8 @@ bool SslTest04::prepare(const SslUserSettings &settings)
         return false;
     }
 
+    generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
+
     setLocalCert(generatedCert.first);
     setPrivateKey(generatedCert.second);
 
@@ -131,6 +133,8 @@ bool SslTest05::prepare(const SslUserSettings &settings)
         return false;
 
     QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert("www.example.com", chain.at(0), key);
+
+    generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
 
     setLocalCert(generatedCert.first);
     setPrivateKey(generatedCert.second);
@@ -166,6 +170,8 @@ bool SslTest06::prepare(const SslUserSettings &settings)
 
     QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert(cn, chain.at(0), key);
 
+    generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
+
     setLocalCert(generatedCert.first);
     setPrivateKey(generatedCert.second);
 
@@ -188,6 +194,8 @@ bool SslTest07::prepare(const SslUserSettings &settings)
         return false;
 
     QPair<QList<XSslCertificate>, XSslKey> generatedCert = SslCertGen::genSignedByCACert("www.example.com", chain.at(0), key);
+
+    generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
 
     setLocalCert(generatedCert.first);
     setPrivateKey(generatedCert.second);
