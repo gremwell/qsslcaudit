@@ -192,7 +192,9 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName("qsslcaudit");
-    QCoreApplication::setApplicationVersion("0.1");
+    QCoreApplication::setApplicationVersion(QSSLC_VERSION);
+    QCoreApplication::setOrganizationName("Gremwell");
+    QCoreApplication::setOrganizationDomain("gremwell.com");
 
     SslUserSettings settings;
 
