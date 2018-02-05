@@ -109,7 +109,7 @@ QString SslUserSettings::getUserCertPath() const
 
 QList<XSslCertificate> SslUserSettings::getUserCert() const
 {
-    if (userCaCertPath.isEmpty())
+    if (userCertPath.isEmpty())
         return QList<XSslCertificate>();
     return SslCertGen::certChainFromFile(userCertPath);
 }
