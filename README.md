@@ -13,6 +13,14 @@ Basically, after performing tests using `qsslcaudit` one can answer the followin
 
 If the tested application has some weaknesses in TLS/SSL implementation, there is a risk of man-in-the-middle attack which could lead to sensitive information (such as user credentials) disclosure.
 
+Assume that we have mobile application which at some point requests https://login.domain.tld/ Such request can be forwarded to rogue server (i.e. on public WiFi network) and, if mobile app does not verify server's certificate, users credentials will be intercepted.
+
+To check how the application behaves in this scenario we should setup our own rogue TLS/SSL server and forward the app to it. Then we launch the application, try to login and observe the results. In case login failed -- all is fine.
+
+However, there could be misconfigurations on client which are not easy to find. For instance, the application can check that server's certificate is valid, but does not check if it is issued to the target domain (does not check CN property).
+
+In order to help with tasks like described above, `qsslcaudit` tool has been created.
+
 # Installation
 
 ## Note on OpenSSL 1.1.0
@@ -42,7 +50,7 @@ Packages for Ubuntu 16.04: `cmake qtbase5-dev libgnutls-dev libssl-dev`.
 
 Packages for Fedora 26: `cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
 
-Packages for Kali (rolling@01-2018): `cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`. Probably, you will need to explicitly remove `libssl-dev`.
+Packages for Kali (rolling@01-2018): `cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
 
 Once you have `qsslcaudit` source code repository and packages installed, do the following:
 
@@ -54,7 +62,7 @@ Once you have `qsslcaudit` source code repository and packages installed, do the
 ```
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 sudo make install
 ```
@@ -81,61 +89,96 @@ That is all. Now, if you want to use `qsslcaudit` with unsafe OpenSSL version, j
 
 Use `-h` flag to get some usage help.
 
-```
-$ qsslcaudit -h
-Usage: qsslcaudit.bin [options]
-A tool to test SSL clients behavior
+The most easy way to understand how to use the tool properly is to follow examples provided below.
 
-SSL client tests:
-        1: certificate trust test with user-supplied certificate
-        2: certificate trust test with self-signed certificate for user-supplied common name
-        3: certificate trust test with self-signed certificate for www.example.com
-        4: certificate trust test with user-supplied common name signed by user-supplied certificate
-        5: certificate trust test with www.example.com common name signed by user-supplied certificate
-        6: certificate trust test with user-supplied common name signed by user-supplied CA certificate
-        7: certificate trust test with www.example.com common name signed by user-supplied CA certificate
-        8: SSLv2 protocol support test
-        9: SSLv3 protocol support test
-        10: SSLv3 protocol and EXPORT grade ciphers support test
-        11: SSLv3 protocol and LOW grade ciphers support test
-        12: SSLv3 protocol and MEDIUM grade ciphers support test
+## Forwarding Connection
 
+The first task before launching any test is to configure forwarding connections from client to `qsslcaudit` instance. This depends on the client itself and network configuration. Thus, there is no common solution. However, several recommendations still can be provided.
 
-Options:
-  -h, --help                      Displays this help.
-  -v, --version                   Displays version information.
-  -l, --listen-address <0.0.0.0>  listen on <address>
-  -p, --listen-port <8443>        bind to <port>
-  --user-cn <example.com>         common name (CN) to suggest to client
-  --server <https://example.com>  grab certificate information from <server>
-  --user-cert <~/host.cert>       path to file containing custom certificate
-                                  (or chain of certificates)
-  --user-key <~/host.key>         path to file containing custom private key
-  --user-ca-cert <~/ca.cert>      path to file containing custom certificate
-                                  usable as CA
-  --user-ca-key <~/ca.key>        path to file containing custom private key
-                                  for CA certificate
-  --selected-tests <1,3,5>        comma-separated list of tests (id) to execute
-  --forward <127.0.0.1:6666>      forward connection to upstream proxy
-  --show-ciphers                  show ciphers provided by loaded openssl
-                                  library
-```
+### application settings
 
-Usage example:
+In some cases the client can be reconfigured to connect to another hostname. I.e.: login.domain.tld --> login.rogue.tld.
+
+Implications:
+
+* If you own SSL certificate for login.rogue.tld and use it in `qsslcaudit` tests, the client will successfully connect to `qsslcaudit` instance. Corresponding test will fail, but technically all is correct. This can be used as MitM configuration for traffic interception.
+
+### hosts file
+
+Modify `hosts` file on the system where client is. Change IP address of the target domain to the IP address of the host running `qsslcaudit`.
+
+Implications:
+
+* superuser privileges required on client's system to edit `hosts` file;
+* superuser privileges required on server's system to listen privileged port (443, as we can not change port number via `hosts` file);
+
+### traffic forwarding
+
+The actual setup highly depends on network configuration.
+
+For instance: TLS/SSL client as mobile application running on Android/iOS device. Device is connected to the Internet via laptop's WiFi access point. WiFi network: `192.168.12.0/24`. Use the following commands on laptop's OS:
 
 ```
-$ qsslcaudit --user-cert ~/example.com_cert+chain.pem --user-key ~/example.com.key --selected-tests 1 
+sudo sysctl -w net.ipv4.conf.all.route_localnet=1  # enable forwarding on local interfaces
+sudo iptables -t nat -A PREROUTING -p tcp -d login.domain.tld --dport 443 -s 192.168.12.0/24 -j DNAT --to-destination 127.0.0.1:8443  # forward connections to login.domain.tld:443 towards qsslcaudit instance on 127.0.0.1:8443
+```
+
+SSH port forwarding can help if `hosts` file was modified on client's system and running `qsslcaudit` as root is not an option:
+
+```
+sudo ssh user@127.0.0.1 -L 0.0.0.0:443:127.0.0.1:8443 -N  # forward connections to port 443 from outside towards local listener on port 8443
+```
+
+Implications:
+
+* superuser privileges on systems where forwarding is configured;
+* difficult to implement and debug in case of problems;
+
+## Usage Example #1
+
+Test if client accepts self-signed certificates:
+
+```
+$ qsslcaudit --selected-tests 2 --user-cn login.domain.tld
 preparing selected tests...
 
 SSL library used: OpenSSL 1.0.2i  22 Sep 2016
 
-running test: certificate trust test with user-supplied certificate
+running test: certificate trust test with self-signed certificate for user-supplied common name
 listening on 127.0.0.1:8443
-connection from: 127.0.0.1:33808
+connection from: 127.0.0.1:36336
+ssl error: Error during SSL handshake: error:14094418:SSL routines:ssl3_read_bytes:tlsv1 alert unknown ca (-1)
+        The SSL/TLS handshake failed, so the connection was closed.
+no data received (Unknown error)
+report:
+test passed, client refused fake certificate
+test finished
+```
+
+Test results are OK, client refused to connect to our rogue instance.
+
+Simulate negative result using `curl` with `-k` switch:
+
+```
+$ curl -ik https://127.0.0.1:8443/
+curl: (52) Empty reply from server
+```
+
+We get the following from `qsslcaudit`:
+
+```
+$ qsslcaudit --selected-tests 2 --user-cn login.domain.tld
+preparing selected tests...
+
+SSL library used: OpenSSL 1.0.2i  22 Sep 2016
+
+running test: certificate trust test with self-signed certificate for user-supplied common name
+listening on 127.0.0.1:8443
+connection from: 127.0.0.1:36342
 SSL connection established
 received data: GET / HTTP/1.1
 Host: 127.0.0.1:8443
-User-Agent: curl/7.57.0-DEV
+User-Agent: curl/7.58.0-DEV
 Accept: */*
 
 
@@ -145,12 +188,90 @@ test failed, client accepted fake certificate, data was intercepted
 test finished
 ```
 
-`curl` with `-k` switch was used to trigger certificate verification test failure:
+Even data was intercepted.
+
+## Usage Example #2
+
+Test if client accepts valid certificate for another domain. It is similar to the example above, but we explicitly set which certificate to present to client. Note that full chain of public keys should be included in certificate file.
 
 ```
-$ curl -ik https://127.0.0.1:8443/
-curl: (52) Empty reply from server
+$ qsslcaudit --selected-tests 1 --user-cert ~/untrusted.domain.com_cert+chain.pem --user-key ~/untrusted.domain.com.key -l 0.0.0.0
+preparing selected tests...
+
+SSL library used: OpenSSL 1.0.2n  7 Dec 2017
+
+running test: certificate trust test with user-supplied certificate
+listening on 0.0.0.0:8443
+connection from: 91.XX.XX.90:53976
+SSL connection established
+ssl error: The TLS/SSL connection has been closed (-1)
+ssl error: The remote host closed the connection (-1)
+no data received (The remote host closed the connection)
+report:
+test passed, client refused fake certificate
+test finished
 ```
+
+Test returned OK as we connect to this host using another domain name:
+
+```
+$ curl https://trusted.domain.com:8443/
+curl: (51) SSL: no alternative certificate subject name matches target host name 'trusted.domain.com'
+```
+
+In case the client connects using `untrusted.domain.com` hostname the test fails:
+
+```
+$ qsslcaudit --selected-tests 1 --user-cert ~/untrusted.domain.com_cert+chain.pem --user-key ~/untrusted.domain.com.key -l 0.0.0.0
+preparing selected tests...
+
+SSL library used: OpenSSL 1.0.2n  7 Dec 2017
+
+running test: certificate trust test with user-supplied certificate
+listening on 0.0.0.0:8443
+connection from: 91.XX.XX.90:53986
+SSL connection established
+received data: GET / HTTP/1.1
+Host: untrusted.domain.com:8443
+User-Agent: curl/7.58.0-DEV
+Accept: */*
+
+
+disconnected
+report:
+test failed, client accepted fake certificate, data was intercepted
+test finished
+```
+
+## Usage Example #3
+
+Another possible misconfiguration on client side is support of insecure protocols (SSLv2, SSLv3) and ciphers: EXPORT/LOW/MEDIUM.
+
+This can be tested in the following way:
+
+```
+$ qsslcaudit --selected-tests 12
+preparing selected tests...
+
+SSL library used: OpenSSL 1.0.2i  22 Sep 2016
+
+running test: test for SSLv3 protocol and MEDIUM grade ciphers support
+listening on 127.0.0.1:8443
+connection from: 127.0.0.1:38652
+SSL connection established
+ssl error: Network operation timed out (-1)
+no data received (Network operation timed out)
+report:
+test failed, client accepted fake certificate and weak protocol, but no data transmitted
+test finished
+```
+
+We simulated test failure by using `s_client` tool with explicitly set weak configuration:
+
+```
+$ openssl s_client -connect 127.0.0.1:8443 -ssl3 -cipher MEDIUM
+```
+
 
 ## (Some) Command Line Options
 
@@ -236,4 +357,4 @@ The repository includes copy *modified* sources of [Qt Certificate Addon](https:
 
 The most time-consuming part of `qsslcaudit` project development was supporting insecure/unsafe TLS/SSL configurations. Indeed, in present (year 2018) times most operating systems (Linux distributions) include [OpenSSL](https://www.openssl.org/) library compiled with security-safe settings (disabling SSLv2 and weak ciphers). Some TLS/SSL libraries (like GNU TLS) do not support weak protocols at all. Additionally, abstraction layers (QtSsl, Python M2Crypto and others) implement some security checks disabling unsafe configurations. To overcome these problems and be able to test unsafe TLS/SSL cases it was decided to take QtSsl module implementation and make it *unsafe*.
 
-For this reason one can find `src/unsafessl` directory here with QtSsl modules sources taken from https://github.com/qt/qtbase.git, Git tag `v5.9.3`. Obviously, these sources were heavily modified to make them work outside of the Qt main source tree. However, having such complete implementation in our hands is very helpful if we want to test some non-standard cases.
+For this reason one can find `src/unsafessl` directory here with QtSsl modules sources taken from https://github.com/qt/qtbase.git, Git tag `v5.10.0`. Obviously, these sources were heavily modified to make them work outside of the Qt main source tree. However, having such complete implementation in our hands is very helpful if we want to test some non-standard cases.
