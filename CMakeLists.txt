@@ -24,8 +24,9 @@ endif()
 find_package(GnuTLS REQUIRED)
 
 # check for openssl library version
-find_package(OpenSSL QUIET)
+find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)
+    message(STATUS "OpenSSL version " ${OPENSSL_VERSION} " found")
     if (OPENSSL_VERSION VERSION_GREATER 1.0.99)
         set(OPENSSL11_FOUND "yes")
         add_definitions(-DQT_FEATURE_opensslv11=1)
