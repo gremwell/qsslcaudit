@@ -848,7 +848,7 @@ bool q_resolveOpenSslSymbols()
     static bool triedToResolveSymbols = false;
 #ifndef QT_NO_THREAD
 #if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
-    QMutexLocker locker(QMutexPool::globalInstanceGet((void *)&q_OPENSSL_init_ssl));
+    QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&q_OPENSSL_init_ssl));
 #else
     QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&q_SSL_library_init));
 #endif
