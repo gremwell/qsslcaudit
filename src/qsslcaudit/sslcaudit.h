@@ -42,6 +42,9 @@ private slots:
 
 private:
     void runTest(SslTest *test);
+    SslServer *prepareSslServer(const SslTest *test);
+    void proxyConnection(XSslSocket *sslSocket, SslTest *test);
+    void handleIncomingConnection(XSslSocket *sslSocket, SslTest *test);
 
     SslUserSettings settings;
     QList<SslTest *> sslTests;

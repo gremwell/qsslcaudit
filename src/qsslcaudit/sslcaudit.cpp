@@ -43,39 +43,120 @@ void SslCAudit::setSslTests(const QList<SslTest *> &tests)
     sslTests = tests;
 }
 
-void SslCAudit::runTest(SslTest *test)
+SslServer *SslCAudit::prepareSslServer(const SslTest *test)
 {
     QHostAddress listenAddress = settings.getListenAddress();
     quint16 listenPort = settings.getListenPort();
-    SslServer sslServer;
+    SslServer *sslServer = new SslServer;
+
+    sslServer->setSslLocalCertificateChain(test->localCert());
+
+    sslServer->setSslPrivateKey(test->privateKey());
+
+    sslServer->setSslProtocol(test->sslProtocol());
+
+    sslServer->setSslCiphers(test->sslCiphers());
+
+    sslServer->setStartTlsProto(settings.getStartTlsProtocol());
+
+    if (!sslServer->listen(listenAddress, listenPort)) {
+        RED(QString("can not bind to %1:%2").arg(listenAddress.toString()).arg(listenPort));
+        sslServer->deleteLater();
+        return nullptr;
+    }
+
+    VERBOSE(QString("listening on %1:%2").arg(listenAddress.toString()).arg(listenPort));
+    return sslServer;
+}
+
+void SslCAudit::proxyConnection(XSslSocket *sslSocket, SslTest *test)
+{
+    // in case 'forward' option was set, we do the following:
+    // - connect to the proxy;
+    // - synchronously read data from ssl socket
+    // - synchronously send this data to proxy
+    QTcpSocket proxy;
+
+    proxy.connectToHost(settings.getForwardHostAddr(), settings.getForwardHostPort());
+
+    if (!proxy.waitForConnected(2000)) {
+        RED("can't connect to the forward proxy");
+    } else {
+        WHITE("forwarding incoming data to the provided proxy");
+        WHITE("to get test results, relauch this app without 'forward' option");
+
+        while (1) {
+            if (sslSocket->state() == QAbstractSocket::UnconnectedState)
+                break;
+            if (proxy.state() == QAbstractSocket::UnconnectedState)
+                break;
+
+            if (sslSocket->waitForReadyRead(100)) {
+                QByteArray data = sslSocket->readAll();
+
+                test->addInterceptedData(data);
+
+                proxy.write(data);
+            }
+
+            if (proxy.waitForReadyRead(100)) {
+                sslSocket->write(proxy.readAll());
+            }
+        }
+    }
+}
+
+void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
+{
+    VERBOSE(QString("connection from: %1:%2").arg(sslSocket->peerAddress().toString()).arg(sslSocket->peerPort()));
+
+    if (!settings.getForwardHostAddr().isNull()) {
+        // this will loop until connection is interrupted
+        proxyConnection(sslSocket, test);
+    } else {
+        // handling socket errors makes sence only in non-interception mode
+
+        connect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
+                this, &SslCAudit::handleSocketError);
+        connect(sslSocket, &XSslSocket::encrypted, this, &SslCAudit::sslHandshakeFinished);
+        connect(sslSocket, static_cast<void(XSslSocket::*)(const QList<XSslError> &)>(&XSslSocket::sslErrors),
+                this, &SslCAudit::handleSslErrors);
+        connect(sslSocket, &XSslSocket::peerVerifyError, this, &SslCAudit::handlePeerVerifyError);
+
+        // no 'forward' option -- just read the first packet of unencrypted data and close the connection
+        if (sslSocket->waitForReadyRead(5000)) {
+            QByteArray message = sslSocket->readAll();
+
+            VERBOSE("received data: " + QString(message));
+
+            test->addInterceptedData(message);
+
+            sslSocket->disconnectFromHost();
+            sslSocket->waitForDisconnected();
+            VERBOSE("disconnected");
+        } else {
+            VERBOSE("no data received (" + sslSocket->errorString() + ")");
+        }
+    }
+}
+
+void SslCAudit::runTest(SslTest *test)
+{
+    SslServer *sslServer;
 
     WHITE("running test: " + test->description());
 
-    sslServer.setSslLocalCertificateChain(test->localCert());
-
-    sslServer.setSslPrivateKey(test->privateKey());
-
-    sslServer.setSslProtocol(test->sslProtocol());
-
-    sslServer.setSslCiphers(test->sslCiphers());
-
-    sslServer.setStartTlsProto(settings.getStartTlsProtocol());
-
-    if (sslServer.listen(listenAddress, listenPort)) {
-        VERBOSE(QString("listening on %1:%2").arg(listenAddress.toString()).arg(listenPort));
-    } else {
-        RED(QString("can not bind to %1:%2").arg(listenAddress.toString()).arg(listenPort));
+    sslServer = prepareSslServer(test);
+    if (!sslServer) {
         return;
     }
 
     emit sslTestReady();
 
-    if (sslServer.waitForNewConnection(-1)) {
-        XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sslServer.nextPendingConnection());
+    if (sslServer->waitForNewConnection(-1)) {
+        // check if *server* was not able to setup SSL connection
+        QStringList sslInitErrors = sslServer->getSslInitErrorsStr();
 
-        VERBOSE(QString("connection from: %1:%2").arg(sslSocket->peerAddress().toString()).arg(sslSocket->peerPort()));
-
-        QStringList sslInitErrors = sslServer.getSslInitErrorsStr();
         if (sslInitErrors.size() > 0) {
             RED("failure during SSL initialization, test will not continue");
 
@@ -83,74 +164,18 @@ void SslCAudit::runTest(SslTest *test)
                 VERBOSE("\t" + sslInitErrors.at(i));
             }
 
-            test->addSocketErrors(sslServer.getSslInitErrors());
+            test->addSocketErrors(sslServer->getSslInitErrors());
             test->calcResults();
 
             return;
         }
 
-        if (!settings.getForwardHostAddr().isNull()) {
-            // in case 'forward' option was set, we do the following:
-            // - connect to the proxy;
-            // - synchronously read data from ssl socket
-            // - synchronously send this data to proxy
-
-            QTcpSocket proxy;
-
-            proxy.connectToHost(settings.getForwardHostAddr(), settings.getForwardHostPort());
-
-            if (!proxy.waitForConnected(2000)) {
-                RED("can't connect to the forward proxy");
-            } else {
-                WHITE("forwarding incoming data to the provided proxy");
-                WHITE("to get test results, relauch this app without 'forward' option");
-
-                while (1) {
-                    if (sslSocket->state() == QAbstractSocket::UnconnectedState)
-                        break;
-                    if (proxy.state() == QAbstractSocket::UnconnectedState)
-                        break;
-
-                    if (sslSocket->waitForReadyRead(100)) {
-                        QByteArray data = sslSocket->readAll();
-
-                        test->addInterceptedData(data);
-
-                        proxy.write(data);
-                    }
-
-                    if (proxy.waitForReadyRead(100)) {
-                        sslSocket->write(proxy.readAll());
-                    }
-                }
-            }
-        } else {
-            // handling socket errors makes sence only in non-interception mode
-
-            connect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
-                    this, &SslCAudit::handleSocketError);
-            connect(sslSocket, &XSslSocket::encrypted, this, &SslCAudit::sslHandshakeFinished);
-            connect(sslSocket, static_cast<void(XSslSocket::*)(const QList<XSslError> &)>(&XSslSocket::sslErrors),
-                    this, &SslCAudit::handleSslErrors);
-            connect(sslSocket, &XSslSocket::peerVerifyError, this, &SslCAudit::handlePeerVerifyError);
-
-            // no 'forward' option -- just read the first packet of unencrypted data and close the connection
-            if (sslSocket->waitForReadyRead(5000)) {
-                QByteArray message = sslSocket->readAll();
-
-                VERBOSE("received data: " + QString(message));
-
-                test->addInterceptedData(message);
-
-                sslSocket->disconnectFromHost();
-                sslSocket->waitForDisconnected();
-                VERBOSE("disconnected");
-            } else {
-                VERBOSE("no data received (" + sslSocket->errorString() + ")");
-            }
-        }
+        // now we can hanle client side
+        XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sslServer->nextPendingConnection());
+        // this call will loop until connection close if 'forward' option is set
+        handleIncomingConnection(sslSocket, test);
     } else {
-        VERBOSE("could not establish encrypted connection (" + sslServer.errorString() + ")");
+        VERBOSE("could not establish encrypted connection (" + sslServer->errorString() + ")");
     }
 
     test->calcResults();
