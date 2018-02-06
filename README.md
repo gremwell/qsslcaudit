@@ -52,7 +52,33 @@ Installing packages for Fedora 26: `sudo yum install cmake qt5-qtbase-devel gnut
 
 Installing packages for Kali (rolling@01-2018): `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
 
-Once you have `qsslcaudit` source code repository and packages installed, do the following:
+### Easy build with custom OpenSSL library
+
+Create directory somewhere in you `$HOME` for insecure build of OpenSSL library and switch to this directory:
+
+```
+mkdir ~/unsafeopenssl
+cd ~/unsafeopenssl
+```
+
+Launch `build_with_old_openssl.sh` script from repository specifying path to `qsslcaudit` sources:
+
+```
+~/qsslcaudit/tools/build_with_old_openssl.sh ~/qsslcaudit
+```
+
+Please note that the script will download (using curl) OpenSSL archive, so connection to the Internet is required.
+
+The following binaries will be installed:
+
+* `qsslcaudit.bin` -- main application binary
+* `qsslcaudit` -- shell script, which launches `qsslcaudit.bin` with `LD_LIBRARY_PATH` environment variable set to the current directory
+
+Now the tool is ready to use. Launch it being inside `~/unsafeopenssl` directory.
+
+### Detailed build description
+
+Once you have `qsslcaudit` source code repository and packages installed, do the following (inside cloned repo):
 
 * Create build directory
 * Create Makefile (run cmake) there
@@ -67,12 +93,11 @@ make
 sudo make install
 ```
 
-The following binaries will be installed:
+Now the tool is installed. However, unsafe SSL protocols can be tested only with unsafe OpenSSL library. Most likely your Linux distro has safe one.
 
-* `qsslcaudit.bin` -- main application binary
-* `qsslcaudit` -- shell script, which launches `qsslcaudit.bin` with `LD_LIBRARY_PATH` environment variable set to the current directory
+#### Building unsafe OpenSSL library
 
-Now the tool is ready to use. However, unsafe SSL protocols can be tested only with unsafe OpenSSL library. To have such unsafe version, do the following:
+To have such unsafe version, do the following:
 
 * Create directory where you would like to store unsafe OpenSSL libraries and binary (can be somewhere in your `$HOME`)
 * Launch helper script to download and compile unsafe OpenSSL library
@@ -83,7 +108,9 @@ cd openssl
 ~/Downloads/qsslcaudit/tools/build_openssl.sh
 ```
 
-That is all. Now, if you want to use `qsslcaudit` with unsafe OpenSSL version, just launch it inside `openssl` directory (or any other you chose).
+Now, if you want to use `qsslcaudit` with unsafe OpenSSL version, just launch it inside `openssl` directory (or any other you chose).
+
+The tool will load library symbols at runtime. However, if `qsslcaudit` was compiled using "safe" headers (i.e. SSLv2 turned off), some errors will rise. Thus, it is better to follow "easy way" and use `build_with_old_openssl.sh` script.
 
 # Usage
 
