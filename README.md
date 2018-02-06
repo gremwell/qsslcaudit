@@ -134,6 +134,28 @@ Implications:
 * superuser privileges on systems where forwarding is configured;
 * difficult to implement and debug in case of problems;
 
+### using proxy
+
+Connections can also be forwarded with help of HTTP proxy:
+
+* Setup HTTP/HTTPS proxy on the host which has network access to `qsslcaudit` instance.
+* Configure client's system to use proxy.
+* Configure proxy to forward incoming connections to the target host towards `qsslcaudit` listener. This is complicated step which is described below.
+
+Forwarding connections can not be done in [Burp](http://releases.portswigger.net/) (the only option is to forward all connections). [Fiddler](https://www.telerik.com/fiddler) also does not support such mode. A custom tool can be used (like Python script).
+
+[proxenet](https://github.com/hugsy/proxenet.git) tool has this functionality with adaptation from [forward_http](https://github.com/zOrg1331/proxenet/tree/forward_http) branch. Use it like in the following example:
+
+```
+$ proxenet -v -I -m login.domain.tld -N -b 0.0.0.0 -p 8080 -X 127.0.0.1 -P 8443
+```
+
+This command forwards incoming connections to login.domain.tld towards proxy at 127.0.0.1:8443 and deals with others as usual.
+
+Implications:
+
+* no out-of-the-box proxy tool with required functionality
+
 ## Usage Example #1
 
 Test if client accepts self-signed certificates:
