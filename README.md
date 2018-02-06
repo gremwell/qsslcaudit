@@ -44,13 +44,13 @@ Some packages have to be installed in order to compile `qsslcaudit`:
 * [OpenSSL](https://www.openssl.org/) library development package
 * [CMake](https://cmake.org/) tool
 
-Packages for ALT Linux (P8, Sisyphus@01-2018): `cmake qt5-base-devel libgnutls-devel libssl-devel`.
+Installing packages for ALT Linux (P8, Sisyphus@01-2018): `sudo apt-get install cmake qt5-base-devel libgnutls-devel libssl-devel`.
 
-Packages for Ubuntu 16.04: `cmake qtbase5-dev libgnutls-dev libssl-dev`.
+Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev libgnutls-dev libssl-dev`.
 
-Packages for Fedora 26: `cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
+Installing packages for Fedora 26: `sudo yum install cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
 
-Packages for Kali (rolling@01-2018): `cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
+Installing packages for Kali (rolling@01-2018): `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
 
 Once you have `qsslcaudit` source code repository and packages installed, do the following:
 
