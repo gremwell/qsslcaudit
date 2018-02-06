@@ -49,19 +49,24 @@ make
 if [ $useopenssl11 = "yes" ]; then
     cp -a libcrypto.so{,.1.1} $curdir
     cp -a libssl.so{,.1.1} $curdir
-    ln -sf libssl.so{.1.1,.11}
-    ln -sf libcrypto.so{.1.1,.11}
 else
     cp -a libcrypto.so{,.1.0.0} $curdir
     cp -a libssl.so{,.1.0.0} $curdir
-    ln -sf libssl.so{.1.0.0,.10}
-    ln -sf libcrypto.so{.1.0.0,.10}
-    ln -sf libssl.so{.1.0.0,.1.0.2}
-    ln -sf libcrypto.so{.1.0.0,.1.0.2}
 fi
 cp -a apps/openssl $curdir
 
 popd
 popd
+
+# make all distros happy
+if [ $useopenssl11 = "yes" ]; then
+    ln -sf libssl.so{.1.1,.11}
+    ln -sf libcrypto.so{.1.1,.11}
+else
+    ln -sf libssl.so{.1.0.0,.10}
+    ln -sf libcrypto.so{.1.0.0,.10}
+    ln -sf libssl.so{.1.0.0,.1.0.2}
+    ln -sf libcrypto.so{.1.0.0,.1.0.2}
+fi
 
 rm -rf $builddir
