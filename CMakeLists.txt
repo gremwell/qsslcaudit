@@ -27,6 +27,10 @@ find_package(GnuTLS REQUIRED)
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)
     message(STATUS "OpenSSL version " ${OPENSSL_VERSION} " found")
+
+    # in fact, instruction below is only required for custom openssl location
+    include_directories(${OPENSSL_INCLUDE_DIR})
+
     if (OPENSSL_VERSION VERSION_GREATER 1.0.99)
         set(OPENSSL11_FOUND "yes")
         add_definitions(-DQT_FEATURE_opensslv11=1)
