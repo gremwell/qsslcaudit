@@ -66,7 +66,7 @@ ln -sf libcrypto.so{.1.0.0,.1.0.2}
 builddir=`mktemp -d`
 pushd $builddir
 
-cmake -DOPENSSL_ROOT_DIR="$opensslprefix" $qsslcauditdir
+cmake -DOPENSSL_ROOT_DIR="$opensslprefix" -DCMAKE_BUILD_TYPE=Release $qsslcauditdir
 make
 sudo make install
 popd
