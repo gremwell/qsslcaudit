@@ -56,6 +56,8 @@ else
     cp -a libssl.so{,.1.0.0} $curdir
     ln -sf libssl.so{.1.0.0,.10}
     ln -sf libcrypto.so{.1.0.0,.10}
+    ln -sf libssl.so{.1.0.0,.1.0.2}
+    ln -sf libcrypto.so{.1.0.0,.1.0.2}
 fi
 cp -a apps/openssl $curdir
 
