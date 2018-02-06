@@ -4,6 +4,9 @@ include_directories(
     ${QSSLCAUDIT_DIR}
     )
 
+# this is required on Ubuntu
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 add_executable(tests_SslTest02 tests_SslTest02.cpp test.h)
 set_target_properties(tests_SslTest02 PROPERTIES AUTOMOC TRUE)
 target_link_libraries(tests_SslTest02 qsslcaudit)
