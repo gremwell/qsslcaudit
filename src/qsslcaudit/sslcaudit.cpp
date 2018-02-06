@@ -167,6 +167,8 @@ void SslCAudit::runTest(SslTest *test)
             test->addSocketErrors(sslServer->getSslInitErrors());
             test->calcResults();
 
+            sslServer->close();
+            sslServer->deleteLater();
             return;
         }
 
@@ -177,6 +179,9 @@ void SslCAudit::runTest(SslTest *test)
     } else {
         VERBOSE("could not establish encrypted connection (" + sslServer->errorString() + ")");
     }
+
+    sslServer->close();
+    sslServer->deleteLater();
 
     test->calcResults();
 
