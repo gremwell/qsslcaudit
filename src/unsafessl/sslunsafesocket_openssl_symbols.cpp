@@ -784,6 +784,22 @@ static QPair<QLibrary*, QLibrary*> loadOpenSsl()
     }
 #endif
 
+    // next attempt: another canonical name is libssl.so.{10,11}
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    libssl->setFileNameAndVersion(QLatin1String("ssl"), QLatin1String("10"));
+    libcrypto->setFileNameAndVersion(QLatin1String("crypto"), QLatin1String("10"));
+#else
+    libssl->setFileNameAndVersion(QLatin1String("ssl"), QLatin1String("11"));
+    libcrypto->setFileNameAndVersion(QLatin1String("crypto"), QLatin1String("11"));
+#endif
+    if (libcrypto->load() && libssl->load()) {
+        // libssl.so.<10/11> and libcrypto.so.<10/11> found
+        return pair;
+    } else {
+        libssl->unload();
+        libcrypto->unload();
+    }
+
 #ifndef Q_OS_DARWIN
     // second attempt: find the development files libssl.so and libcrypto.so
     //
