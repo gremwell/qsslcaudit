@@ -82,6 +82,6 @@ set_target_properties(unsafessl PROPERTIES AUTOMOC TRUE)
 
 target_link_libraries(unsafessl Qt5::Core Qt5::Network)
 # Fedora builds Qt with "openssl-linked" configuration
-if(EXISTS "/etc/redhat-release")
-    target_link_libraries(unsafessl ssl crypto)
-endif()
+# if(EXISTS "/etc/redhat-release")
+#     target_link_libraries(unsafessl ssl crypto)
+# endif()
