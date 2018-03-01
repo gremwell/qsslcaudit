@@ -30,3 +30,7 @@ target_link_libraries(tests_SslTest16 qsslcaudit)
 add_executable(tests_SslTest19 tests_SslTest19.cpp test.h)
 set_target_properties(tests_SslTest19 PROPERTIES AUTOMOC TRUE)
 target_link_libraries(tests_SslTest19 qsslcaudit)
+
+add_executable(tests_SslTest22 tests_SslTest22.cpp test.h)
+set_target_properties(tests_SslTest22 PROPERTIES AUTOMOC TRUE)
+target_link_libraries(tests_SslTest22 qsslcaudit)

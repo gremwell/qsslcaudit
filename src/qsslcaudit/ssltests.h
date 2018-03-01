@@ -3,7 +3,7 @@
 
 #include "ssltest.h"
 
-#define SSLTESTS_COUNT 19
+#define SSLTESTS_COUNT 22
 
 class SslTest01 : public SslCertificatesTest
 {
@@ -209,6 +209,39 @@ public:
     SslTest19() {
         setName("TLS 1.1 protocol and MEDIUM grade ciphers support");
         setDescription("test for TLS 1.1 protocol and MEDIUM grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest20 : public SslProtocolsTest
+{
+public:
+    SslTest20() {
+        setName("TLS 1.2 protocol and EXPORT grade ciphers support");
+        setDescription("test for TLS 1.2 protocol and EXPORT grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest21 : public SslProtocolsTest
+{
+public:
+    SslTest21() {
+        setName("TLS 1.2 protocol and LOW grade ciphers support");
+        setDescription("test for TLS 1.2 protocol and LOW grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest22 : public SslProtocolsTest
+{
+public:
+    SslTest22() {
+        setName("TLS 1.2 protocol and MEDIUM grade ciphers support");
+        setDescription("test for TLS 1.2 protocol and MEDIUM grade ciphers support");
     }
     bool setProtoAndCiphers();
 
