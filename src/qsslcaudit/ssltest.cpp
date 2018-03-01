@@ -132,6 +132,15 @@ void SslProtocolsTest::calcResults()
         return;
     }
 
+    if (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
+            && ((m_sslErrorsStr.filter(QString("certificate unknown")).size() > 0)
+                || (m_sslErrorsStr.filter(QString("unknown ca")).size() > 0)
+                || (m_sslErrorsStr.filter(QString("bad certificate")).size() > 0))) {
+        m_report = QString("test failed, client accepted weak protocol");
+        setResult(-5);
+        return;
+    }
+
     m_report = QString("test passed, client does not accept weak protocol");
     setResult(0);
 }

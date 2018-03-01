@@ -51,6 +51,7 @@ public:
     QList<XSslCipher> sslCiphers() const { return m_sslCiphers; }
 
     void addSslErrors(const QList<XSslError> errors) { m_sslErrors << errors; }
+    void addSslErrorString(const QString error) { m_sslErrorsStr << error; }
     void addSocketErrors(const QList<QAbstractSocket::SocketError> errors) { m_socketErrors << errors; }
     void setSslConnectionStatus(bool isEstablished) { m_sslConnectionEstablished = isEstablished; }
     void addInterceptedData(const QByteArray &data) { m_interceptedData.append(data); }
@@ -68,6 +69,7 @@ private:
     QList<XSslCipher> m_sslCiphers;
 
     QList<XSslError> m_sslErrors;
+    QStringList m_sslErrorsStr;
     QList<QAbstractSocket::SocketError> m_socketErrors;
     bool m_sslConnectionEstablished;
     QByteArray m_interceptedData;

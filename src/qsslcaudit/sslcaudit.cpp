@@ -218,6 +218,7 @@ void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)
             .arg(sslSocket->error()));
 
     currentTest->addSslErrors(sslSocket->sslErrors());
+    currentTest->addSslErrorString(sslSocket->errorString());
     currentTest->addSocketErrors(QList<QAbstractSocket::SocketError>() << socketError);
 
     switch (socketError) {
@@ -244,6 +245,7 @@ void SslCAudit::handleSslErrors(const QList<XSslError> &errors)
 
     foreach (error, errors) {
         VERBOSE("\t" + error.errorString());
+        currentTest->addSslErrorString(error.errorString());
     }
 
     currentTest->addSslErrors(errors);
