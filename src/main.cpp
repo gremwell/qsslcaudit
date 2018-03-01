@@ -1,7 +1,7 @@
 
 #include "debug.h"
 #include "sslusersettings.h"
-#include "ssltest.h"
+#include "ssltests.h"
 #include "sslcaudit.h"
 
 #include <QCoreApplication>
@@ -10,17 +10,8 @@
 #include <QHostAddress>
 
 
-static QList<SslTest *> allTests;
 static QList<int> selectedTests;
 
-
-void createTests()
-{
-    for (int i = 0; i < 12; i++) {
-        selectedTests << i;
-        allTests << SslTest::createTest(i);
-    }
-}
 
 void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 {
@@ -29,9 +20,13 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 
     QString appDescription = "A tool to test SSL clients behavior\n\n";
     appDescription += "SSL client tests:\n";
-    for (int i = 0; i < allTests.size(); i++) {
-        appDescription += QString("\t%1: %2\n").arg(i + 1).arg(allTests.at(i)->name());
-        appDescription += QString("\t   %1\n").arg(allTests.at(i)->description());
+    for (int i = 0; i < SSLTESTS_COUNT; i++) {
+        SslTest *t = SslTest::createTest(i);
+
+        appDescription += QString("\t%1: %2\n").arg(i + 1).arg(t->name());
+        appDescription += QString("\t   %1\n").arg(t->description());
+
+        delete t;
     }
 
     parser.setApplicationDescription(appDescription);
@@ -150,7 +145,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         for (int i = 0; i < testsListStr.size(); i++) {
             bool ok;
             int num = testsListStr.at(i).toInt(&ok) - 1;
-            if (ok && (allTests.size() > num))
+            if (ok && (SSLTESTS_COUNT > num))
                 selectedTests << num;
         }
     }
@@ -171,11 +166,8 @@ QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
     QList<SslTest *> ret;
 
     VERBOSE("preparing selected tests...");
-    for (int i = 0; i < allTests.size(); i++) {
-        if (!selectedTests.contains(i))
-            continue;
-
-        SslTest *test = allTests.at(i);
+    for (int i = 0; i < selectedTests.size(); i++) {
+        SslTest *test = SslTest::createTest(selectedTests.at(i));
         if (test->prepare(settings)) {
             ret << test;
         } else {
@@ -197,8 +189,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("gremwell.com");
 
     SslUserSettings settings;
-
-    createTests();
 
     parseOptions(a, &settings);
 
