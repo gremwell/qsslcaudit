@@ -20,6 +20,7 @@ class SslTest
 {
 public:
     SslTest();
+    virtual ~SslTest();
 
     static SslTest *createTest(int id);
 

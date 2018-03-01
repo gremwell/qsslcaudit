@@ -14,6 +14,10 @@ SslTest::SslTest()
     m_report = QString("test results undefined");
 }
 
+SslTest::~SslTest()
+{
+}
+
 SslTest *SslTest::createTest(int id)
 {
     switch (id) {
