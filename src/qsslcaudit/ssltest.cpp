@@ -53,6 +53,12 @@ SslTest *SslTest::createTest(int id)
         return new SslTest15();
     case 15:
         return new SslTest16();
+    case 16:
+        return new SslTest17();
+    case 17:
+        return new SslTest18();
+    case 18:
+        return new SslTest19();
     }
     return NULL;
 }

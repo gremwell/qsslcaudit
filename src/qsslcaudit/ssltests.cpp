@@ -386,3 +386,75 @@ bool SslTest16::setProtoAndCiphers()
 
     return true;
 }
+
+
+bool SslTest17::setProtoAndCiphers()
+{
+    XSsl::SslProtocol proto = XSsl::TlsV1_1;
+    QList<XSslCipher> ciphers;
+    QStringList opensslCiphers = ciphers_export_str.split(":");
+
+    for (int i = 0; i < opensslCiphers.size(); i++) {
+        XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+        if (!cipher.isNull())
+            ciphers << cipher;
+    }
+    if (ciphers.size() == 0) {
+        VERBOSE("no EXPORT ciphers available");
+        return false;
+    }
+
+    setSslCiphers(ciphers);
+    setSslProtocol(proto);
+
+    return true;
+}
+
+
+bool SslTest18::setProtoAndCiphers()
+{
+    XSsl::SslProtocol proto = XSsl::TlsV1_1;
+    QList<XSslCipher> ciphers;
+    QStringList opensslCiphers = ciphers_low_str.split(":");
+
+    for (int i = 0; i < opensslCiphers.size(); i++) {
+        XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+        if (!cipher.isNull())
+            ciphers << cipher;
+    }
+    if (ciphers.size() == 0) {
+        VERBOSE("no LOW ciphers available");
+        return false;
+    }
+
+    setSslCiphers(ciphers);
+    setSslProtocol(proto);
+
+    return true;
+}
+
+
+bool SslTest19::setProtoAndCiphers()
+{
+    XSsl::SslProtocol proto = XSsl::TlsV1_1;
+    QList<XSslCipher> ciphers;
+    QStringList opensslCiphers = ciphers_medium_str.split(":");
+
+    for (int i = 0; i < opensslCiphers.size(); i++) {
+        XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+        if (!cipher.isNull())
+            ciphers << cipher;
+    }
+    if (ciphers.size() == 0) {
+        VERBOSE("now MEDIUM ciphers available");
+        return false;
+    }
+
+    setSslCiphers(ciphers);
+    setSslProtocol(proto);
+
+    return true;
+}
