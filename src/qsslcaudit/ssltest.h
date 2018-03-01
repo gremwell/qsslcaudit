@@ -35,6 +35,8 @@ public:
     QString description() const { return m_description; }
     void setDescription(const QString &descr) { m_description = descr; }
 
+    void clear();
+
     int result() const { return m_result; }
     void setResult(int result) { m_result = result; }
 

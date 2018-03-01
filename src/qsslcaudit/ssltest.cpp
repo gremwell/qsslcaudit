@@ -6,12 +6,7 @@
 
 SslTest::SslTest()
 {
-    m_sslErrors = QList<XSslError>();
-    m_socketErrors = QList<QAbstractSocket::SocketError>();
-    m_sslConnectionEstablished = false;
-    m_interceptedData = QByteArray();
-    m_result = -99;
-    m_report = QString("test results undefined");
+    clear();
 }
 
 SslTest::~SslTest()
@@ -76,6 +71,17 @@ void SslTest::printReport()
     } else {
         GREEN(m_report);
     }
+}
+
+void SslTest::clear()
+{
+    m_sslErrors = QList<XSslError>();
+    m_sslErrorsStr = QStringList();
+    m_socketErrors = QList<QAbstractSocket::SocketError>();
+    m_sslConnectionEstablished = false;
+    m_interceptedData = QByteArray();
+    m_result = -99;
+    m_report = QString("test results undefined");
 }
 
 void SslCertificatesTest::calcResults()

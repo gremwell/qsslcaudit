@@ -198,6 +198,7 @@ void SslCAudit::run()
         for (int i = 0; i < sslTests.size(); i++) {
             VERBOSE("");
             currentTest = sslTests.at(i);
+            currentTest->clear();
             runTest(currentTest);
             VERBOSE("");
         }
