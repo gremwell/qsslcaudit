@@ -3,6 +3,7 @@
 
 #include "ssltest.h"
 
+#define SSLTESTS_COUNT 12
 
 class SslTest01 : public SslCertificatesTest
 {
