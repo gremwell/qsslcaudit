@@ -194,12 +194,14 @@ void SslCAudit::runTest(SslTest *test)
 
 void SslCAudit::run()
 {
-    for (int i = 0; i < sslTests.size(); i++) {
-        VERBOSE("");
-        currentTest = sslTests.at(i);
-        runTest(currentTest);
-        VERBOSE("");
-    }
+    do {
+        for (int i = 0; i < sslTests.size(); i++) {
+            VERBOSE("");
+            currentTest = sslTests.at(i);
+            runTest(currentTest);
+            VERBOSE("");
+        }
+    } while (settings.getLoopTests());
 
     emit sslTestsFinished();
 

@@ -54,6 +54,9 @@ public:
     bool setStartTlsProtocol(const QString &proto);
     SslServer::StartTlsProtocol getStartTlsProtocol() const;
 
+    void setLoopTests(bool loop);
+    bool getLoopTests() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -66,6 +69,7 @@ private:
     QString forwardAddr;
     QList<XSslCertificate> peerCerts;
     SslServer::StartTlsProtocol startTlsProtocol;
+    bool loopTests;
 
 };
 

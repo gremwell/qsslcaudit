@@ -342,6 +342,8 @@ Please note that some options are ignored in certain tests or are essential to o
 
 `--user-ca-cert`, `--user-ca-key` sets path to CA (certificate authority) files to sign certificates presented to client.
 
+`--loop-tests` this is helpful when it is desired to test TLS/SSL client multiple times or launch SSL server assessment tools against `qsslcaudit`.
+
 ## Tests
 
 Current list of TLS/SSL client tests.

@@ -24,6 +24,7 @@ SslUserSettings::SslUserSettings()
     userCaKeyPath = "";
     forwardAddr = "";
     startTlsProtocol = SslServer::StartTlsUnknownProtocol;
+    loopTests = false;
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -234,4 +235,14 @@ bool SslUserSettings::setStartTlsProtocol(const QString &proto)
 SslServer::StartTlsProtocol SslUserSettings::getStartTlsProtocol() const
 {
     return startTlsProtocol;
+}
+
+void SslUserSettings::setLoopTests(bool loop)
+{
+    loopTests = loop;
+}
+
+bool SslUserSettings::getLoopTests() const
+{
+    return loopTests;
 }

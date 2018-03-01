@@ -68,6 +68,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption starttlsOption(QStringList() << "starttls",
                                     "exchange specific STARTTLS messages before starting secure connection", "ftp|smtp");
     parser.addOption(starttlsOption);
+    QCommandLineOption loopTestsOption(QStringList() << "loop-tests",
+                                       "infinitely repeat selected tests (use Ctrl-C to kill the tool)");
+    parser.addOption(loopTestsOption);
 
     parser.process(a);
 
@@ -157,6 +160,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             RED("unsupported STARTTLS protocol");
             exit(-1);
         }
+    }
+    if (parser.isSet(loopTestsOption)) {
+        settings->setLoopTests(true);
     }
 }
 
