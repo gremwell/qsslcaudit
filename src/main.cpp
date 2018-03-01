@@ -147,9 +147,23 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         QStringList testsListStr = testsStr.split(",", QString::SkipEmptyParts);
         for (int i = 0; i < testsListStr.size(); i++) {
             bool ok;
-            int num = testsListStr.at(i).toInt(&ok) - 1;
-            if (ok && (SSLTESTS_COUNT > num))
-                selectedTests << num;
+
+            // check for range
+            if (testsListStr.at(i).count("-") == 1) {
+                int low = testsListStr.at(i).split("-").at(0).toInt(&ok) - 1;
+                int high = testsListStr.at(i).split("-").at(1).toInt(&ok) - 1;
+
+                if (ok && (low <= high) && (high < SSLTESTS_COUNT)) {
+                    for (int num = low; num <= high; num++) {
+                        selectedTests << num;
+                    }
+                }
+            } else {
+                // check for single number
+                int num = testsListStr.at(i).toInt(&ok) - 1;
+                if (ok && (SSLTESTS_COUNT > num))
+                    selectedTests << num;
+            }
         }
     }
     if (parser.isSet(forwardOption)) {
