@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "sslcertgen.h"
 #include "ssltests.h"
+#include "ciphers.h"
 
 
 SslTest::SslTest()
@@ -179,4 +180,51 @@ bool SslProtocolsTest::prepare(const SslUserSettings &settings)
     setPrivateKey(key);
 
     return setProtoAndCiphers();
+}
+
+bool SslProtocolsTest::setProtoAndSupportedCiphers(XSsl::SslProtocol proto)
+{
+    QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
+
+    setSslCiphers(ciphers);
+    setSslProtocol(proto);
+
+    return true;
+}
+
+bool SslProtocolsTest::setProtoAndSpecifiedCiphers(XSsl::SslProtocol proto, QString ciphersString, QString name)
+{
+    QList<XSslCipher> ciphers;
+    QStringList opensslCiphers = ciphersString.split(":");
+
+    for (int i = 0; i < opensslCiphers.size(); i++) {
+        XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+        if (!cipher.isNull())
+            ciphers << cipher;
+    }
+    if (ciphers.size() == 0) {
+        VERBOSE(QString("no %1 ciphers available").arg(name));
+        return false;
+    }
+
+    setSslCiphers(ciphers);
+    setSslProtocol(proto);
+
+    return true;
+}
+
+bool SslProtocolsTest::setProtoAndExportCiphers(XSsl::SslProtocol proto)
+{
+    return setProtoAndSpecifiedCiphers(proto, ciphers_export_str, "EXPORT");
+}
+
+bool SslProtocolsTest::setProtoAndLowCiphers(XSsl::SslProtocol proto)
+{
+    return setProtoAndSpecifiedCiphers(proto, ciphers_low_str, "LOW");
+}
+
+bool SslProtocolsTest::setProtoAndMediumCiphers(XSsl::SslProtocol proto)
+{
+    return setProtoAndSpecifiedCiphers(proto, ciphers_medium_str, "MEDIUM");
 }

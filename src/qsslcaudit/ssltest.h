@@ -6,11 +6,13 @@
 #include "sslunsafekey.h"
 #include "sslunsafecipher.h"
 #include "sslunsafeerror.h"
+#include "sslunsafeconfiguration.h"
 #else
 #include <QSslCertificate>
 #include <QSslKey>
 #include <QSslCipher>
 #include <QSslError>
+#include <QSslConfiguration>
 #endif
 
 #include "sslusersettings.h"
@@ -93,6 +95,13 @@ public:
     virtual bool prepare(const SslUserSettings &settings);
     virtual void calcResults();
     virtual bool setProtoAndCiphers() = 0;
+    bool setProtoAndSupportedCiphers(XSsl::SslProtocol proto);
+    bool setProtoAndExportCiphers(XSsl::SslProtocol proto);
+    bool setProtoAndLowCiphers(XSsl::SslProtocol proto);
+    bool setProtoAndMediumCiphers(XSsl::SslProtocol proto);
+
+private:
+    bool setProtoAndSpecifiedCiphers(XSsl::SslProtocol proto, QString ciphersString, QString name);
 
 };
 
