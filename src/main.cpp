@@ -165,6 +165,11 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
                     selectedTests << num;
             }
         }
+    } else {
+        // if this option is not set -- select all available tests
+        for (int i = 0; i < SSLTESTS_COUNT; i++) {
+            selectedTests << i;
+        }
     }
     if (parser.isSet(forwardOption)) {
         settings->setForwardAddr(parser.value(forwardOption));
