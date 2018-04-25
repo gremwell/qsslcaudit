@@ -42,10 +42,10 @@ public slots:
 
         if (!socket->waitForEncrypted()) {
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == -99)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
                 QThread::msleep(50);
 
-            if (sslTest->result() == 0) {
+            if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 printTestSucceeded();
             } else {
                 printTestFailed();
@@ -106,10 +106,10 @@ public slots:
 
         if (!socket->waitForEncrypted()) {
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == -99)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
                 QThread::msleep(50);
 
-            if (sslTest->result() == -3) {
+            if (sslTest->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
                 printTestSucceeded();
             } else {
                 printTestFailed();
@@ -170,10 +170,10 @@ public slots:
 
         if (!socket->waitForEncrypted()) {
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == -99)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
                 QThread::msleep(50);
 
-            if (sslTest->result() == 0) {
+            if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 printTestSucceeded();
             } else {
                 printTestFailed();
@@ -236,10 +236,10 @@ public slots:
             printTestFailed();
         } else {
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == -99)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
                 QThread::msleep(50);
 
-            if (sslTest->result() == -2) {
+            if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
                 printTestSucceeded();
             } else {
                 printTestFailed();

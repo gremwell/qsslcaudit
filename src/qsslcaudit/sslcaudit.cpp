@@ -341,15 +341,23 @@ void SslCAudit::printSummary()
 
     for (int i = 0; i < sslTests.size(); i++) {
         QString testName = sslTests.at(i)->name();
-        QString result = "FAILED";
+        QString result;
 
         while (testName.length() > testColumnWidth) {
             printTableLine(testName.left(testColumnWidth - 2), "");
             testName = "  " + testName.mid(testColumnWidth - 2);
         }
 
-        if (sslTests.at(i)->result() == 0) {
+        switch (sslTests.at(i)->result()) {
+        case SslTest::SSLTEST_RESULT_SUCCESS:
             result = "PASSED";
+            break;
+        case SslTest::SSLTEST_RESULT_UNDEFINED:
+        case SslTest::SSLTEST_RESULT_INIT_FAILED:
+            result = "UNDEFINED";
+            break;
+        default:
+            result = "FAILED";
         }
 
         printTableLine(testName, result);

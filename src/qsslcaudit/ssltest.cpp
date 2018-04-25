@@ -81,7 +81,7 @@ void SslTest::clear()
     m_socketErrors = QList<QAbstractSocket::SocketError>();
     m_sslConnectionEstablished = false;
     m_interceptedData = QByteArray();
-    m_result = -99;
+    m_result = SSLTEST_RESULT_UNDEFINED;
     m_report = QString("test results undefined");
 }
 
@@ -89,53 +89,53 @@ void SslCertificatesTest::calcResults()
 {
     if (m_interceptedData.size() > 0) {
         m_report = QString("test failed, client accepted fake certificate, data was intercepted");
-        setResult(-1);
+        setResult(SSLTEST_RESULT_DATA_INTERCEPTED);
         return;
     }
 
     if (m_sslConnectionEstablished && (m_interceptedData.size() == 0)
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
         m_report = QString("test failed, client accepted fake certificate, but no data transmitted");
-        setResult(-2);
+        setResult(SSLTEST_RESULT_CERT_ACCEPTED);
         return;
     }
 
     if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
             || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
         m_report = QString("failure during SSL initialization");
-        setResult(-3);
+        setResult(SSLTEST_RESULT_INIT_FAILED);
         return;
     }
 
     m_report = QString("test passed, client refused fake certificate");
-    setResult(0);
+    setResult(SSLTEST_RESULT_SUCCESS);
 }
 
 void SslProtocolsTest::calcResults()
 {
     if (m_interceptedData.size() > 0) {
         m_report = QString("test failed, client accepted fake certificate and weak protocol, data was intercepted");
-        setResult(-1);
+        setResult(SSLTEST_RESULT_DATA_INTERCEPTED);
         return;
     }
 
     if (m_sslConnectionEstablished && (m_interceptedData.size() == 0)
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
         m_report = QString("test failed, client accepted fake certificate and weak protocol, but no data transmitted");
-        setResult(-2);
+        setResult(SSLTEST_RESULT_CERT_ACCEPTED);
         return;
     }
 
     if (m_sslConnectionEstablished) {
         m_report = QString("test failed, client accepted weak protocol");
-        setResult(-3);
+        setResult(SSLTEST_RESULT_PROTO_ACCEPTED);
         return;
     }
 
     if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
             || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
         m_report = QString("failure during SSL initialization");
-        setResult(-4);
+        setResult(SSLTEST_RESULT_INIT_FAILED);
         return;
     }
 
@@ -144,12 +144,12 @@ void SslProtocolsTest::calcResults()
                 || (m_sslErrorsStr.filter(QString("unknown ca")).size() > 0)
                 || (m_sslErrorsStr.filter(QString("bad certificate")).size() > 0))) {
         m_report = QString("test failed, client accepted weak protocol");
-        setResult(-5);
+        setResult(SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR);
         return;
     }
 
     m_report = QString("test passed, client does not accept weak protocol");
-    setResult(0);
+    setResult(SSLTEST_RESULT_SUCCESS);
 }
 
 bool SslProtocolsTest::prepare(const SslUserSettings &settings)

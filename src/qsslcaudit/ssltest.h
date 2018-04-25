@@ -21,6 +21,17 @@
 class SslTest
 {
 public:
+
+    enum {
+        SSLTEST_RESULT_SUCCESS = 0,
+        SSLTEST_RESULT_UNDEFINED = -99,
+        SSLTEST_RESULT_INIT_FAILED = -1,
+        SSLTEST_RESULT_DATA_INTERCEPTED = -2,
+        SSLTEST_RESULT_CERT_ACCEPTED = -3,
+        SSLTEST_RESULT_PROTO_ACCEPTED = -4,
+        SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR = -5,
+    };
+
     SslTest();
     virtual ~SslTest();
 
