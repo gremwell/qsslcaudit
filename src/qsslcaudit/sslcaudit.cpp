@@ -144,7 +144,7 @@ void SslCAudit::runTest(SslTest *test)
 {
     SslServer *sslServer;
 
-    WHITE("running test: " + test->description());
+    WHITE(QString("running test #%1: %2").arg(test->id()).arg(test->description()));
 
     sslServer = prepareSslServer(test);
     if (!sslServer) {

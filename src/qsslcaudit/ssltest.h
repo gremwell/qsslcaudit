@@ -42,6 +42,9 @@ public:
 
     void printReport();
 
+    int id() const { return m_id; }
+    void setId(int id) { m_id = id; }
+
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
 
@@ -74,6 +77,7 @@ public:
     const QByteArray &interceptedData() { return m_interceptedData; }
 
 private:
+    int m_id;
     QString m_name;
     QString m_description;
     int m_result;
