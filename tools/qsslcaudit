@@ -2,4 +2,4 @@
 
 curdir=`pwd`
 
-LD_LIBRARY_PATH="$curdir:/opt/unsafeopenssl/lib64:/opt/unsafeopenssl/lib" qsslcaudit.bin "$@"
+LD_LIBRARY_PATH="$curdir:/opt/unsafeopenssl/lib64:/opt/unsafeopenssl/lib:/opt/unsafeopenssl/usr/lib/x86_64-linux-gnu" qsslcaudit.bin "$@"
