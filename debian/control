@@ -1,0 +1,14 @@
+Source: qsslcaudit
+Section: misc
+Priority: optional
+Maintainer: Pavel Nakonechnyi <pavel@gremwell.com>
+Build-Depends: debhelper (>= 9), cmake, qtbase5-dev, libgnutls28-dev, unsafelibssl-dev
+Standards-Version: 3.9.8
+Homepage: https://github.com/gremwell/qsslcaudit
+
+Package: qsslcaudit
+Architecture: any
+Depends: libqt5core5a, unsafelibssl1.0.2, ${misc:Depends}, ${shlibs:Depends}
+Description: test SSL/TLS clients how secure they are
+ This tool can be used to determine if an application that uses TLS/SSL for its
+ data transfers does this in a secure way.
