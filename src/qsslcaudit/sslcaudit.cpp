@@ -124,7 +124,7 @@ void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
         connect(sslSocket, &XSslSocket::peerVerifyError, this, &SslCAudit::handlePeerVerifyError);
 
         // no 'forward' option -- just read the first packet of unencrypted data and close the connection
-        if (sslSocket->waitForReadyRead(5000)) {
+        if (sslSocket->waitForReadyRead(settings.getWaitDataTimeout())) {
             QByteArray message = sslSocket->readAll();
 
             VERBOSE("received data: " + QString(message));

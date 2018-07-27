@@ -25,6 +25,7 @@ SslUserSettings::SslUserSettings()
     forwardAddr = "";
     startTlsProtocol = SslServer::StartTlsUnknownProtocol;
     loopTests = false;
+    waitDataTimeout = 5000;
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -245,4 +246,14 @@ void SslUserSettings::setLoopTests(bool loop)
 bool SslUserSettings::getLoopTests() const
 {
     return loopTests;
+}
+
+void SslUserSettings::setWaitDataTimeout(quint32 to)
+{
+    waitDataTimeout = to;
+}
+
+quint32 SslUserSettings::getWaitDataTimeout() const
+{
+    return waitDataTimeout;
 }

@@ -71,6 +71,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption loopTestsOption(QStringList() << "loop-tests",
                                        "infinitely repeat selected tests (use Ctrl-C to kill the tool)");
     parser.addOption(loopTestsOption);
+    QCommandLineOption waitDataTimeoutOption(QStringList() << "w" << "wait-data-timeout",
+                                        "wait for incoming data <ms> milliseconds before emitting error", "5000");
+    parser.addOption(waitDataTimeoutOption);
 
     parser.process(a);
 
@@ -182,6 +185,12 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     }
     if (parser.isSet(loopTestsOption)) {
         settings->setLoopTests(true);
+    }
+    if (parser.isSet(waitDataTimeoutOption)) {
+        bool ok = true;
+        quint32 to = parser.value(waitDataTimeoutOption).toInt(&ok);
+        if (ok)
+            settings->setWaitDataTimeout(to);
     }
 }
 

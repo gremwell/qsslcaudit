@@ -57,6 +57,9 @@ public:
     void setLoopTests(bool loop);
     bool getLoopTests() const;
 
+    void setWaitDataTimeout(quint32 to);
+    quint32 getWaitDataTimeout() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -70,6 +73,7 @@ private:
     QList<XSslCertificate> peerCerts;
     SslServer::StartTlsProtocol startTlsProtocol;
     bool loopTests;
+    quint32 waitDataTimeout;
 
 };
 
