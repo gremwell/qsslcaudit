@@ -253,6 +253,73 @@ public slots:
 
 };
 
+// do verify peer certificate, use TlsV1_2 protocol with medium ciphers
+// check for proper test result code
+class Test05 : public Test
+{
+    Q_OBJECT
+public:
+    int getId() { return 5; }
+
+    void setTestSettings()
+    {
+        testSettings.setUserCN("www.example.com");
+    }
+
+    void setSslTest() { targetTest = QString("SslTest16"); sslTest = new SslTest16; }
+
+public slots:
+
+    void run()
+    {
+        XSslSocket *socket = new XSslSocket;
+
+        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
+        socket->setProtocol(XSsl::TlsV1_2);
+        QList<XSslCipher> mediumCiphers;
+        QStringList opensslCiphers = ciphers_medium_str.split(":");
+        opensslCiphers.append(ciphers_low_str.split(":"));
+        opensslCiphers.append(ciphers_export_str.split(":"));
+        opensslCiphers.append(ciphers_high_str.split(":"));
+
+        for (int i = 0; i < opensslCiphers.size(); i++) {
+            XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+            if (!cipher.isNull())
+                mediumCiphers << cipher;
+        }
+        if (mediumCiphers.size() == 0) {
+            printTestFailed();
+            this->deleteLater();
+            QThread::currentThread()->quit();
+            return;
+        }
+        socket->setCiphers(mediumCiphers);
+
+        socket->connectToHostEncrypted("localhost", 8443);
+
+        if (!socket->waitForEncrypted()) {
+            // we should wait until test finishes prior to querying for test results
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+                QThread::msleep(50);
+
+            if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+                printTestSucceeded();
+            } else {
+                printTestFailed();
+            }
+
+        } else {
+            printTestFailed();
+        }
+        socket->disconnectFromHost();
+
+        this->deleteLater();
+        QThread::currentThread()->quit();
+    }
+
+};
+
 
 void launchTest(Test *autotest)
 {
@@ -281,6 +348,7 @@ int main(int argc, char *argv[])
             << new Test02
             << new Test03
             << new Test04
+            << new Test05
                ;
 
     while (autotests.size() > 0) {

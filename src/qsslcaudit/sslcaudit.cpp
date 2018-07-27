@@ -213,13 +213,13 @@ void SslCAudit::run()
 void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)
 {
     XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sender());
+    QString errorStr = sslSocket->errorString();
+    int errorCode = sslSocket->error();
 
-    VERBOSE(QString("ssl error: %1 (%2)")
-            .arg(sslSocket->errorString())
-            .arg(sslSocket->error()));
+    VERBOSE(QString("ssl error: %1 (%2)").arg(errorStr).arg(errorCode));
 
     currentTest->addSslErrors(sslSocket->sslErrors());
-    currentTest->addSslErrorString(sslSocket->errorString());
+    currentTest->addSslErrorString(errorStr);
     currentTest->addSocketErrors(QList<QAbstractSocket::SocketError>() << socketError);
 
     switch (socketError) {
@@ -230,7 +230,13 @@ void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)
         VERBOSE("\tThe SSL library being used reported an internal error. This is probably the result of a bad installation or misconfiguration of the library.");
         break;
     case QAbstractSocket::SslHandshakeFailedError:
-        VERBOSE("\tThe SSL/TLS handshake failed, so the connection was closed.");
+        if (errorStr.contains(QString("ssl3_get_client_hello:no shared cipher"))) {
+            VERBOSE("\tThe SSL/TLS handshake failed (client did not provide expected ciphers), so the connection was closed.");
+        } else if (errorStr.contains(QString("ssl3_read_bytes:tlsv1 alert protocol version"))) {
+            VERBOSE("\tThe SSL/TLS handshake failed (client refused the proposed protocol), so the connection was closed.");
+        } else {
+            VERBOSE("\tThe SSL/TLS handshake failed, so the connection was closed.");
+        }
         break;
     default:
         // just ignore all other errors
