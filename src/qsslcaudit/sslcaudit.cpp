@@ -176,6 +176,11 @@ void SslCAudit::runTest(SslTest *test)
         XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sslServer->nextPendingConnection());
         // this call will loop until connection close if 'forward' option is set
         handleIncomingConnection(sslSocket, test);
+        // be sure that socket is disconnected
+        sslSocket->disconnectFromHost();
+        sslSocket->waitForDisconnected();
+        sslSocket->close();
+        sslSocket->deleteLater();
     } else {
         VERBOSE("could not establish encrypted connection (" + sslServer->errorString() + ")");
     }
