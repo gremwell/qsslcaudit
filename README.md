@@ -21,7 +21,31 @@ However, there could be misconfigurations on client which are not easy to find. 
 
 In order to help with tasks like described above, `qsslcaudit` tool has been created.
 
-# Installation
+# Installation from Binary Packages
+
+Prior note: `openssl-unsafe` will *not* override system OpenSSL library, it installs its files to `/opt` directory.
+
+## Debian / Kali
+
+Download `qsslcaudit` deb package from https://github.com/gremwell/qsslcaudit/releases
+Download `openssl-unsafe`, `unsafelibssl1.0.0` deb packages from https://github.com/gremwell/unsafeopenssl-pkg-debian/releases page.
+
+Install them altogether:
+```
+dpkg -i qsslcaudit_0.1.0-1_amd64.deb openssl-unsafe_1.0.2i-1_amd64.deb unsafelibssl1.0.2_1.0.2i-1_amd64.deb
+```
+
+## ALTLinux
+
+Download `qsslcaudit` RPM package from https://github.com/gremwell/qsslcaudit/releases
+Download `unsafeopenssl`, `unsafelibssl10`, `unsafelibcrypto10` RPM packages from https://github.com/gremwell/unsafeopenssl-pkg-alt/releases page.
+
+Install them altogether:
+```
+apt-get install qsslcaudit-0.1.0-alt1.x86_64.rpm unsafelibcrypto10-1.0.2i-alt1.x86_64.rpm unsafelibssl10-1.0.2i-alt1.x86_64.rpm unsafeopenssl-1.0.2i-alt1.x86_64.rpm
+```
+
+# Installation from Sources
 
 ## Note on OpenSSL 1.1.0
 
