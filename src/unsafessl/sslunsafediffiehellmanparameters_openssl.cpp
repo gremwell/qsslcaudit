@@ -75,7 +75,7 @@ static bool isSafeDH(DH *dh)
     //     Without the test, the IETF parameters would
     //     fail validation. For details, see Diffie-Hellman
     //     Parameter Check (when g = 2, must p mod 24 == 11?).
-#if QT_FEATURE_opensslv11 //QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 //QT_CONFIG(opensslv11)
     // Mark p < 1024 bits as unsafe.
     if (q_DH_bits(dh) < 1024)
         return false;

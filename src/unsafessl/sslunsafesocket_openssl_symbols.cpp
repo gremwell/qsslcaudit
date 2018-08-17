@@ -137,7 +137,7 @@ void qsslSocketCannotResolveSymbolWarning(const char *functionName)
 
 #endif // QT_LINKED_OPENSSL
 
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
 
 // Below are the functions first introduced in version 1.1:
 
@@ -863,7 +863,7 @@ bool q_resolveOpenSslSymbols()
     static bool symbolsResolved = false;
     static bool triedToResolveSymbols = false;
 #ifndef QT_NO_THREAD
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&q_OPENSSL_init_ssl));
 #else
     QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&q_SSL_library_init));
@@ -884,7 +884,7 @@ bool q_resolveOpenSslSymbols()
         // failed to load them
         return false;
 
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
 
     RESOLVEFUNC(OPENSSL_init_ssl)
     RESOLVEFUNC(OPENSSL_init_crypto)

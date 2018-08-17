@@ -98,7 +98,7 @@
 #include <openssl/crypto.h>
 #include <openssl/tls1.h>
 
-#if QT_FEATURE_opensslv11 //QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 //QT_CONFIG(opensslv11)
 #include <openssl/dh.h>
 #endif
 

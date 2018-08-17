@@ -216,7 +216,7 @@ QT_BEGIN_NAMESPACE
 
 #endif // !defined QT_LINKED_OPENSSL
 
-#if QT_FEATURE_opensslv11 //QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 //QT_CONFIG(opensslv11)
 #include "sslunsafesocket_openssl11_symbols_p.h"
 #else
 #include "sslunsafesocket_opensslpre11_symbols_p.h"

@@ -88,7 +88,7 @@ bool SslUnsafeKeyPrivate::fromEVP_PKEY(EVP_PKEY *pkey)
     if (pkey == nullptr)
         return false;
 
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     const int keyType = q_EVP_PKEY_type(q_EVP_PKEY_base_id(pkey));
 #else
     const int keyType = pkey->type;
@@ -274,7 +274,7 @@ Qt::HANDLE SslUnsafeKeyPrivate::handle() const
 
 static QByteArray doCrypt(SslUnsafeKeyPrivate::Cipher cipher, const QByteArray &data, const QByteArray &key, const QByteArray &iv, int enc)
 {
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     EVP_CIPHER_CTX *ctx = q_EVP_CIPHER_CTX_new();
 #else
     EVP_CIPHER_CTX evpCipherContext;
@@ -299,7 +299,7 @@ static QByteArray doCrypt(SslUnsafeKeyPrivate::Cipher cipher, const QByteArray &
     QByteArray output;
     output.resize(data.size() + EVP_MAX_BLOCK_LENGTH);
 
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     q_EVP_CIPHER_CTX_reset(ctx);
 #else
     q_EVP_CIPHER_CTX_init(ctx);
@@ -310,7 +310,7 @@ static QByteArray doCrypt(SslUnsafeKeyPrivate::Cipher cipher, const QByteArray &
     if (cipher == SslUnsafeKeyPrivate::Rc2Cbc)
         q_EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_SET_RC2_KEY_BITS, 8 * key.size(), NULL);
 
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     // EVP_CipherInit in 1.1 resets the context thus making the calls above useless.
     // We call EVP_CipherInit_ex instead.
     q_EVP_CipherInit_ex(ctx, nullptr, nullptr,
@@ -330,7 +330,7 @@ static QByteArray doCrypt(SslUnsafeKeyPrivate::Cipher cipher, const QByteArray &
         reinterpret_cast<unsigned char *>(output.data()) + len, &i);
     len += i;
 
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     q_EVP_CIPHER_CTX_reset(ctx);
     q_EVP_CIPHER_CTX_free(ctx);
 #else

@@ -213,7 +213,7 @@ int q_X509Callback(int ok, X509_STORE_CTX *ctx)
     if (!ok) {
         // Store the error and at which depth the error was detected.
         _q_sslErrorList()->errors << SslUnsafeErrorEntry::fromStoreContext(ctx);
-#if ! QT_FEATURE_opensslv11 //QT_CONFIG(opensslv11)
+#if OPENSSLV10 //QT_CONFIG(opensslv11)
 #ifdef SSLUNSAFESOCKET_DEBUG
         qCDebug(lcSsl) << "verification error: dumping bad certificate";
         qCDebug(lcSsl) << SslUnsafeCertificatePrivate::SslUnsafeCertificate_from_X509(q_X509_STORE_CTX_get_current_cert(ctx)).toPem();
@@ -438,14 +438,14 @@ QString SslUnsafeSocketPrivate::sslLibraryBuildVersionString()
 */
 void SslUnsafeSocketPrivate::resetDefaultCiphers()
 {
-#if QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     SSL_CTX *myCtx = q_SSL_CTX_new(q_TLS_client_method());
 #else
     SSL_CTX *myCtx = q_SSL_CTX_new(q_SSLv23_client_method());
 #endif
     SSL *mySsl = q_SSL_new(myCtx);
 
-#if ! QT_FEATURE_opensslv11 // QT_CONFIG(opensslv11)
+#if OPENSSLV10 // QT_CONFIG(opensslv11)
     // explicitly enable SSLv2 and SSLv3
     q_SSL_ctrl(mySsl, SSL_CTRL_CLEAR_OPTIONS, (SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3), NULL);
 #endif
