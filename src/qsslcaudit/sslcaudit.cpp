@@ -177,8 +177,6 @@ void SslCAudit::runTest(SslTest *test)
         // this call will loop until connection close if 'forward' option is set
         handleIncomingConnection(sslSocket, test);
         // be sure that socket is disconnected
-        sslSocket->disconnectFromHost();
-        sslSocket->waitForDisconnected();
         sslSocket->close();
         sslSocket->deleteLater();
     } else {
