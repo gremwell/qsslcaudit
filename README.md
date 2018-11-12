@@ -72,6 +72,8 @@ Installing packages for ALT Linux (P8, Sisyphus@01-2018): `sudo apt-get install 
 
 Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev libgnutls-dev libssl-dev`.
 
+Installing packages for Ubuntu 18.04: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
+
 Installing packages for Fedora 26: `sudo yum install cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
 
 Installing packages for Kali (rolling@01-2018): `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
@@ -85,13 +87,11 @@ mkdir ~/unsafeopenssl
 cd ~/unsafeopenssl
 ```
 
-Launch `build_with_old_openssl.sh` script from repository specifying path to `qsslcaudit` sources:
+Launch `build_with_old_openssl.sh` script from repository specifying path to `qsslcaudit` sources as shown below. Please note that the script will download (using `curl`) OpenSSL archive, so connection to the Internet is required.
 
 ```
 ~/qsslcaudit/tools/build_with_old_openssl.sh ~/qsslcaudit
 ```
-
-Please note that the script will download (using curl) OpenSSL archive, so connection to the Internet is required.
 
 The following binaries will be installed:
 
