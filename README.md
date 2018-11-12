@@ -74,6 +74,8 @@ Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev li
 
 Installing packages for Ubuntu 18.04: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
 
+Installing packages for Linux Mint 18.3: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl-dev g++`.
+
 Installing packages for Fedora 26: `sudo yum install cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
 
 Installing packages for Kali (rolling@01-2018): `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
