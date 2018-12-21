@@ -90,9 +90,6 @@ set(LIBQSSLCAUDIT_DIR "${CMAKE_SOURCE_DIR}/src/libqsslcaudit")
 add_subdirectory(thirdparty)
 add_subdirectory(src)
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/tools/qsslcaudit" DESTINATION bin
-  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE)
-
 if(WITH_TESTS)
   add_subdirectory(tests)
 endif()
