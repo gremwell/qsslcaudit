@@ -1,4 +1,4 @@
-project(qsslcaudit)
+project(libqsslcaudit)
 
 set(qsslcauditSources
     sslcaudit.cpp
@@ -29,10 +29,10 @@ include_directories(
     ${UNSAFESSL_DIR}
     )
 
-add_library(qsslcaudit STATIC ${qsslcauditSources} ${qsslcauditHeaders})
-set_target_properties(qsslcaudit PROPERTIES AUTOMOC TRUE)
+add_library(qsslcaudit_lib STATIC ${qsslcauditSources} ${qsslcauditHeaders})
+set_target_properties(qsslcaudit_lib PROPERTIES AUTOMOC TRUE)
 
-target_link_libraries(qsslcaudit
+target_link_libraries(qsslcaudit_lib
     qtcertificateaddon
     unsafessl
     )

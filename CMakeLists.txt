@@ -85,7 +85,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
 set(THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
 set(UNSAFESSL_DIR "${CMAKE_SOURCE_DIR}/src/unsafessl")
-set(QSSLCAUDIT_DIR "${CMAKE_SOURCE_DIR}/src/qsslcaudit")
+set(LIBQSSLCAUDIT_DIR "${CMAKE_SOURCE_DIR}/src/libqsslcaudit")
 
 add_subdirectory(thirdparty)
 add_subdirectory(src)
