@@ -80,8 +80,10 @@ include_directories(${unsafessl_INCLUDE_DIRECTORIES})
 add_library(unsafessl STATIC ${unsafessl_SOURCES} ${unsafessl_HEADERS})
 set_target_properties(unsafessl PROPERTIES AUTOMOC TRUE)
 
+if(UNSAFE_MODE)
+  target_link_libraries(unsafessl OpenSSLUnsafe::SSL OpenSSLUnsafe::Crypto)
+else()
+  target_link_libraries(unsafessl OpenSSL::SSL OpenSSL::Crypto)
+endif()
+
 target_link_libraries(unsafessl Qt5::Core Qt5::Network)
-# Fedora builds Qt with "openssl-linked" configuration
-# if(EXISTS "/etc/redhat-release")
-#     target_link_libraries(unsafessl ssl crypto)
-# endif()
