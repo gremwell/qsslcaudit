@@ -57,7 +57,11 @@
 #include <QtCore/qvariant.h>
 #include "sslunsafecertificate.h"
 #include "sslunsafeconfiguration.h"
+#ifdef UNSAFE
+#include <openssl-unsafe/ssl.h>
+#else
 #include <openssl/ssl.h>
+#endif
 
 QT_BEGIN_NAMESPACE
 

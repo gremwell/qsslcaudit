@@ -61,7 +61,11 @@
 #include <QtCore/qmap.h>
 
 #ifndef QT_NO_OPENSSL
+#ifdef UNSAFE
+#include <openssl-unsafe/x509.h>
+#else
 #include <openssl/x509.h>
+#endif
 #else
 struct X509;
 struct X509_EXTENSION;

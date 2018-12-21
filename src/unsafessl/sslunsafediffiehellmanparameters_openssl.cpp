@@ -51,8 +51,13 @@
 #include <QtCore/qdebug.h>
 #endif
 
+#ifdef UNSAFE
+#include <openssl-unsafe/bn.h>
+#include <openssl-unsafe/dh.h>
+#else
 #include <openssl/bn.h>
 #include <openssl/dh.h>
+#endif
 
 QT_BEGIN_NAMESPACE
 

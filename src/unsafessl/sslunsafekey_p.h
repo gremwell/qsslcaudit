@@ -57,8 +57,13 @@
 #include "sslunsafesocket_p.h" // includes wincrypt.h
 
 #ifndef QT_NO_OPENSSL
+#ifdef UNSAFE
+#include <openssl-unsafe/rsa.h>
+#include <openssl-unsafe/dsa.h>
+#else
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>
+#endif
 #endif
 
 QT_BEGIN_NAMESPACE

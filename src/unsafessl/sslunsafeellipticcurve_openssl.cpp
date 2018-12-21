@@ -42,8 +42,13 @@
 #include "sslunsafesocket_p.h"
 #include "sslunsafesocket_openssl_symbols_p.h"
 
+#ifdef UNSAFE
+#include <openssl-unsafe/ssl.h>
+#include <openssl-unsafe/obj_mac.h>
+#else
 #include <openssl/ssl.h>
 #include <openssl/obj_mac.h>
+#endif
 
 #include <algorithm>
 

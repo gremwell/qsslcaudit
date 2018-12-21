@@ -79,6 +79,26 @@
 #endif
 #endif // Q_OS_WIN
 
+#ifdef UNSAFE
+#include <openssl-unsafe/asn1.h>
+#include <openssl-unsafe/bio.h>
+#include <openssl-unsafe/bn.h>
+#include <openssl-unsafe/err.h>
+#include <openssl-unsafe/evp.h>
+#include <openssl-unsafe/pem.h>
+#include <openssl-unsafe/pkcs12.h>
+#include <openssl-unsafe/pkcs7.h>
+#include <openssl-unsafe/rand.h>
+#include <openssl-unsafe/ssl.h>
+#include <openssl-unsafe/stack.h>
+#include <openssl-unsafe/x509.h>
+#include <openssl-unsafe/x509v3.h>
+#include <openssl-unsafe/x509_vfy.h>
+#include <openssl-unsafe/dsa.h>
+#include <openssl-unsafe/rsa.h>
+#include <openssl-unsafe/crypto.h>
+#include <openssl-unsafe/tls1.h>
+#else
 #include <openssl/asn1.h>
 #include <openssl/bio.h>
 #include <openssl/bn.h>
@@ -97,9 +117,14 @@
 #include <openssl/rsa.h>
 #include <openssl/crypto.h>
 #include <openssl/tls1.h>
+#endif
 
 #if QT_FEATURE_opensslv11 && OPENSSLV11 //QT_CONFIG(opensslv11)
+#ifdef UNSAFE
+#include <openssl-unsafe/dh.h>
+#else
 #include <openssl/dh.h>
+#endif
 #endif
 
 QT_BEGIN_NAMESPACE
