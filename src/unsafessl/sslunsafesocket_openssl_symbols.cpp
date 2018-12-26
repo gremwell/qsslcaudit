@@ -664,12 +664,20 @@ static QStringList findAllLibs(QLatin1String filter)
 
 static QStringList findAllLibSsl()
 {
+#ifdef UNSAFE
+    return findAllLibs(QLatin1String("libunsafessl.*"));
+#else
     return findAllLibs(QLatin1String("libssl.*"));
+#endif
 }
 
 static QStringList findAllLibCrypto()
 {
+#ifdef UNSAFE
+    return findAllLibs(QLatin1String("libunsafecrypto.*"));
+#else
     return findAllLibs(QLatin1String("libcrypto.*"));
+#endif
 }
 # endif
 
