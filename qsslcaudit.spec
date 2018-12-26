@@ -1,5 +1,5 @@
 Name: qsslcaudit
-Version: 0.1.0
+Version: 0.2.0
 Release: alt1
 Summary: test SSL/TLS clients how secure they are
 License: GPLv3
@@ -13,7 +13,10 @@ Source: %name.tar
 BuildPreReq: cmake rpm-macros-cmake
 BuildRequires: qt5-base-devel, libgnutls-devel
 
-BuildRequires: unsafelibssl-devel
+BuildRequires: libunsafessl-devel
+#BuildRequires: libssl1.1
+
+Patch: %name-%version-%release.patch
 
 %description
 This tool can be used to determine if an application that uses TLS/SSL for its
@@ -21,9 +24,10 @@ data transfers does this in a secure way.
 
 %prep
 %setup -n %name
+%patch -p1
 
 %build
-%cmake_insource -DOPENSSL_ROOT_DIR="/opt/unsafeopenssl/usr" -DCMAKE_BUILD_TYPE=Release
+%cmake_insource -DCMAKE_BUILD_TYPE=Release
 %make_build VERBOSE=1
 
 %install
@@ -34,5 +38,9 @@ data transfers does this in a secure way.
 %doc README.md
 
 %changelog
+* Sat Dec 22 2018 Pavel Nakonechnyi <pavel@altlinux.org> 0.2.0-alt1
+- version 0.2.0
+- spec updated to follow another edition of unsafe OpenSSL library
+
 * Thu Aug 17 2018 Pavel Nakonechnyi <pavel@altlinux.org> 0.1.0-alt1
 - initial build from https://github.com/gremwell/qsslcaudit

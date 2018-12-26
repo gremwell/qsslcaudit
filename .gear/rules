@@ -1,1 +1,2 @@
 tar: v@version@:. name=@name@
+diff: v@version@:. .
