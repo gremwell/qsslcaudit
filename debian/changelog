@@ -1,3 +1,10 @@
+qsslcaudit (0.2.0-1) UNRELEASED; urgency=low
+
+  * version 0.2.0
+  * spec updated to follow another edition of unsafe OpenSSL library
+
+ -- Pavel Nakonechnyi <pavel@gremwell.com>  Wed, 26 Dec 2018 12:00:00 +0100
+
 qsslcaudit (0.1.0-1) UNRELEASED; urgency=low
 
   * Initial Release for Debian

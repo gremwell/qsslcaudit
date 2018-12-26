@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DOPENSSL_ROOT_DIR=/opt/unsafeopenssl/usr/lib/x86_64-linux-gnu -DOPENSSL_INCLUDE_DIR=/opt/unsafeopenssl/usr/include -DCMAKE_CXX_FLAGS=-isystem\ /opt/unsafeopenssl/usr/include/x86_64-linux-gnu -DCMAKE_BUILD_TYPE=Release
+	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Release
 
 %:
 	dh $@ --buildsystem=cmake --sourcedirectory=.
