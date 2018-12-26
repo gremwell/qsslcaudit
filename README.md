@@ -23,43 +23,49 @@ In order to help with tasks like described above, `qsslcaudit` tool has been cre
 
 # Installation from Binary Packages
 
-Prior note: `openssl-unsafe` will *not* override system OpenSSL library, it installs its files to `/opt` directory.
+Prior note: `openssl-unsafe` package will *not* override system OpenSSL library. It has all its libraries renamed so one can not occasionally link against *unsafe* version.
 
 ## Debian / Kali
 
 Download `qsslcaudit` deb package from https://github.com/gremwell/qsslcaudit/releases
-Download `openssl-unsafe`, `unsafelibssl1.0.0` deb packages from https://github.com/gremwell/unsafeopenssl-pkg-debian/releases page.
+Download `openssl-unsafe` deb packages from https://github.com/gremwell/unsafeopenssl-pkg-debian/releases page.
 
 Install them altogether:
 ```
-dpkg -i qsslcaudit_0.1.0-1_amd64.deb openssl-unsafe_1.0.2i-1_amd64.deb unsafelibssl1.0.2_1.0.2i-1_amd64.deb
+dpkg -i qsslcaudit_0.2.0-1_amd64.deb openssl-unsafe_1.0.2i-2_amd64.deb libunsafessl1.0.2_1.0.2i-2_amd64.deb
 ```
 
 ## ALTLinux
 
 Download `qsslcaudit` RPM package from https://github.com/gremwell/qsslcaudit/releases
-Download `unsafeopenssl`, `unsafelibssl10`, `unsafelibcrypto10` RPM packages from https://github.com/gremwell/unsafeopenssl-pkg-alt/releases page.
+Download `openssl-unsafe` packages from https://github.com/gremwell/unsafeopenssl-pkg-alt/releases page.
 
 Install them altogether:
 ```
-apt-get install qsslcaudit-0.1.0-alt1.x86_64.rpm unsafelibcrypto10-1.0.2i-alt1.x86_64.rpm unsafelibssl10-1.0.2i-alt1.x86_64.rpm unsafeopenssl-1.0.2i-alt1.x86_64.rpm
+apt-get install qsslcaudit-0.2.0-alt1.x86_64.rpm libunsafecrypto10-1.0.2i-alt2.x86_64.rpm libunsafessl10-1.0.2i-alt2.x86_64.rpm openssl-unsafe-1.0.2i-alt2.x86_64.rpm
 ```
 
 # Installation from Sources
 
 ## Note on OpenSSL 1.1.0
 
-OpenSSL 1.1.0 removed support for SSLv2 protocol, see https://www.openssl.org/news/changelog.html#x9
+OpenSSL 1.1.0 removed support for SSLv2 protocol and other insecure features, see https://www.openssl.org/news/changelog.html#x9
 
-Thus, compiling `qsslcaudit` with this version results in some (SSLv2-related) tests not working.
+Thus, compiling `qsslcaudit` with this version results in some (i.e. SSLv2-related) tests not working.
 
 Moreover, runtime linking with "unsafe" library version 1.0.yx with `qsslcaudit` compiled with OpenSSL 1.1.0x is not possible, as these versions are not binary compatible.
 
 For these reasons we advise you to compile `qsslcaudit` using OpenSSL versions 1.0.yx.
 
-## Build Instructions
+## Note on unsafe OpenSSL variant
 
-At the time of writing there was no packages ready for popular Linux distributions. However, compilation from sources should be quite straightforward for engineer that wants to test TLS/SSL client.
+As even 1.0.x versions are too safe for some of the tests included, we prepared so-called *unsafe* build of OpenSSL library. See repositories https://github.com/gremwell/unsafeopenssl-pkg-debian and https://github.com/gremwell/unsafeopenssl-pkg-alt
+
+Packages backed from these repos follow filesystem hierarchy standard but install renamed OpenSSL libraries, i.e. `libunsafessl` and `libunsafecrypto`. This makes it impossible to occasionally link your program against these libraries. Additionally, they provide `openssl-unsafe` binary which can be useful by itself with tools like https://testssl.sh/
+
+Build system of `qsslcaudit` determines which OpenSSL variant is installed and will use *unsafe* version if it is available.
+
+## Build Instructions
 
 Some packages have to be installed in order to compile `qsslcaudit`:
 
@@ -68,39 +74,17 @@ Some packages have to be installed in order to compile `qsslcaudit`:
 * [OpenSSL](https://www.openssl.org/) library development package
 * [CMake](https://cmake.org/) tool
 
+If you want to use unsafe OpenSSL variant, install corresponding packages from https://github.com/gremwell/unsafeopenssl-pkg-debian or https://github.com/gremwell/unsafeopenssl-pkg-alt and avoid having standard system OpenSSL devel packages. Below we mention default system libraries.
+
 Installing packages for ALT Linux (P8, Sisyphus@01-2018): `sudo apt-get install cmake qt5-base-devel libgnutls-devel libssl-devel`.
+
+Installing packages for Kali (rolling@01-2018): `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
 
 Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev libgnutls-dev libssl-dev`.
 
 Installing packages for Ubuntu 18.04: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
 
 Installing packages for Linux Mint 18.3: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl-dev g++`.
-
-Installing packages for Fedora 26: `sudo yum install cmake qt5-qtbase-devel gnutls-devel compat-openssl10-devel`. Probably, you will need to explicitly remove `openssl-devel`.
-
-Installing packages for Kali (rolling@01-2018): `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
-
-### Easy build with custom OpenSSL library
-
-Create directory somewhere in you `$HOME` for insecure build of OpenSSL library and switch to this directory:
-
-```
-mkdir ~/unsafeopenssl
-cd ~/unsafeopenssl
-```
-
-Launch `build_with_old_openssl.sh` script from repository specifying path to `qsslcaudit` sources as shown below. Please note that the script will download (using `curl`) OpenSSL archive, so connection to the Internet is required.
-
-```
-~/qsslcaudit/tools/build_with_old_openssl.sh ~/qsslcaudit
-```
-
-The following binaries will be installed:
-
-* `qsslcaudit.bin` -- main application binary
-* `qsslcaudit` -- shell script, which launches `qsslcaudit.bin` with `LD_LIBRARY_PATH` environment variable set to the current directory
-
-Now the tool is ready to use. Launch it being inside `~/unsafeopenssl` directory.
 
 ### Detailed build description
 
@@ -119,24 +103,13 @@ make
 sudo make install
 ```
 
-Now the tool is installed. However, unsafe SSL protocols can be tested only with unsafe OpenSSL library. Most likely your Linux distro has safe one.
+Now the tool is installed.
+
+OpenSSL library is determine during `cmake` run. If your system has unsafe version (see above), it will be used. Otherwise -- available system version (1.0.x or 1.1.x).
 
 #### Building unsafe OpenSSL library
 
-To have such unsafe version, do the following:
-
-* Create directory where you would like to store unsafe OpenSSL libraries and binary (can be somewhere in your `$HOME`)
-* Launch helper script to download and compile unsafe OpenSSL library
-
-```
-mkdir openssl
-cd openssl
-~/Downloads/qsslcaudit/tools/build_openssl.sh
-```
-
-Now, if you want to use `qsslcaudit` with unsafe OpenSSL version, just launch it inside `openssl` directory (or any other you chose).
-
-The tool will load library symbols at runtime. However, if `qsslcaudit` was compiled using "safe" headers (i.e. SSLv2 turned off), some errors will rise. Thus, it is better to follow "easy way" and use `build_with_old_openssl.sh` script.
+Manual building unsafe OpenSSL library is (now) not supported. For those who are curious, see spec files in the corresponding `unsafeopenssl` repository.
 
 # Usage
 
