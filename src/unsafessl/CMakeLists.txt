@@ -80,6 +80,8 @@ include_directories(${unsafessl_INCLUDE_DIRECTORIES})
 add_library(unsafessl STATIC ${unsafessl_SOURCES} ${unsafessl_HEADERS})
 set_target_properties(unsafessl PROPERTIES AUTOMOC TRUE)
 
+# this is not needed when Qt built with openssl-linked
+# however, I do not know how to determine it with cmake
 if(UNSAFE_MODE)
   target_link_libraries(unsafessl OpenSSLUnsafe::SSL OpenSSLUnsafe::Crypto)
 else()
