@@ -1,0 +1,38 @@
+If you have docker, you can run qsslcaudit in a container:
+ docker run --name qs --rm -p 8443:8443 -it gremwell/qsslcaudit
+
+This command can be run anywhere, no need to clone qsslcaudit git repo.
+
+This commands will do the following:
+ * On the first run: download image of Ubuntu 18.10 with qsslcaudit
+ * Start container named 'qs' and make it listen on port 8443 on the host
+ * Display the output of qsslcaudit on terminal
+ * Wipe the container as soon as qsslcaudit exits
+
+To quickly test it, run the following command in another terminal:
+ while sleep 1; do curl -k https://localhost:8443/ ; done
+
+Your qsslcaudit instance will show something like following:
+ +------------------------------------------------------------------+--------------+
+ |                            Test Name                             |    Result    |
+ +------------------------------------------------------------------+--------------+
+ | self-signed certificate for invalid domain trust                 |    FAILED    |
+ | SSLv2 protocol support                                           |    PASSED    |
+ | SSLv3 protocol support                                           |    PASSED    |
+ | SSLv3 protocol and EXPORT grade ciphers support                  |    PASSED    |
+ | SSLv3 protocol and LOW grade ciphers support                     |    PASSED    |
+ | SSLv3 protocol and MEDIUM grade ciphers support                  |    PASSED    |
+ | TLS 1.0 protocol support                                         |    FAILED    |
+ | TLS 1.0 protocol and EXPORT grade ciphers support                |    PASSED    |
+ | TLS 1.0 protocol and LOW grade ciphers support                   |    PASSED    |
+ | TLS 1.0 protocol and MEDIUM grade ciphers support                |    FAILED    |
+ | TLS 1.1 protocol and EXPORT grade ciphers support                |    PASSED    |
+ | TLS 1.1 protocol and LOW grade ciphers support                   |    PASSED    |
+ | TLS 1.1 protocol and MEDIUM grade ciphers support                |    FAILED    |
+ | TLS 1.2 protocol and EXPORT grade ciphers support                |    PASSED    |
+ | TLS 1.2 protocol and LOW grade ciphers support                   |    PASSED    |
+ | TLS 1.2 protocol and MEDIUM grade ciphers support                |    FAILED    |
+ +------------------------------------------------------------------+--------------+
+ 
+If you need kill the container manually, do:
+ docker kill qs
