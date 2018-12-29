@@ -68,7 +68,7 @@ void SslServer::incomingConnection(qintptr socketDescriptor)
         sslConf.setEllipticCurves(m_sslEllipticCurves);
 #endif
     /* this is important to set even in server mode to properly verify SSLv3 / SSLv2 support */
-    sslConf.setPeerVerifyMode(SslUnsafeSocket::VerifyNone);
+    sslConf.setPeerVerifyMode(XSslSocket::VerifyNone);
 
     sslSocket->setSslConfiguration(sslConf);
 

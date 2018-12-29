@@ -781,8 +781,13 @@ static QPair<QLibrary*, QLibrary*> loadOpenSsl()
 #endif
 #if defined(SHLIB_VERSION_NUMBER) && !defined(Q_OS_QNX) // on QNX, the libs are always libssl.so and libcrypto.so
     // first attempt: the canonical name is libssl.so.<SHLIB_VERSION_NUMBER>
+#ifdef UNSAFE
+    libssl->setFileNameAndVersion(QLatin1String("unsafessl"), QLatin1String(SHLIB_VERSION_NUMBER));
+    libcrypto->setFileNameAndVersion(QLatin1String("unsafecrypto"), QLatin1String(SHLIB_VERSION_NUMBER));
+#else
     libssl->setFileNameAndVersion(QLatin1String("ssl"), QLatin1String(SHLIB_VERSION_NUMBER));
     libcrypto->setFileNameAndVersion(QLatin1String("crypto"), QLatin1String(SHLIB_VERSION_NUMBER));
+#endif
     if (libcrypto->load() && libssl->load()) {
         // libssl.so.<SHLIB_VERSION_NUMBER> and libcrypto.so.<SHLIB_VERSION_NUMBER> found
         return pair;
@@ -793,12 +798,22 @@ static QPair<QLibrary*, QLibrary*> loadOpenSsl()
 #endif
 
     // next attempt: another canonical name is libssl.so.{10,11}
+#ifdef UNSAFE
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    libssl->setFileNameAndVersion(QLatin1String("unsafessl"), QLatin1String("10"));
+    libcrypto->setFileNameAndVersion(QLatin1String("unsafecrypto"), QLatin1String("10"));
+#else
+    libssl->setFileNameAndVersion(QLatin1String("unsafessl"), QLatin1String("11"));
+    libcrypto->setFileNameAndVersion(QLatin1String("unsafecrypto"), QLatin1String("11"));
+#endif
+#else
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     libssl->setFileNameAndVersion(QLatin1String("ssl"), QLatin1String("10"));
     libcrypto->setFileNameAndVersion(QLatin1String("crypto"), QLatin1String("10"));
 #else
     libssl->setFileNameAndVersion(QLatin1String("ssl"), QLatin1String("11"));
     libcrypto->setFileNameAndVersion(QLatin1String("crypto"), QLatin1String("11"));
+#endif
 #endif
     if (libcrypto->load() && libssl->load()) {
         // libssl.so.<10/11> and libcrypto.so.<10/11> found
@@ -815,8 +830,13 @@ static QPair<QLibrary*, QLibrary*> loadOpenSsl()
     //  macOS's /usr/lib/libssl.dylib, /usr/lib/libcrypto.dylib will be picked up in the third
     //    attempt, _after_ <bundle>/Contents/Frameworks has been searched.
     //  iOS does not ship a system libssl.dylib, libcrypto.dylib in the first place.
+#ifdef UNSAFE
+    libssl->setFileNameAndVersion(QLatin1String("unsafessl"), -1);
+    libcrypto->setFileNameAndVersion(QLatin1String("unsafecrypto"), -1);
+#else
     libssl->setFileNameAndVersion(QLatin1String("ssl"), -1);
     libcrypto->setFileNameAndVersion(QLatin1String("crypto"), -1);
+#endif
     if (libcrypto->load() && libssl->load()) {
         // libssl.so.0 and libcrypto.so.0 found
         return pair;
