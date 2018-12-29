@@ -38,9 +38,13 @@ QHostAddress SslUserSettings::getListenAddress() const
     return listenAddress;
 }
 
-void SslUserSettings::setListenPort(quint16 port)
+bool SslUserSettings::setListenPort(int port)
 {
-    listenPort = port;
+    if ((port < 0) || (port > 65535)) {
+        return false;
+    }
+    listenPort = static_cast<quint16>(port);
+    return true;
 }
 
 quint16 SslUserSettings::getListenPort() const
@@ -248,9 +252,12 @@ bool SslUserSettings::getLoopTests() const
     return loopTests;
 }
 
-void SslUserSettings::setWaitDataTimeout(quint32 to)
+bool SslUserSettings::setWaitDataTimeout(int to)
 {
-    waitDataTimeout = to;
+    if (to < 0)
+        return false;
+    waitDataTimeout = static_cast<quint32>(to);
+    return true;
 }
 
 quint32 SslUserSettings::getWaitDataTimeout() const

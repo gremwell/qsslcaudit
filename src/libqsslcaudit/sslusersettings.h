@@ -20,7 +20,7 @@ public:
     void setListenAddress(const QHostAddress &addr);
     QHostAddress getListenAddress() const;
 
-    void setListenPort(quint16 port);
+    bool setListenPort(int port);
     quint16 getListenPort() const;
 
     void setUserCN(const QString &cn);
@@ -57,7 +57,7 @@ public:
     void setLoopTests(bool loop);
     bool getLoopTests() const;
 
-    void setWaitDataTimeout(quint32 to);
+    bool setWaitDataTimeout(int to);
     quint32 getWaitDataTimeout() const;
 
 private:

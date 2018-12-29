@@ -85,10 +85,11 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         settings->setListenAddress(QHostAddress(parser.value(listenAddressOption)));
     }
     if (parser.isSet(listenPortOption)) {
-        bool ok = true;
-        quint16 port = parser.value(listenPortOption).toInt(&ok);
-        if (ok)
-            settings->setListenPort(port);
+        int port = parser.value(listenPortOption).toInt(&ok);
+        if (!ok || !settings->setListenPort(port)) {
+            RED("the provided listening port value is invalid: " + parser.value(listenPortOption));
+            exit(-1);
+        }
     }
     if (parser.isSet(userCNOption)) {
         settings->setUserCN(parser.value(userCNOption));
@@ -147,16 +148,22 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         selectedTests.clear();
 
         QString testsStr = parser.value(selectedTestsOption);
+        QRegExp rx = QRegExp("[\\d?,?\\-?]+");
+
+        if (!rx.exactMatch(testsStr)) {
+            RED("tests selection is malformed: " + testsStr);
+            exit(-1);
+        }
+
         QStringList testsListStr = testsStr.split(",", QString::SkipEmptyParts);
         for (int i = 0; i < testsListStr.size(); i++) {
-            bool ok;
-
             // check for range
             if (testsListStr.at(i).count("-") == 1) {
+                // due to regex above we know that input is correct here
                 int low = testsListStr.at(i).split("-").at(0).toInt(&ok) - 1;
                 int high = testsListStr.at(i).split("-").at(1).toInt(&ok) - 1;
 
-                if (ok && (low <= high) && (high < SSLTESTS_COUNT)) {
+                if ((low <= high) && (high < SSLTESTS_COUNT)) {
                     for (int num = low; num <= high; num++) {
                         selectedTests << num;
                     }
@@ -188,9 +195,11 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     }
     if (parser.isSet(waitDataTimeoutOption)) {
         bool ok = true;
-        quint32 to = parser.value(waitDataTimeoutOption).toInt(&ok);
-        if (ok)
-            settings->setWaitDataTimeout(to);
+        int to = parser.value(waitDataTimeoutOption).toInt(&ok);
+        if (!ok || !settings->setWaitDataTimeout(to)) {
+            RED("invalid timeout value " + parser.value(waitDataTimeoutOption));
+            exit(-1);
+        }
     }
 }
 
