@@ -26,6 +26,7 @@ SslUserSettings::SslUserSettings()
     startTlsProtocol = SslServer::StartTlsUnknownProtocol;
     loopTests = false;
     waitDataTimeout = 5000;
+    outputXmlFilename = "";
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -256,4 +257,14 @@ void SslUserSettings::setWaitDataTimeout(quint32 to)
 quint32 SslUserSettings::getWaitDataTimeout() const
 {
     return waitDataTimeout;
+}
+
+void SslUserSettings::setOutputXml(const QString &filename)
+{
+    outputXmlFilename = filename;
+}
+
+QString SslUserSettings::getOutputXml() const
+{
+    return outputXmlFilename;
 }

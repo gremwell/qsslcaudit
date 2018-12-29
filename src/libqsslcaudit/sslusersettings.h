@@ -60,6 +60,9 @@ public:
     void setWaitDataTimeout(quint32 to);
     quint32 getWaitDataTimeout() const;
 
+    void setOutputXml(const QString &filename);
+    QString getOutputXml() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -74,7 +77,7 @@ private:
     SslServer::StartTlsProtocol startTlsProtocol;
     bool loopTests;
     quint32 waitDataTimeout;
-
+    QString outputXmlFilename;
 };
 
 #endif // SSLUSERSETTINGS_H
