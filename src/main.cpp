@@ -57,7 +57,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
                                        "path to file containing custom private key for CA certificate", "~/ca.key");
     parser.addOption(userCaKeyOption);
     QCommandLineOption selectedTestsOption(QStringList() << "selected-tests",
-                                     "comma-separated list of tests (id) to execute", "1,3,5");
+                                     "comma-separated list of tests (id or group) to execute", "1,3,5,certs,protos,ciphers");
     parser.addOption(selectedTestsOption);
     QCommandLineOption forwardOption(QStringList() << "forward",
                                     "forward connection to upstream proxy", "127.0.0.1:6666");
@@ -164,8 +164,45 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             } else {
                 // check for single number
                 int num = testsListStr.at(i).toInt(&ok) - 1;
-                if (ok && (SSLTESTS_COUNT > num))
-                    selectedTests << num;
+                if (ok) {
+                    if (0 < num && num < SSLTESTS_COUNT) {
+                        selectedTests << num;
+                    } else {
+                        RED("bad test selection");
+                        exit(-1);
+                    }
+                } else {
+                    // got a non-numeric test id
+                    if (testsListStr.at(i).compare("certs") == 0) {
+                        selectedTests << (1-1);
+                        selectedTests << (2-1);
+                        selectedTests << (3-1);
+                        selectedTests << (4-1);
+                        selectedTests << (5-1);
+                        selectedTests << (6-1);
+                        selectedTests << (7-1);
+                    } else if (testsListStr.at(i).compare("protos") == 0) {
+                        selectedTests << (8-1);
+                        selectedTests << (9-1);
+                        selectedTests << (13-1);
+                    } else if (testsListStr.at(i).compare("ciphers") == 0) {
+                        selectedTests << (10-1);
+                        selectedTests << (11-1);
+                        selectedTests << (12-1);
+                        selectedTests << (14-1);
+                        selectedTests << (15-1);
+                        selectedTests << (16-1);
+                        selectedTests << (17-1);
+                        selectedTests << (18-1);
+                        selectedTests << (19-1);
+                        selectedTests << (20-1);
+                        selectedTests << (21-1);
+                        selectedTests << (22-1);
+                    } else {
+                        RED("bad test selection");
+                        exit(-1);
+                    }
+                }
             }
         }
     } else {
