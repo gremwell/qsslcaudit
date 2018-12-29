@@ -4,6 +4,7 @@
 #include "debug.h"
 
 #include <QUrl>
+#include <QFileInfo>
 
 #ifdef UNSAFE
 #include "sslunsafesocket.h"
@@ -26,6 +27,7 @@ SslUserSettings::SslUserSettings()
     startTlsProtocol = SslServer::StartTlsUnknownProtocol;
     loopTests = false;
     waitDataTimeout = 5000;
+    outputXmlFilename = "";
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -263,4 +265,28 @@ bool SslUserSettings::setWaitDataTimeout(int to)
 quint32 SslUserSettings::getWaitDataTimeout() const
 {
     return waitDataTimeout;
+}
+
+bool SslUserSettings::setOutputXml(const QString &filename)
+{
+    QFileInfo info(filename);
+    if (info.exists()) {
+        if (!info.isFile() || !info.isWritable())
+            return false;
+    } else {
+        QFile f(filename);
+        if (!f.open(QIODevice::WriteOnly)) {
+            f.close();
+            return false;
+        }
+        // file was created, but there is a chance that it won't be used, delete it
+        f.remove();
+    }
+    outputXmlFilename = filename;
+    return true;
+}
+
+QString SslUserSettings::getOutputXml() const
+{
+    return outputXmlFilename;
 }

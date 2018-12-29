@@ -65,6 +65,29 @@ SslTest *SslTest::createTest(int id)
     return NULL;
 }
 
+const QString SslTest::resultToStatus(enum SslTest::SslTestResult result)
+{
+    QString ret;
+
+    switch (result) {
+    case SslTest::SSLTEST_RESULT_SUCCESS:
+        ret = "PASSED";
+        break;
+    case SslTest::SSLTEST_RESULT_UNDEFINED:
+    case SslTest::SSLTEST_RESULT_INIT_FAILED:
+        ret = "UNDEFINED";
+        break;
+    case SslTest::SSLTEST_RESULT_DATA_INTERCEPTED:
+    case SslTest::SSLTEST_RESULT_CERT_ACCEPTED:
+    case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED:
+    case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR:
+        ret = "FAILED";
+        break;
+    }
+
+    return ret;
+}
+
 void SslTest::printReport()
 {
     if (m_result < 0) {

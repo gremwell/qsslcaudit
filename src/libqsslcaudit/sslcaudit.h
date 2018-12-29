@@ -26,6 +26,7 @@ public:
 
     static void showCiphers();
     void printSummary();
+    void writeXmlSummary(const QString &filename);
 
 public slots:
     void run();

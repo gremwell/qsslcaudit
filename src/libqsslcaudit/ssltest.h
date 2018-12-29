@@ -33,7 +33,7 @@ class SslTest
 {
 public:
 
-    enum {
+    enum SslTestResult {
         SSLTEST_RESULT_SUCCESS = 0,
         SSLTEST_RESULT_UNDEFINED = -99,
         SSLTEST_RESULT_INIT_FAILED = -1,
@@ -47,6 +47,7 @@ public:
     virtual ~SslTest();
 
     static SslTest *createTest(int id);
+    static const QString resultToStatus(enum SslTest::SslTestResult result);
 
     virtual bool prepare(const SslUserSettings &settings) = 0;
     virtual void calcResults() = 0;
@@ -67,8 +68,8 @@ public:
 
     void clear();
 
-    int result() const { return m_result; }
-    void setResult(int result) { m_result = result; }
+    enum SslTest::SslTestResult result() const { return m_result; }
+    void setResult(enum SslTest::SslTestResult result) { m_result = result; }
 
     void setLocalCert(const QList<XSslCertificate> &chain) { m_localCertsChain = chain; }
     QList<XSslCertificate> localCert() const { return m_localCertsChain; }
@@ -95,7 +96,7 @@ private:
     int m_group;
     QString m_name;
     QString m_description;
-    int m_result;
+    enum SslTest::SslTestResult m_result;
     QString m_report;
     QList<XSslCertificate> m_localCertsChain;
     XSslKey m_privateKey;

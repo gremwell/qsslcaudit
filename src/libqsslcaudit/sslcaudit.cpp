@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QThread>
 #include <QFile>
+#include <QXmlStreamWriter>
 
 #ifdef UNSAFE
 #include "sslunsafesocket.h"
@@ -349,28 +350,44 @@ void SslCAudit::printSummary()
     printTableHSeparator();
 
     for (int i = 0; i < sslTests.size(); i++) {
-        QString testName = sslTests.at(i)->name();
-        QString result;
+        SslTest *test = sslTests.at(i);
+        QString testName = test->name();
+        QString result = SslTest::resultToStatus(test->result());
 
         while (testName.length() > testColumnWidth) {
             printTableLine(testName.left(testColumnWidth - 2), "");
             testName = "  " + testName.mid(testColumnWidth - 2);
         }
 
-        switch (sslTests.at(i)->result()) {
-        case SslTest::SSLTEST_RESULT_SUCCESS:
-            result = "PASSED";
-            break;
-        case SslTest::SSLTEST_RESULT_UNDEFINED:
-        case SslTest::SSLTEST_RESULT_INIT_FAILED:
-            result = "UNDEFINED";
-            break;
-        default:
-            result = "FAILED";
-        }
-
         printTableLine(testName, result);
     }
 
     printTableHSeparator();
+}
+
+void SslCAudit::writeXmlSummary(const QString &filename)
+{
+    QFile file(filename);
+    file.open(QIODevice::WriteOnly);
+
+    QXmlStreamWriter xmlWriter(&file);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
+
+    xmlWriter.writeStartElement("qsslcaudit");
+    for (int i = 0; i < sslTests.size(); i++) {
+        SslTest *test = sslTests.at(i);
+        QString testId = QString::number(test->id());
+        QString testName = test->name();
+        QString testResult = SslTest::resultToStatus(test->result());
+
+        xmlWriter.writeStartElement("test");
+        xmlWriter.writeTextElement("id", testId);
+        xmlWriter.writeTextElement("name", testName);
+        xmlWriter.writeTextElement("result", testResult);
+        xmlWriter.writeEndElement();
+    }
+
+    xmlWriter.writeEndElement();
+    file.close();
 }

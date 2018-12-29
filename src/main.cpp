@@ -74,6 +74,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption waitDataTimeoutOption(QStringList() << "w" << "wait-data-timeout",
                                         "wait for incoming data <ms> milliseconds before emitting error", "5000");
     parser.addOption(waitDataTimeoutOption);
+    QCommandLineOption outputXmlOption(QStringList() << "output-xml",
+                                       "save results in XML", "qsslcaudit.xml");
+    parser.addOption(outputXmlOption);
 
     parser.process(a);
 
@@ -224,6 +227,13 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             exit(-1);
         }
     }
+    if (parser.isSet(outputXmlOption)) {
+        ok = settings->setOutputXml(parser.value(outputXmlOption));
+        if (!ok) {
+            RED("check if the provided path to XML output is writable");
+            exit(-1);
+        };
+    }
 }
 
 
@@ -270,6 +280,10 @@ int main(int argc, char *argv[])
 
     QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){
         caudit->printSummary();
+
+        if (settings.getOutputXml().length() > 0)
+            caudit->writeXmlSummary(settings.getOutputXml());
+
         qApp->exit();
     });
 
