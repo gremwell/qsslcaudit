@@ -1,0 +1,27 @@
+#
+# Docker environment for QSSLCAUDIT development and testing
+# Uses binary packages of unsafe OpenSSL
+#
+# Prepare qs-dev image: docker build -t qs-dev -f Dockerfile.dev .
+# Spawn docker instance: docker run --name qs-dev --rm -it -v `pwd`:/qsslcaudit qs-dev
+# Prepare for build (run inside docker): cd /qsslcaudit && rm -rf build && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+# Build and intall (run inside docker): make install
+#
+FROM ubuntu:xenial
+
+RUN apt-get update && apt-get install -y wget git
+
+WORKDIR /tmp
+
+# install unsafe version of OpenSSL
+RUN wget https://github.com/gremwell/unsafeopenssl-pkg-debian/releases/download/1.0.2i-2/libunsafessl-dev_1.0.2i-2_ubuntu16.04_amd64.deb
+RUN wget https://github.com/gremwell/unsafeopenssl-pkg-debian/releases/download/1.0.2i-2/libunsafessl1.0.2_1.0.2i-2_ubuntu16.04_amd64.deb
+RUN wget https://github.com/gremwell/unsafeopenssl-pkg-debian/releases/download/1.0.2i-2/openssl-unsafe_1.0.2i-2_ubuntu16.04_amd64.deb
+RUN apt-get install -y ./libunsafessl1.0.2_1.0.2i-2_ubuntu16.04_amd64.deb ./libunsafessl-dev_1.0.2i-2_ubuntu16.04_amd64.deb ./openssl-unsafe_1.0.2i-2_ubuntu16.04_amd64.deb
+RUN rm ./libunsafessl1.0.2_1.0.2i-2_ubuntu16.04_amd64.deb ./libunsafessl-dev_1.0.2i-2_ubuntu16.04_amd64.deb ./openssl-unsafe_1.0.2i-2_ubuntu16.04_amd64.deb
+
+# install other build dependencies
+RUN apt-get install -y cmake qtbase5-dev libgnutls-dev
+
+# install other tools useful for development and testing
+RUN apt-get install -y curl vim libxml-xpath-perl
