@@ -8,7 +8,7 @@
 class SslTest01 : public SslCertificatesTest
 {
 public:
-    SslTest01() {
+    SslTest01() : SslCertificatesTest() {
         setId(1);
         setName("custom certificate trust");
         setDescription("certificate trust test with user-supplied certificate");
@@ -113,7 +113,7 @@ public:
 
 };
 
-class SslTest10 : public SslProtocolsTest
+class SslTest10 : public SslCiphersTest
 {
 public:
     SslTest10() {
@@ -125,7 +125,7 @@ public:
 
 };
 
-class SslTest11 : public SslProtocolsTest
+class SslTest11 : public SslCiphersTest
 {
 public:
     SslTest11() {
@@ -137,7 +137,7 @@ public:
 
 };
 
-class SslTest12 : public SslProtocolsTest
+class SslTest12 : public SslCiphersTest
 {
 public:
     SslTest12() {
@@ -161,7 +161,7 @@ public:
 
 };
 
-class SslTest14 : public SslProtocolsTest
+class SslTest14 : public SslCiphersTest
 {
 public:
     SslTest14() {
@@ -173,7 +173,7 @@ public:
 
 };
 
-class SslTest15 : public SslProtocolsTest
+class SslTest15 : public SslCiphersTest
 {
 public:
     SslTest15() {
@@ -185,7 +185,7 @@ public:
 
 };
 
-class SslTest16 : public SslProtocolsTest
+class SslTest16 : public SslCiphersTest
 {
 public:
     SslTest16() {
@@ -197,7 +197,7 @@ public:
 
 };
 
-class SslTest17 : public SslProtocolsTest
+class SslTest17 : public SslCiphersTest
 {
 public:
     SslTest17() {
@@ -209,7 +209,7 @@ public:
 
 };
 
-class SslTest18 : public SslProtocolsTest
+class SslTest18 : public SslCiphersTest
 {
 public:
     SslTest18() {
@@ -221,7 +221,7 @@ public:
 
 };
 
-class SslTest19 : public SslProtocolsTest
+class SslTest19 : public SslCiphersTest
 {
 public:
     SslTest19() {
@@ -233,7 +233,7 @@ public:
 
 };
 
-class SslTest20 : public SslProtocolsTest
+class SslTest20 : public SslCiphersTest
 {
 public:
     SslTest20() {
@@ -245,7 +245,7 @@ public:
 
 };
 
-class SslTest21 : public SslProtocolsTest
+class SslTest21 : public SslCiphersTest
 {
 public:
     SslTest21() {
@@ -257,7 +257,7 @@ public:
 
 };
 
-class SslTest22 : public SslProtocolsTest
+class SslTest22 : public SslCiphersTest
 {
 public:
     SslTest22() {

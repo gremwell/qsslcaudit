@@ -111,7 +111,7 @@ void SslCertificatesTest::calcResults()
     setResult(SSLTEST_RESULT_SUCCESS);
 }
 
-void SslProtocolsTest::calcResults()
+void SslProtocolsCiphersTest::calcResults()
 {
     if (m_interceptedData.size() > 0) {
         m_report = QString("test failed, client accepted fake certificate and weak protocol, data was intercepted");
@@ -152,7 +152,7 @@ void SslProtocolsTest::calcResults()
     setResult(SSLTEST_RESULT_SUCCESS);
 }
 
-bool SslProtocolsTest::prepare(const SslUserSettings &settings)
+bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
 {
     XSslKey key;
     QList<XSslCertificate> chain = settings.getUserCert();
@@ -182,7 +182,7 @@ bool SslProtocolsTest::prepare(const SslUserSettings &settings)
     return setProtoAndCiphers();
 }
 
-bool SslProtocolsTest::setProtoAndSupportedCiphers(XSsl::SslProtocol proto)
+bool SslProtocolsCiphersTest::setProtoAndSupportedCiphers(XSsl::SslProtocol proto)
 {
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
 
@@ -192,7 +192,7 @@ bool SslProtocolsTest::setProtoAndSupportedCiphers(XSsl::SslProtocol proto)
     return true;
 }
 
-bool SslProtocolsTest::setProtoAndSpecifiedCiphers(XSsl::SslProtocol proto, QString ciphersString, QString name)
+bool SslProtocolsCiphersTest::setProtoAndSpecifiedCiphers(XSsl::SslProtocol proto, QString ciphersString, QString name)
 {
     QList<XSslCipher> ciphers;
     QStringList opensslCiphers = ciphersString.split(":");
@@ -214,17 +214,17 @@ bool SslProtocolsTest::setProtoAndSpecifiedCiphers(XSsl::SslProtocol proto, QStr
     return true;
 }
 
-bool SslProtocolsTest::setProtoAndExportCiphers(XSsl::SslProtocol proto)
+bool SslProtocolsCiphersTest::setProtoAndExportCiphers(XSsl::SslProtocol proto)
 {
     return setProtoAndSpecifiedCiphers(proto, ciphers_export_str, "EXPORT");
 }
 
-bool SslProtocolsTest::setProtoAndLowCiphers(XSsl::SslProtocol proto)
+bool SslProtocolsCiphersTest::setProtoAndLowCiphers(XSsl::SslProtocol proto)
 {
     return setProtoAndSpecifiedCiphers(proto, ciphers_low_str, "LOW");
 }
 
-bool SslProtocolsTest::setProtoAndMediumCiphers(XSsl::SslProtocol proto)
+bool SslProtocolsCiphersTest::setProtoAndMediumCiphers(XSsl::SslProtocol proto)
 {
     return setProtoAndSpecifiedCiphers(proto, ciphers_medium_str, "MEDIUM");
 }

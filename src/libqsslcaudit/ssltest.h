@@ -18,6 +18,17 @@
 #include "sslusersettings.h"
 
 
+enum {
+    SSLTESTS_GROUP_CERTS,
+    SSLTESTS_GROUP_PROTOS,
+    SSLTESTS_GROUP_CIPHERS,
+};
+
+static const QString SSLTESTS_GROUP_CERTS_STR = QString("certs");
+static const QString SSLTESTS_GROUP_PROTOS_STR = QString("protos");
+static const QString SSLTESTS_GROUP_CIPHERS_STR = QString("ciphers");
+
+
 class SslTest
 {
 public:
@@ -44,6 +55,9 @@ public:
 
     int id() const { return m_id; }
     void setId(int id) { m_id = id; }
+
+    int group() const { return m_group; }
+    void setGroup(int group) { m_group = group; }
 
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
@@ -78,6 +92,7 @@ public:
 
 private:
     int m_id;
+    int m_group;
     QString m_name;
     QString m_description;
     int m_result;
@@ -94,17 +109,21 @@ private:
     QByteArray m_interceptedData;
 
     friend class SslCertificatesTest;
-    friend class SslProtocolsTest;
+    friend class SslProtocolsCiphersTest;
 };
 
 class SslCertificatesTest : public SslTest
 {
 public:
+    SslCertificatesTest() {
+        setGroup(SSLTESTS_GROUP_CERTS);
+    }
+
     virtual void calcResults();
 
 };
 
-class SslProtocolsTest : public SslTest
+class SslProtocolsCiphersTest : public SslTest
 {
 public:
     virtual bool prepare(const SslUserSettings &settings);
@@ -118,6 +137,22 @@ public:
 private:
     bool setProtoAndSpecifiedCiphers(XSsl::SslProtocol proto, QString ciphersString, QString name);
 
+};
+
+class SslProtocolsTest : public SslProtocolsCiphersTest
+{
+public:
+    SslProtocolsTest() {
+        setGroup(SSLTESTS_GROUP_PROTOS);
+    }
+};
+
+class SslCiphersTest : public SslProtocolsCiphersTest
+{
+public:
+    SslCiphersTest() {
+        setGroup(SSLTESTS_GROUP_CIPHERS);
+    }
 };
 
 #endif // SSLTEST_H
