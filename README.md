@@ -71,7 +71,7 @@ Download `openssl-unsafe` deb packages from https://github.com/gremwell/unsafeop
 
 Install them altogether:
 ```
-dpkg -i qsslcaudit_0.2.0-1_amd64.deb openssl-unsafe_1.0.2i-2_amd64.deb libunsafessl1.0.2_1.0.2i-2_amd64.deb
+dpkg -i qsslcaudit_0.2.1-1_amd64.deb openssl-unsafe_1.0.2i-2_amd64.deb libunsafessl1.0.2_1.0.2i-2_amd64.deb
 ```
 
 ## ALTLinux
@@ -81,7 +81,7 @@ Download `openssl-unsafe` packages from https://github.com/gremwell/unsafeopenss
 
 Install them altogether:
 ```
-apt-get install qsslcaudit-0.2.0-alt1.x86_64.rpm libunsafecrypto10-1.0.2i-alt2.x86_64.rpm libunsafessl10-1.0.2i-alt2.x86_64.rpm openssl-unsafe-1.0.2i-alt2.x86_64.rpm
+apt-get install qsslcaudit-0.2.1-alt1.x86_64.rpm libunsafecrypto10-1.0.2i-alt2.x86_64.rpm libunsafessl10-1.0.2i-alt2.x86_64.rpm openssl-unsafe-1.0.2i-alt2.x86_64.rpm
 ```
 
 # Installation from Sources

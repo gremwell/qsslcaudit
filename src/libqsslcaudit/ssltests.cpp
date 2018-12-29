@@ -12,6 +12,11 @@
 
 bool SslTest01::prepare(const SslUserSettings &settings)
 {
+    // if user did not provide a certificate, do not emit error, just skip test initialization
+    if (settings.getUserCertPath().isEmpty()) {
+        return false;
+    }
+
     QList<XSslCertificate> chain = settings.getUserCert();
     if (chain.size() == 0) {
         RED("can not parse user-supplied certificate");
