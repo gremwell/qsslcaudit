@@ -148,7 +148,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         selectedTests.clear();
 
         QString testsStr = parser.value(selectedTestsOption);
-        QRegExp rx = QRegExp("[\\d?,?\\-?]+");
+        QRegExp rx = QRegExp("[\\d?,?\\-?(certs)?(protos)?(ciphers)?]+");
 
         if (!rx.exactMatch(testsStr)) {
             RED("tests selection is malformed: " + testsStr);
@@ -157,22 +157,45 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 
         QStringList testsListStr = testsStr.split(",", QString::SkipEmptyParts);
         for (int i = 0; i < testsListStr.size(); i++) {
+            QString group = testsListStr.at(i);
             // check for range
             if (testsListStr.at(i).count("-") == 1) {
-                // due to regex above we know that input is correct here
-                int low = testsListStr.at(i).split("-").at(0).toInt(&ok) - 1;
-                int high = testsListStr.at(i).split("-").at(1).toInt(&ok) - 1;
+                bool ok1, ok2;
+                int low = group.split("-").at(0).toInt(&ok1) - 1;
+                int high = group.split("-").at(1).toInt(&ok2) - 1;
 
-                if ((low <= high) && (high < SSLTESTS_COUNT)) {
+                if (ok1 && ok2 && (low <= high) && (high < SSLTESTS_COUNT)) {
                     for (int num = low; num <= high; num++) {
                         selectedTests << num;
                     }
+                } else {
+                    VERBOSE("WARN: invalid test group skipped " + group);
                 }
             } else {
                 // check for single number
-                int num = testsListStr.at(i).toInt(&ok) - 1;
-                if (ok && (SSLTESTS_COUNT > num))
+                int num = group.toInt(&ok) - 1;
+                int selectedGroup = -1;
+                if (ok && (SSLTESTS_COUNT > num)) {
                     selectedTests << num;
+                } else if (group == SSLTESTS_GROUP_CERTS_STR) {
+                    selectedGroup = SSLTESTS_GROUP_CERTS;
+                } else if (group == SSLTESTS_GROUP_PROTOS_STR) {
+                    selectedGroup = SSLTESTS_GROUP_PROTOS;
+                } else if (group == SSLTESTS_GROUP_CIPHERS_STR) {
+                    selectedGroup = SSLTESTS_GROUP_CIPHERS;
+                } else {
+                    VERBOSE("WARN: invalid test group skipped " + group);
+                    break;
+                }
+                // groups handling is weird until we have global container for all existing tests
+                // TODO: for now, we create a temporary local one
+                for (int i = 0; i < SSLTESTS_COUNT; i++) {
+                    SslTest *test = SslTest::createTest(i);
+                    if (test->group() == selectedGroup) {
+                        selectedTests << i;
+                    }
+                    delete test;
+                }
             }
         }
     } else {
