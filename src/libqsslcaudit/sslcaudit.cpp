@@ -384,25 +384,25 @@ void SslCAudit::printSummary()
 void SslCAudit::writeXmlSummary(QString filename)
 {
     QFile file(filename);
-	file.open(QIODevice::WriteOnly);
+    file.open(QIODevice::WriteOnly);
 
-	QXmlStreamWriter xmlWriter(&file);
-	xmlWriter.setAutoFormatting(true);
-	xmlWriter.writeStartDocument();
+    QXmlStreamWriter xmlWriter(&file);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
 
-	xmlWriter.writeStartElement("qsslcaudit");
+    xmlWriter.writeStartElement("qsslcaudit");
     for (int i = 0; i < sslTests.size(); i++) {
         QString testId = QString::number(sslTests.at(i)->id());
         QString testName = sslTests.at(i)->name();
         QString testResult = r2s(sslTests.at(i)->result());
 
-	    xmlWriter.writeStartElement("test");
-	    xmlWriter.writeTextElement("id", testId );
-	    xmlWriter.writeTextElement("name", testName );
-	    xmlWriter.writeTextElement("result", testResult);
-	    xmlWriter.writeEndElement();
+        xmlWriter.writeStartElement("test");
+        xmlWriter.writeTextElement("id", testId);
+        xmlWriter.writeTextElement("name", testName);
+        xmlWriter.writeTextElement("result", testResult);
+        xmlWriter.writeEndElement();
     }
 
-	xmlWriter.writeEndElement();
+    xmlWriter.writeEndElement();
     file.close();
 }
