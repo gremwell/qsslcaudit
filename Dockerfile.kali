@@ -1,3 +1,7 @@
+#
+# Kali rolling with qsslcaudit installed from packages
+# When started without explicit command runs qsslcaudit
+#
 FROM kalilinux/kali-linux-docker
 
 RUN apt-get update && apt-get install -y ca-certificates

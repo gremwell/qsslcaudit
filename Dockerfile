@@ -1,4 +1,9 @@
-# To publish: docker build -t gremwell/qsslcaudit . && docker push gremwell/qsslcaudit
+#
+# Ubuntu rolling with qsslcaudit installed from packages
+# When started without explicit command runs qsslcaudit
+#
+# To publish in Docker hub: docker build -t gremwell/qsslcaudit . && docker push gremwell/qsslcaudit
+#
 FROM ubuntu:rolling
 
 RUN apt-get update && apt-get install -y wget
