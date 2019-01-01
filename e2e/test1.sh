@@ -36,7 +36,7 @@ fi
 # hammer util pidfile disappears
 for _ in `seq 100` ; do
 	[ ! -e "$PID" ] && break
-	"$CLIENT_SCRIPT"
+	time "$CLIENT_SCRIPT"
 	sleep .5
 done > "$CLIENT_OUT"
 if [ -e "$PID" ] ; then
