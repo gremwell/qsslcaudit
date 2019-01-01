@@ -27,6 +27,7 @@ SslUserSettings::SslUserSettings()
     loopTests = false;
     waitDataTimeout = 5000;
     pidFile = "";
+    outputXmlFilename = "";
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -274,4 +275,14 @@ void SslUserSettings::setPidFile(const QString &fileName)
 QString SslUserSettings::getPidFile() const
 {
     return pidFile;
+}
+
+void SslUserSettings::setOutputXml(const QString &filename)
+{
+    outputXmlFilename = filename;
+}
+
+QString SslUserSettings::getOutputXml() const
+{
+    return outputXmlFilename;
 }

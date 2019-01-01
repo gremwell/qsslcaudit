@@ -63,6 +63,9 @@ public:
     void setPidFile(const QString &fileName);
     QString getPidFile() const;
 
+    void setOutputXml(const QString &filename);
+    QString getOutputXml() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -78,6 +81,7 @@ private:
     bool loopTests;
     quint32 waitDataTimeout;
     QString pidFile;
+    QString outputXmlFilename;
 };
 
 #endif // SSLUSERSETTINGS_H

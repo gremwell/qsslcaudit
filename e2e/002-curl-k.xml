@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qsslcaudit>
+    <test>
+        <id>3</id>
+        <name>self-signed certificate for invalid domain trust</name>
+        <result>FAILED</result>
+    </test>
+    <test>
+        <id>8</id>
+        <name>SSLv2 protocol support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>9</id>
+        <name>SSLv3 protocol support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>10</id>
+        <name>SSLv3 protocol and EXPORT grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>11</id>
+        <name>SSLv3 protocol and LOW grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>12</id>
+        <name>SSLv3 protocol and MEDIUM grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>13</id>
+        <name>TLS 1.0 protocol support</name>
+        <result>FAILED</result>
+    </test>
+    <test>
+        <id>14</id>
+        <name>TLS 1.0 protocol and EXPORT grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>15</id>
+        <name>TLS 1.0 protocol and LOW grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>16</id>
+        <name>TLS 1.0 protocol and MEDIUM grade ciphers support</name>
+        <result>FAILED</result>
+    </test>
+    <test>
+        <id>17</id>
+        <name>TLS 1.1 protocol and EXPORT grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>18</id>
+        <name>TLS 1.1 protocol and LOW grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>19</id>
+        <name>TLS 1.1 protocol and MEDIUM grade ciphers support</name>
+        <result>FAILED</result>
+    </test>
+    <test>
+        <id>20</id>
+        <name>TLS 1.2 protocol and EXPORT grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>21</id>
+        <name>TLS 1.2 protocol and LOW grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>22</id>
+        <name>TLS 1.2 protocol and MEDIUM grade ciphers support</name>
+        <result>FAILED</result>
+    </test>
+</qsslcaudit>

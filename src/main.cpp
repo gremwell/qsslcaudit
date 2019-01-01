@@ -77,6 +77,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption pidFileOption(QStringList() << "pid-file",
                                         "create a pidfile once initialized", "/tmp/qs.pid");
     parser.addOption(pidFileOption);
+    QCommandLineOption outputXmlOption(QStringList() << "output-xml",
+                                    "save results in XML", "qsslcaudit.xml");
+    parser.addOption(outputXmlOption);
 
     parser.process(a);
 
@@ -230,6 +233,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     if (parser.isSet(pidFileOption)) {
         settings->setPidFile(parser.value(pidFileOption));
     }
+    if (parser.isSet(outputXmlOption)) {
+        settings->setOutputXml(parser.value(outputXmlOption));
+    }
 }
 
 
@@ -276,6 +282,10 @@ int main(int argc, char *argv[])
 
     QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){
         caudit->printSummary();
+
+        if (settings.getOutputXml().length() > 0)
+            caudit->writeXmlSummary(settings.getOutputXml());
+
         qApp->exit();
     });
 

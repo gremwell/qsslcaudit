@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QThread>
 #include <QFile>
+#include <QXmlStreamWriter>
 
 #ifdef UNSAFE
 #include "sslunsafesocket.h"
@@ -362,6 +363,23 @@ static void printTableLine(const QString &c1String, const QString &c2String)
     out << endl;
 }
 
+static const QString r2s(int r) {
+    QString result;
+
+    switch (r) {
+    case SslTest::SSLTEST_RESULT_SUCCESS:
+        result = "PASSED";
+        break;
+    case SslTest::SSLTEST_RESULT_UNDEFINED:
+    case SslTest::SSLTEST_RESULT_INIT_FAILED:
+        result = "UNDEFINED";
+        break;
+    default:
+        result = "FAILED";
+    }
+    return result;
+}
+
 void SslCAudit::printSummary()
 {
     WHITE("tests results summary table:");
@@ -372,27 +390,41 @@ void SslCAudit::printSummary()
 
     for (int i = 0; i < sslTests.size(); i++) {
         QString testName = sslTests.at(i)->name();
-        QString result;
+        QString result = r2s(sslTests.at(i)->result());
 
         while (testName.length() > testColumnWidth) {
             printTableLine(testName.left(testColumnWidth - 2), "");
             testName = "  " + testName.mid(testColumnWidth - 2);
         }
 
-        switch (sslTests.at(i)->result()) {
-        case SslTest::SSLTEST_RESULT_SUCCESS:
-            result = "PASSED";
-            break;
-        case SslTest::SSLTEST_RESULT_UNDEFINED:
-        case SslTest::SSLTEST_RESULT_INIT_FAILED:
-            result = "UNDEFINED";
-            break;
-        default:
-            result = "FAILED";
-        }
-
         printTableLine(testName, result);
     }
 
     printTableHSeparator();
+}
+
+void SslCAudit::writeXmlSummary(QString filename)
+{
+    QFile file(filename);
+    file.open(QIODevice::WriteOnly);
+
+    QXmlStreamWriter xmlWriter(&file);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
+
+    xmlWriter.writeStartElement("qsslcaudit");
+    for (int i = 0; i < sslTests.size(); i++) {
+        QString testId = QString::number(sslTests.at(i)->id());
+        QString testName = sslTests.at(i)->name();
+        QString testResult = r2s(sslTests.at(i)->result());
+
+        xmlWriter.writeStartElement("test");
+        xmlWriter.writeTextElement("id", testId);
+        xmlWriter.writeTextElement("name", testName);
+        xmlWriter.writeTextElement("result", testResult);
+        xmlWriter.writeEndElement();
+    }
+
+    xmlWriter.writeEndElement();
+    file.close();
 }
