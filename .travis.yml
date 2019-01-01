@@ -19,5 +19,4 @@ install:
   - mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && make && sudo make install && cd ..
 
 script:
-  - e2e/test1.sh 001-curl
-  - e2e/test1.sh 002-curl-k
+  - e2e/test.sh unsafe

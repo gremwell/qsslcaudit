@@ -1,15 +1,21 @@
 #!/bin/sh -e
 
-if [ $# -ne 1 ] ; then
-	echo "Usage: $0 TESTNAME" >&2
+if [ $# -ne 2 ] ; then
+	echo "Usage: $0 MODE TESTNAME" >&2
 	exit 1
 fi
 
 BASEDIR=`dirname $0`
-TEST="$1"
-CLIENT_SCRIPT="$BASEDIR/$TEST.client.sh"
-SERVER_SCRIPT="$BASEDIR/$TEST.server.sh"
-REFXML="$BASEDIR/$TEST.xml"
+MODE="$1"
+TEST="$2"
+
+if [ "$MODE" != "safe" -a "$MODE" != "unsafe" ] ; then
+	echo "ERROR: unsupported mode '$MODE' (must be 'safe' or 'unsafe')" >&2
+	exit 1
+fi
+
+SCRIPT="$BASEDIR/$TEST.sh"
+REFXML="$BASEDIR/$TEST.$MODE.xml"
 
 PID="/tmp/$TEST.pid"; export PID
 XML="/tmp/$TEST.xml"; export XML
@@ -24,7 +30,7 @@ if [ -e "$PID" ] ; then
 fi
 
 # launch the new one
-"$SERVER_SCRIPT" > "$SERVER_OUT" &
+(. "$SCRIPT" && server )> "$SERVER_OUT" &
 
 # wait 10s
 for _ in `seq 20` ; do sleep .5 && [ -e "$PID" ] && break; done
@@ -37,7 +43,7 @@ fi
 for _ in `seq 100` ; do
 	[ ! -e "$PID" ] && break
 	echo ; echo ; echo "===== `date` =====" ; echo
-	/usr/bin/time "$CLIENT_SCRIPT" 2>&1
+	(. "$SCRIPT" && client) 2>&1
 	sleep .5
 done > "$CLIENT_OUT"
 if [ -e "$PID" ] ; then
