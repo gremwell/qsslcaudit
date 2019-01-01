@@ -28,6 +28,7 @@ SslUserSettings::SslUserSettings()
     loopTests = false;
     waitDataTimeout = 5000;
     outputXmlFilename = "";
+    pidFile = "";
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -289,4 +290,28 @@ bool SslUserSettings::setOutputXml(const QString &filename)
 QString SslUserSettings::getOutputXml() const
 {
     return outputXmlFilename;
+}
+
+bool SslUserSettings::setPidFile(const QString &fileName)
+{
+    QFileInfo info(fileName);
+    if (info.exists()) {
+        if (!info.isFile() || !info.isWritable())
+            return false;
+    } else {
+        QFile f(fileName);
+        if (!f.open(QIODevice::WriteOnly)) {
+            f.close();
+            return false;
+        }
+        // file was created, but there is a chance that it won't be used, delete it
+        f.remove();
+    }
+    pidFile = fileName;
+    return true;
+}
+
+QString SslUserSettings::getPidFile() const
+{
+    return pidFile;
 }

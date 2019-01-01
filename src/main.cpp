@@ -8,6 +8,7 @@
 #include <QCommandLineParser>
 #include <QThread>
 #include <QHostAddress>
+#include <QFile>
 
 
 static QList<int> selectedTests;
@@ -77,6 +78,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption outputXmlOption(QStringList() << "output-xml",
                                        "save results in XML", "qsslcaudit.xml");
     parser.addOption(outputXmlOption);
+    QCommandLineOption pidFileOption(QStringList() << "pid-file",
+                                     "create a pidfile once initialized", "/tmp/qs.pid");
+    parser.addOption(pidFileOption);
 
     parser.process(a);
 
@@ -234,6 +238,13 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             exit(-1);
         };
     }
+    if (parser.isSet(pidFileOption)) {
+        ok = settings->setPidFile(parser.value(pidFileOption));
+        if (!ok) {
+            RED("check if the provided path to PID file is writable");
+            exit(-1);
+        };
+    }
 }
 
 
@@ -253,6 +264,21 @@ QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
     VERBOSE("");
 
     return ret;
+}
+
+
+void createPidFile(const QString &pidFile) {
+    QFile file(pidFile);
+    if (file.open(QIODevice::WriteOnly)) {
+        QTextStream stream(&file);
+        stream << QCoreApplication::applicationPid() << endl;
+        file.close();
+    }
+}
+
+
+void deletePidFile(const QString &pidFile) {
+    QFile::remove(pidFile);
 }
 
 
@@ -287,7 +313,15 @@ int main(int argc, char *argv[])
         qApp->exit();
     });
 
-    thread->start();
+    QString pidFile = settings.getPidFile();
+    if (pidFile.length() > 0)
+        createPidFile(pidFile);
 
-    return a.exec();
+    thread->start();
+    int exitCode = a.exec();
+
+    if (pidFile.length() > 0)
+        deletePidFile(pidFile);
+
+    return exitCode;
 }
