@@ -1,0 +1,21 @@
+#
+# Docker environment for QSSLCAUDIT testing
+# Uses standard OpenSSL libraries
+#
+# Prepare qs-test-safe image:	docker build -t qs-test-safe -f Dockerfile.test-safe .
+# Launch the docker instance:	docker run --name qs-test-safe --rm -it qs-test-safe
+#
+FROM ubuntu:xenial
+
+RUN apt-get update && apt-get install -y wget git time
+
+ADD . /qsslcaudit
+WORKDIR /qsslcaudit
+
+RUN tools/install-deps-xenial-safe.sh
+RUN tools/install.sh
+
+RUN apt-get install -y curl vim libxml-xpath-perl
+
+#RUN tools/run-autotests.sh
+#RUN tools/run-e2e-tests.sh safe

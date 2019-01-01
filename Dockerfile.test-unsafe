@@ -1,0 +1,21 @@
+#
+# Docker environment for QSSLCAUDIT testing
+# Uses binary packages of unsafe OpenSSL
+#
+# Prepare qs-test-unsafe image:	docker build -t qs-test-unsafe -f Dockerfile.test-unsafe .
+# Launch the docker instance:	docker run --name qs-test-unsafe --rm -it qs-test-unsafe
+#
+FROM ubuntu:xenial
+
+RUN apt-get update && apt-get install -y wget git time
+
+ADD . /qsslcaudit
+WORKDIR /qsslcaudit
+
+RUN tools/install-deps-xenial-unsafe.sh
+RUN tools/install.sh
+
+RUN apt-get install -y curl vim libxml-xpath-perl
+
+#RUN tools/run-autotests.sh
+#RUN tools/run-e2e-tests.sh unsafe

@@ -1,0 +1,27 @@
+language: cpp
+compiler: gcc
+os: linux
+dist: xenial
+
+branches:
+  only:
+  - test
+
+matrix:
+  include:
+  - env: MODE=safe
+  - env: MODE=unsafe
+
+before_install:
+  - sudo apt-get install -y lsb-release && export DIST=`lsb_release -sc`
+  - sudo apt-get install -y cmake qtbase5-dev # FIXME: why the same commands fail from within tools/install-deps-${DIST}-${MODE}.sh?
+  - sudo tools/install-deps-${DIST}-${MODE}.sh
+
+install:
+  - sudo tools/install.sh
+
+script:
+  - echo 'Running autotests ...' && echo -en 'travis_fold:start:script.1\\r'
+  - tools/run-autotests.sh
+  - echo -en 'travis_fold:end:script.1\\r'
+  - tools/run-e2e-tests.sh $MODE
