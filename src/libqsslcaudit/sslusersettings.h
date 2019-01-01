@@ -60,6 +60,9 @@ public:
     bool setWaitDataTimeout(int to);
     quint32 getWaitDataTimeout() const;
 
+    void setPidFile(const QString &fileName);
+    QString getPidFile() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -74,7 +77,7 @@ private:
     SslServer::StartTlsProtocol startTlsProtocol;
     bool loopTests;
     quint32 waitDataTimeout;
-
+    QString pidFile;
 };
 
 #endif // SSLUSERSETTINGS_H

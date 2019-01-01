@@ -74,6 +74,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption waitDataTimeoutOption(QStringList() << "w" << "wait-data-timeout",
                                         "wait for incoming data <ms> milliseconds before emitting error", "5000");
     parser.addOption(waitDataTimeoutOption);
+    QCommandLineOption pidFileOption(QStringList() << "pid-file",
+                                        "create a pidfile once initialized", "/tmp/qs.pid");
+    parser.addOption(pidFileOption);
 
     parser.process(a);
 
@@ -223,6 +226,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             RED("invalid timeout value " + parser.value(waitDataTimeoutOption));
             exit(-1);
         }
+    }
+    if (parser.isSet(pidFileOption)) {
+        settings->setPidFile(parser.value(pidFileOption));
     }
 }
 

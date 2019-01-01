@@ -152,6 +152,7 @@ void SslCAudit::runTest(SslTest *test)
     }
 
     emit sslTestReady();
+    createPidFile();
 
     if (sslServer->waitForNewConnection(-1)) {
         // check if *server* was not able to setup SSL connection
@@ -193,6 +194,27 @@ void SslCAudit::runTest(SslTest *test)
     test->printReport();
 
     WHITE("test finished");
+
+    deletePidFile();
+}
+
+void SslCAudit::createPidFile() {
+    QString pidFile = settings.getPidFile();
+    if (pidFile.length() > 0) {
+        QFile file(pidFile);
+        file.open(QIODevice::WriteOnly);
+        QTextStream stream( &file );
+        stream << QCoreApplication::applicationPid() << endl;
+        file.close();
+    }
+}
+
+void SslCAudit::deletePidFile() {
+    QString pidFile = settings.getPidFile();
+    if (pidFile.length() > 0) {
+        QFile file(pidFile);
+        file.remove();
+    }
 }
 
 void SslCAudit::run()
