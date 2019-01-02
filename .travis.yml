@@ -2,8 +2,6 @@ language: cpp
 compiler: gcc
 os: linux
 dist: xenial
-env:
-  - DIST=xenial
 
 branches:
   only:
@@ -11,8 +9,8 @@ branches:
 
 matrix:
   include:
-  - env: MODE=safe
-  - env: MODE=unsafe
+  - env: DIST=xenial MODE=safe
+  - env: DIST=xenial MODE=unsafe
 
 before_install:
   - sudo tools/install-deps-${DIST}-${MODE}.sh
