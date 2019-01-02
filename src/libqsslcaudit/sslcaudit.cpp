@@ -344,12 +344,17 @@ void SslCAudit::handlePeerVerifyError(const XSslError &error)
 }
 
 static const int testColumnWidth = 64;
+static const int testIdWidth = 3;
 static const int resultColumnWidth = 12;
 
 static void printTableHSeparator()
 {
     QTextStream out(stdout);
 
+    out << "+";
+    for (int i = 0; i < testIdWidth + 1; i++) {
+        out << "-";
+    }
     out << "+";
     for (int i = 0; i < testColumnWidth + 2; i++) {
         out << "-";
@@ -362,12 +367,16 @@ static void printTableHSeparator()
     out << endl;
 }
 
-static void printTableHeaderLine(const QString &c1String, const QString &c2String)
+static void printTableHeaderLine(const QString &c0String, const QString &c1String, const QString &c2String)
 {
     QTextStream out(stdout);
 
     out.setFieldAlignment(QTextStream::AlignCenter);
 
+    out << "| ";
+    out << qSetFieldWidth(testIdWidth);
+    out << c0String;
+    out << qSetFieldWidth(0);
     out << "| ";
     out << qSetFieldWidth(testColumnWidth);
     out << c1String;
@@ -377,6 +386,14 @@ static void printTableHeaderLine(const QString &c1String, const QString &c2Strin
     out << c2String;
     out << qSetFieldWidth(0);
     out << " |";
+    out << endl;
+}
+
+static void printTableAnnotations()
+{
+    QTextStream out(stdout);
+
+    out << "* See the test log above for the explicit error message";
     out << endl;
 }
 
@@ -398,12 +415,52 @@ static void printTableLine(const QString &c1String, const QString &c2String)
     out << endl;
 }
 
+static void printTableLineFormatted(int testId, const QString &c1String, const QString &c2String, int formatLen)
+{
+    QTextStream out(stdout);
+
+    out << "| ";
+    out << qSetFieldWidth(testIdWidth);
+    out.setFieldAlignment(QTextStream::AlignCenter);
+    out << testId;
+    out << qSetFieldWidth(0);
+    out << "| ";
+    out << qSetFieldWidth(testColumnWidth);
+    out.setFieldAlignment(QTextStream::AlignLeft);
+    out << c1String;
+    out << qSetFieldWidth(0);
+    out << " | ";
+    out << qSetFieldWidth(resultColumnWidth + formatLen);
+    out.setFieldAlignment(QTextStream::AlignCenter);
+    out << c2String;
+    out << qSetFieldWidth(0);
+    out << " |";
+    out << endl;
+}
+
+static void printTableLineFailed(int testId, const QString &c1String)
+{
+    printTableLineFormatted(testId, c1String, "\033[1;31mFAILED (!)\033[0m", 11);
+}
+
+static void printTableLinePassed(int testId, const QString &c1String)
+{
+    printTableLineFormatted(testId, c1String, "\033[1;32mPASSED (+)\033[0m", 11);
+}
+
+static void printTableLineUndefined(int testId, const QString &c1String)
+{
+    printTableLineFormatted(testId, c1String, "\033[1mUNDEF (*)\033[0m", 8);
+}
+
 void SslCAudit::printSummary()
 {
+    bool printAnnotations = false;
+
     WHITE("tests results summary table:");
 
     printTableHSeparator();
-    printTableHeaderLine("Test Name", "Result");
+    printTableHeaderLine("##", "Test Name", "Result");
     printTableHSeparator();
 
     for (int i = 0; i < sslTests.size(); i++) {
@@ -416,10 +473,28 @@ void SslCAudit::printSummary()
             testName = "  " + testName.mid(testColumnWidth - 2);
         }
 
-        printTableLine(testName, result);
+        switch (test->result()) {
+        case SslTest::SSLTEST_RESULT_SUCCESS:
+            printTableLinePassed(test->id(), testName);
+            break;
+        case SslTest::SSLTEST_RESULT_UNDEFINED:
+        case SslTest::SSLTEST_RESULT_INIT_FAILED:
+            printTableLineUndefined(test->id(), testName);
+            printAnnotations = true;
+            break;
+        case SslTest::SSLTEST_RESULT_DATA_INTERCEPTED:
+        case SslTest::SSLTEST_RESULT_CERT_ACCEPTED:
+        case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED:
+        case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR:
+            printTableLineFailed(test->id(), testName);
+            break;
+        }
     }
 
     printTableHSeparator();
+
+    if (printAnnotations)
+        printTableAnnotations();
 }
 
 void SslCAudit::writeXmlSummary(const QString &filename)
