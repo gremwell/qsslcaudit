@@ -9,11 +9,11 @@ branches:
 
 matrix:
   include:
-  - env: DIST=xenial MODE=safe
-  - env: DIST=xenial MODE=unsafe
+  - env: MODE=safe
+  - env: MODE=unsafe
 
 before_install:
-  - sudo tools/install-deps-${DIST}-${MODE}.sh
+  - sudo tools/install-deps-xenial-${MODE}.sh
 
 install:
   - sudo tools/install.sh
