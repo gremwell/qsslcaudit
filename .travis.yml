@@ -19,5 +19,7 @@ install:
   - mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=true .. && make && sudo make install && cd ..
 
 script:
-  - find build/tests -type f -perm 755 | xargs -n 1 sh -c
+  - echo 'Running autotests ...' && echo -en 'travis_fold:start:script.1\\r'
+  - find build/ -executable -type f -name tests_SslTest\* | xargs -n 1 sh -c
+  - echo -en 'travis_fold:end:script.1\\r'
   - e2e/test.sh unsafe
