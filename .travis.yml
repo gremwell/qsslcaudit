@@ -2,6 +2,8 @@ language: cpp
 compiler: gcc
 os: linux
 dist: xenial
+env:
+  - DIST=xenial
 
 branches:
   only:
