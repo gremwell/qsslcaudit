@@ -45,8 +45,6 @@ private:
     SslServer *prepareSslServer(const SslTest *test);
     void proxyConnection(XSslSocket *sslSocket, SslTest *test);
     void handleIncomingConnection(XSslSocket *sslSocket, SslTest *test);
-    void createPidFile();
-    void deletePidFile();
 
     SslUserSettings settings;
     QList<SslTest *> sslTests;
