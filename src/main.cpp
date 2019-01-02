@@ -8,6 +8,7 @@
 #include <QCommandLineParser>
 #include <QThread>
 #include <QHostAddress>
+#include <QFile>
 
 
 static QList<int> selectedTests;
@@ -258,6 +259,25 @@ QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
 }
 
 
+void createPidFile(QString pidFile) {
+    if (pidFile.length() > 0) {
+        QFile file(pidFile);
+        file.open(QIODevice::WriteOnly);
+        QTextStream stream( &file );
+        stream << QCoreApplication::applicationPid() << endl;
+        file.close();
+    }
+}
+
+
+void deletePidFile(QString pidFile) {
+    if (pidFile.length() > 0) {
+        QFile file(pidFile);
+        file.remove();
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -289,7 +309,13 @@ int main(int argc, char *argv[])
         qApp->exit();
     });
 
-    thread->start();
+    QString pidFile = settings.getPidFile();
+    createPidFile(pidFile);
 
-    return a.exec();
+    thread->start();
+    int exitCode = a.exec();
+
+    deletePidFile(pidFile);
+
+    return exitCode;
 }
