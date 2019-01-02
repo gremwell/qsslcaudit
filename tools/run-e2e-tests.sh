@@ -6,9 +6,10 @@ if [ $# -ne 1 ] ; then
 fi
 
 BASEDIR=`dirname $0`
+E2E_DIR=$BASEDIR/../e2e
 MODE="$1"
 
-for TEST in $BASEDIR/[0-9]*.sh ; do
+for TEST in $E2E_DIR/[0-9]*.sh ; do
 	TEST=`basename -s .sh $TEST`
-	"$BASEDIR/test1.sh" $MODE $TEST
+	"$BASEDIR/run-e2e-test.sh" $MODE $TEST
 done

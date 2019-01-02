@@ -13,24 +13,13 @@ matrix:
   - env: MODE=unsafe
 
 before_install:
-  - if [ x"$MODE" = x"unsafe" ] ; then
-      wget https://github.com/gremwell/unsafeopenssl-pkg-debian/releases/download/1.0.2i-2/libunsafessl-dev_1.0.2i-2_ubuntu16.04_amd64.deb;
-      wget https://github.com/gremwell/unsafeopenssl-pkg-debian/releases/download/1.0.2i-2/libunsafessl1.0.2_1.0.2i-2_ubuntu16.04_amd64.deb;
-      wget https://github.com/gremwell/unsafeopenssl-pkg-debian/releases/download/1.0.2i-2/openssl-unsafe_1.0.2i-2_ubuntu16.04_amd64.deb;
-      sudo apt-get install -y ./libunsafessl1.0.2_1.0.2i-2_ubuntu16.04_amd64.deb ./libunsafessl-dev_1.0.2i-2_ubuntu16.04_amd64.deb ./openssl-unsafe_1.0.2i-2_ubuntu16.04_amd64.deb;
-      rm ./libunsafessl1.0.2_1.0.2i-2_ubuntu16.04_amd64.deb ./libunsafessl-dev_1.0.2i-2_ubuntu16.04_amd64.deb ./openssl-unsafe_1.0.2i-2_ubuntu16.04_amd64.deb;
-    elif [ x"$MODE" = x"safe" ] ; then
-      sudo apt-get install -y libssl-dev;
-    else
-      false;
-    fi
-  - sudo apt-get install -y cmake qtbase5-dev libgnutls-dev
+  - sudo tools/install-deps-${DIST}-${MODE}.sh
 
 install:
-  - mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=true .. && make && sudo make install && cd ..
+  - sudo tools/install.sh
 
 script:
   - echo 'Running autotests ...' && echo -en 'travis_fold:start:script.1\\r'
-  - find build/ -executable -type f -name tests_SslTest\* | xargs -n 1 sh -c
+  - tools/run-autotests.sh
   - echo -en 'travis_fold:end:script.1\\r'
-  - e2e/test.sh $MODE
+  - tools/run-e2e-tests.sh $MODE

@@ -6,6 +6,8 @@ if [ $# -ne 2 ] ; then
 fi
 
 BASEDIR=`dirname $0`
+E2E_DIR=$BASEDIR/../e2e
+
 MODE="$1"
 TEST="$2"
 
@@ -14,8 +16,8 @@ if [ "$MODE" != "safe" -a "$MODE" != "unsafe" ] ; then
 	exit 1
 fi
 
-SCRIPT="$BASEDIR/$TEST.sh"
-REFXML="$BASEDIR/$TEST.$MODE.xml"
+SCRIPT="$E2E_DIR/$TEST.sh"
+REFXML="$E2E_DIR/$TEST.$MODE.xml"
 
 PID="/tmp/$TEST.pid"; export PID
 XML="/tmp/$TEST.xml"; export XML
