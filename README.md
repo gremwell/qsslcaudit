@@ -1,3 +1,43 @@
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [Summary](#summary)
+- [Installation from Binary Packages](#installation-from-binary-packages)
+    - [Debian / Kali](#debian--kali)
+    - [ALTLinux](#altlinux)
+- [Installation from Sources](#installation-from-sources)
+    - [Note on OpenSSL 1.1.0](#note-on-openssl-110)
+    - [Note on unsafe OpenSSL variant](#note-on-unsafe-openssl-variant)
+    - [Build Instructions](#build-instructions)
+        - [Detailed build description](#detailed-build-description)
+            - [Building unsafe OpenSSL library](#building-unsafe-openssl-library)
+- [Usage](#usage)
+    - [Forwarding Connection](#forwarding-connection)
+        - [application settings](#application-settings)
+        - [hosts file](#hosts-file)
+        - [traffic forwarding](#traffic-forwarding)
+        - [using proxy](#using-proxy)
+    - [Usage Example #1](#usage-example-1)
+    - [Usage Example #2](#usage-example-2)
+    - [Usage Example #3](#usage-example-3)
+    - [(Some) Command Line Options](#some-command-line-options)
+    - [Tests](#tests)
+        - [certificate trust test with user-supplied certificate](#certificate-trust-test-with-user-supplied-certificate)
+        - [certificate trust test with self-signed certificate for user-supplied common name](#certificate-trust-test-with-self-signed-certificate-for-user-supplied-common-name)
+        - [certificate trust test with self-signed certificate for www.example.com](#certificate-trust-test-with-self-signed-certificate-for-wwwexamplecom)
+        - [certificate trust test with user-supplied common name signed by user-supplied certificate](#certificate-trust-test-with-user-supplied-common-name-signed-by-user-supplied-certificate)
+        - [certificate trust test with www.example.com common name signed by user-supplied certificate](#certificate-trust-test-with-wwwexamplecom-common-name-signed-by-user-supplied-certificate)
+        - [certificate trust test with user-supplied common name signed by user-supplied CA certificate](#certificate-trust-test-with-user-supplied-common-name-signed-by-user-supplied-ca-certificate)
+        - [certificate trust test with www.example.com common name signed by user-supplied CA certificate](#certificate-trust-test-with-wwwexamplecom-common-name-signed-by-user-supplied-ca-certificate)
+        - [SSLv2 protocol support test](#sslv2-protocol-support-test)
+        - [SSLv3 protocol support test](#sslv3-protocol-support-test)
+        - [SSLv3 protocol and EXPORT grade ciphers support test](#sslv3-protocol-and-export-grade-ciphers-support-test)
+        - [SSLv3 protocol and LOW grade ciphers support test](#sslv3-protocol-and-low-grade-ciphers-support-test)
+        - [SSLv3 protocol and MEDIUM grade ciphers support test](#sslv3-protocol-and-medium-grade-ciphers-support-test)
+- [Adding New Tests](#adding-new-tests)
+- [Technical Details](#technical-details)
+
+<!-- markdown-toc end -->
 # Summary
 
 This tool can be used to determine if an application that uses TLS/SSL for its data transfers does this in a secure way.
