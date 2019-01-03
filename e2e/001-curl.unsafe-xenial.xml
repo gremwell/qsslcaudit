@@ -3,7 +3,7 @@
     <test>
         <id>3</id>
         <name>self-signed certificate for invalid domain trust</name>
-        <result>FAILED</result>
+        <result>PASSED</result>
     </test>
     <test>
         <id>8</id>
@@ -48,7 +48,7 @@
     <test>
         <id>16</id>
         <name>TLS 1.0 protocol and MEDIUM grade ciphers support</name>
-        <result>PASSED</result>
+        <result>FAILED</result>
     </test>
     <test>
         <id>17</id>
@@ -63,7 +63,7 @@
     <test>
         <id>19</id>
         <name>TLS 1.1 protocol and MEDIUM grade ciphers support</name>
-        <result>PASSED</result>
+        <result>FAILED</result>
     </test>
     <test>
         <id>20</id>
@@ -78,6 +78,6 @@
     <test>
         <id>22</id>
         <name>TLS 1.2 protocol and MEDIUM grade ciphers support</name>
-        <result>PASSED</result>
+        <result>FAILED</result>
     </test>
 </qsslcaudit>
