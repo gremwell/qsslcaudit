@@ -12,6 +12,7 @@
 
 // Target SslTest is SslTest12:
 // "test for SSLv3 protocol and MEDIUM grade ciphers support"
+// should be launched with unsafe openssl library
 
 
 // do verify peer certificate, use TLSv1.1 and stronger protocols
