@@ -17,7 +17,10 @@ if [ "$MODE" != "safe" -a "$MODE" != "unsafe" ] ; then
 fi
 
 SCRIPT="$E2E_DIR/$TEST.sh"
-REFXML="$E2E_DIR/$TEST.$MODE.xml"
+
+DIST=`lsb_release -sc`
+REFXML="$E2E_DIR/$TEST.$MODE-$DIST.xml"
+[ -f "$REFXML" ] || REFXML="$E2E_DIR/$TEST.$MODE.xml"
 
 PID="/tmp/$TEST.pid"; export PID
 XML="/tmp/$TEST.xml"; export XML
