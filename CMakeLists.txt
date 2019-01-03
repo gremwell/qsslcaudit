@@ -91,5 +91,6 @@ add_subdirectory(thirdparty)
 add_subdirectory(src)
 
 if(WITH_TESTS)
+  enable_testing()
   add_subdirectory(tests)
 endif()
