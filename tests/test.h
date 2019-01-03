@@ -11,7 +11,9 @@ class Test : public QObject
 {
     Q_OBJECT
 public:
-    Test(QObject *parent = 0) : QObject(parent) {}
+    Test(QObject *parent = nullptr) : QObject(parent) {
+        testResult = -1;
+    }
 
     virtual int getId() = 0;
 
@@ -56,9 +58,19 @@ public:
         GREEN(QString("autotest #%1 for %2 succeeded").arg(getId()).arg(targetTest));
     }
 
+    int getResult() { return testResult; }
+
     QString targetTest;
     SslTest *sslTest;
     SslUserSettings testSettings;
+
+protected:
+    void setResult(int result) {
+        testResult = result;
+    }
+
+private:
+    int testResult;
 
 };
 

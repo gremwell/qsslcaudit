@@ -42,6 +42,7 @@ public slots:
             qDebug() << socket->error();
             qDebug() << socket->errorString();
 
+            setResult(-1);
             printTestFailed();
         } else {
             socket->write(data);
@@ -53,14 +54,15 @@ public slots:
 
             if ((sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED)
                     && (sslTest->interceptedData() == data)) {
+                setResult(0);
                 printTestSucceeded();
             } else {
+                setResult(-1);
                 printTestFailed();
             }
         }
         socket->disconnectFromHost();
 
-        this->deleteLater();
         QThread::currentThread()->quit();
     }
 
@@ -95,6 +97,7 @@ public slots:
             qDebug() << socket->error();
             qDebug() << socket->errorString();
 
+            setResult(-1);
             printTestFailed();
         } else {
             QThread::msleep(5500);
@@ -104,14 +107,15 @@ public slots:
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+                setResult(0);
                 printTestSucceeded();
             } else {
+                setResult(-1);
                 printTestFailed();
             }
         }
         socket->disconnectFromHost();
 
-        this->deleteLater();
         QThread::currentThread()->quit();
     }
 
@@ -150,17 +154,19 @@ public slots:
                 QThread::msleep(50);
 
             if ((res == 0) && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+                setResult(0);
                 printTestSucceeded();
             } else {
+                setResult(-1);
                 printTestFailed();
             }
 
         } else {
+            setResult(-1);
             printTestFailed();
         }
         socket->disconnectFromHost();
 
-        this->deleteLater();
         QThread::currentThread()->quit();
     }
 
@@ -200,17 +206,19 @@ public slots:
                 QThread::msleep(50);
 
             if ((res == 0) && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+                setResult(0);
                 printTestSucceeded();
             } else {
+                setResult(-1);
                 printTestFailed();
             }
 
         } else {
+            setResult(-1);
             printTestFailed();
         }
         socket->disconnectFromHost();
 
-        this->deleteLater();
         QThread::currentThread()->quit();
     }
 
@@ -238,6 +246,7 @@ int main(int argc, char *argv[])
 {
     // we need QCoreApplication instance to initialize Qt internals
     QCoreApplication a(argc, argv);
+    int ret = 0;
 
     QList<Test *> autotests = QList<Test *>()
             << new Test01
@@ -247,10 +256,15 @@ int main(int argc, char *argv[])
                ;
 
     while (autotests.size() > 0) {
-        launchTest(autotests.takeFirst());
+        Test *test = autotests.takeFirst();
+        launchTest(test);
+        if (test->getResult() != 0) {
+            ret = -1;
+        }
+        test->deleteLater();
     }
 
-    return 0; //a.exec();
+    return ret;
 }
 
 #include "tests_SslTest02.moc"

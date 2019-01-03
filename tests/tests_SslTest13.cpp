@@ -46,16 +46,18 @@ public slots:
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+                setResult(0);
                 printTestSucceeded();
             } else {
+                setResult(-1);
                 printTestFailed();
             }
         } else {
+            setResult(-1);
             printTestFailed();
         }
         socket->disconnectFromHost();
 
-        this->deleteLater();
         QThread::currentThread()->quit();
     }
 
@@ -93,16 +95,18 @@ public slots:
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
+                setResult(0);
                 printTestSucceeded();
             } else {
+                setResult(-1);
                 printTestFailed();
             }
         } else {
+            setResult(-1);
             printTestFailed();
         }
         socket->disconnectFromHost();
 
-        this->deleteLater();
         QThread::currentThread()->quit();
     }
 };
@@ -129,6 +133,7 @@ int main(int argc, char *argv[])
 {
     // we need QCoreApplication instance to initialize Qt internals
     QCoreApplication a(argc, argv);
+    int ret = 0;
 
     QList<Test *> autotests = QList<Test *>()
             << new Test01
@@ -136,10 +141,15 @@ int main(int argc, char *argv[])
                ;
 
     while (autotests.size() > 0) {
-        launchTest(autotests.takeFirst());
+        Test *test = autotests.takeFirst();
+        launchTest(test);
+        if (test->getResult() != 0) {
+            ret = -1;
+        }
+        test->deleteLater();
     }
 
-    return 0; //a.exec();
+    return ret;
 }
 
 #include "tests_SslTest13.moc"
