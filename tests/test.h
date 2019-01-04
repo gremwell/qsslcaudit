@@ -72,6 +72,10 @@ public:
         RED(QString("autotest #%1 for %2 failed").arg(getId()).arg(targetTest));
     }
 
+    void printTestFailed(const QString &details) {
+        RED(QString("autotest #%1 for %2 failed: %3").arg(getId()).arg(targetTest).arg(details));
+    }
+
     void printTestSucceeded() {
         GREEN(QString("autotest #%1 for %2 succeeded").arg(getId()).arg(targetTest));
     }
