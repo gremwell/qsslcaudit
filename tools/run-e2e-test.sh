@@ -27,6 +27,11 @@ XML="/tmp/$TEST.xml"; export XML
 CLIENT_OUT="/tmp/$TEST.client.out"
 SERVER_OUT="/tmp/$TEST.server.out"
 
+if [ ! -f $REFXML ] ; then
+	echo "$TEST: skipped (no refxml)"
+	exit 0
+fi
+
 # kill old qsslcaudit instance, if any
 if [ -e "$PID" ] ; then
 	kill `cat $PID` || true
@@ -40,7 +45,7 @@ fi
 # wait 10s
 for _ in `seq 20` ; do sleep .5 && [ -e "$PID" ] && break; done
 if [ ! -e "$PID" ] ; then
-	echo "ERROR: PID file '$PID' has not appeared in 10s (qsslcaudit failed to start?)" >&2
+	echo "$TEST: ERROR: PID file '$PID' has not appeared in 10s (qsslcaudit failed to start?)" >&2
 	exit 2
 fi
 
@@ -58,7 +63,7 @@ if [ -e "$PID" ] ; then
        echo "===== $CLIENT_OUT ====="
        cat "$CLIENT_OUT"
        echo "======================="
-       echo "ERROR: qsslcaudit is still running, after 100 client iterations" >&2
+       echo "$TEST: ERROR: qsslcaudit is still running, after 100 client iterations" >&2
 	exit 3
 fi
 
@@ -69,8 +74,9 @@ if ! diff -b -u "$REFXML" "$XML" ; then
 	echo "===== $CLIENT_OUT ====="
 	cat "$CLIENT_OUT"
        echo "======================="
-       echo "ERROR: refxml mismatch" >&2
+       echo "$TEST: ERROR: refxml mismatch" >&2
        exit 3
 else
 	rm "$XML" "$SERVER_OUT" "$CLIENT_OUT"
+	echo "$TEST: ok"
 fi
