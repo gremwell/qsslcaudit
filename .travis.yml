@@ -1,27 +1,31 @@
 language: cpp
 compiler: gcc
 os: linux
-dist: xenial
+
+services:
+  - docker
 
 branches:
   only:
-  - test
+  - master
 
 matrix:
   include:
-  - env: MODE=safe
-  - env: MODE=unsafe
+  - env: DIST=xenial MODE=safe
+  - env: DIST=xenial MODE=unsafe
+  - env: DIST=bionic MODE=safe
+  - env: DIST=bionic MODE=unsafe
 
 before_install:
-  - sudo apt-get install -y lsb-release && export DIST=`lsb_release -sc`
-  - sudo apt-get install -y cmake qtbase5-dev # FIXME: why the same commands fail from within tools/install-deps-${DIST}-${MODE}.sh?
-  - sudo tools/install-deps-${DIST}-${MODE}.sh
+  - NAME=qs-${MODE}-${DIST}
+  - docker build -f Dockerfile.${NAME} -t ${NAME} .
 
 install:
-  - sudo tools/install.sh
+  - docker run -d --name ${NAME} -e LC_ALL="en_US.UTF-8" -e LANG="en_US.UTF-8" ${NAME} tail -f /dev/null
+  - SH="docker exec -t ${NAME} bash -c"
 
 script:
-  - echo 'Running autotests ...' && echo -en 'travis_fold:start:script.1\\r'
-  - tools/run-autotests.sh
-  - echo -en 'travis_fold:end:script.1\\r'
-  - tools/run-e2e-tests.sh $MODE
+  - #echo 'Running autotests ...' && echo -en 'travis_fold:start:script.1\\r'
+  - #$SH "tools/run-autotests.sh"
+  - #echo -en 'travis_fold:end:script.1\\r'
+  - $SH "tools/run-e2e-tests.sh $MODE"
