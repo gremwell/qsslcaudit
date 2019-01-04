@@ -1,12 +1,16 @@
 project(qsslcaudit.bin)
 
-add_subdirectory(unsafessl)
+if(UNSAFE_MODE)
+  add_subdirectory(unsafessl)
+endif()
+
 add_subdirectory(libqsslcaudit)
 
-include_directories(
-    ${LIBQSSLCAUDIT_DIR}
-    ${UNSAFESSL_DIR}
-    )
+include_directories(${LIBQSSLCAUDIT_DIR})
+
+if(UNSAFE_MODE)
+  include_directories(${UNSAFESSL_DIR})
+endif()
 
 add_executable(qsslcaudit main.cpp)
 set_target_properties(qsslcaudit PROPERTIES AUTOMOC TRUE)
