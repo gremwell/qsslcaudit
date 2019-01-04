@@ -142,13 +142,12 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            int res = QString::compare(socket->errorString(),
-                                       "The host name did not match any of the valid hosts for this certificate");
-
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if ((res == 0) && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+            } else if ((QString::compare(socket->errorString(),
+                                         "The host name did not match any of the valid hosts for this certificate") == 0)
+                       && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -194,13 +193,12 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443, "www.example.com");
 
         if (!socket->waitForEncrypted()) {
-            int res = QString::compare(socket->errorString(),
-                                       "The issuer certificate of a locally looked up certificate could not be found");
-
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if ((res == 0) && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+            } else if ((QString::compare(socket->errorString(),
+                                         "The issuer certificate of a locally looked up certificate could not be found") == 0)
+                       && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
                 setResult(0);
                 printTestSucceeded();
             } else {
