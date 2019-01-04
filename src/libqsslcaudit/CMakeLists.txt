@@ -26,13 +26,17 @@ set(qsslcauditHeaders
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     ${THIRDPARTY_DIR}/qt-certificate-addon/src/certificate
-    ${UNSAFESSL_DIR}
     )
+
+if(UNSAFE_MODE)
+  include_directories(${UNSAFESSL_DIR})
+endif()
 
 add_library(qsslcaudit_lib STATIC ${qsslcauditSources} ${qsslcauditHeaders})
 set_target_properties(qsslcaudit_lib PROPERTIES AUTOMOC TRUE)
 
-target_link_libraries(qsslcaudit_lib
-    qtcertificateaddon
-    unsafessl
-    )
+target_link_libraries(qsslcaudit_lib qtcertificateaddon)
+
+if(UNSAFE_MODE)
+    target_link_libraries(qsslcaudit_lib unsafessl)
+endif()

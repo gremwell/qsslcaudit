@@ -41,11 +41,10 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
-                QThread::msleep(50);
-
-            if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            if (!waitForSslTestFinished()) {
+                setResult(-1);
+                printTestFailed();
+            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -107,11 +106,10 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
-                QThread::msleep(50);
-
-            if (sslTest->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
+            if (!waitForSslTestFinished()) {
+                setResult(-1);
+                printTestFailed();
+            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -173,11 +171,10 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
-                QThread::msleep(50);
-
-            if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            if (!waitForSslTestFinished()) {
+                setResult(-1);
+                printTestFailed();
+            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -242,11 +239,10 @@ public slots:
             setResult(-1);
             printTestFailed();
         } else {
-            // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
-                QThread::msleep(50);
-
-            if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+            if (!waitForSslTestFinished()) {
+                setResult(-1);
+                printTestFailed();
+            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -307,11 +303,10 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
-                QThread::msleep(50);
-
-            if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            if (!waitForSslTestFinished()) {
+                setResult(-1);
+                printTestFailed();
+            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 setResult(0);
                 printTestSucceeded();
             } else {

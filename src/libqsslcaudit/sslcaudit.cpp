@@ -149,7 +149,14 @@ void SslCAudit::runTest(SslTest *test)
 
     sslServer = prepareSslServer(test);
     if (!sslServer) {
-        return;
+        // this place is in the middle of code path and others could expect
+        // some return values, signals, etc.
+        // however, if we can not setup listener (mostly due to permission/busy errors)
+        // for one test, all others will fail.
+        // there is no strong reason to attempt to recover from that, thus, exit with
+        // non-zero code
+        // alternative way -- test availability of socket prior launching SslCaudit
+        exit(-1);
     }
 
     emit sslTestReady();
