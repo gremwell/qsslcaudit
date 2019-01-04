@@ -42,7 +42,7 @@ public slots:
 
         if (!socket->waitForEncrypted()) {
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
@@ -92,7 +92,7 @@ public slots:
 
         if (!socket->waitForEncrypted()) {
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
@@ -142,7 +142,7 @@ public slots:
 
         if (!socket->waitForEncrypted()) {
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
@@ -199,7 +199,7 @@ public slots:
             socket->disconnectFromHost();
 
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
