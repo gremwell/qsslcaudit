@@ -2062,6 +2062,7 @@ SslUnsafeSocketPrivate::SslUnsafeSocketPrivate()
     writeBuffer.m_buf = &writeBuffers[0];
 
     transactionPos = 0;
+    readBufferMaxSize = 0;
 }
 
 /*!
