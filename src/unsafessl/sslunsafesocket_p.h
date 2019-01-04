@@ -262,8 +262,6 @@ public:
     int writeChannelCount;
     int currentReadChannel;
     int currentWriteChannel;
-    int readBufferChunkSize;
-    int writeBufferChunkSize;
     qint64 transactionPos;
     bool transactionStarted;
     bool baseReadLineDataCalled;

@@ -2056,8 +2056,8 @@ SslUnsafeSocketPrivate::SslUnsafeSocketPrivate()
 {
     SslUnsafeConfigurationPrivate::deepCopyDefaultConfiguration(&configuration);
 
-    readBuffers << SslUnsafeRingBuffer(writeBufferChunkSize);
-    writeBuffers << SslUnsafeRingBuffer(writeBufferChunkSize);
+    readBuffers << SslUnsafeRingBuffer();
+    writeBuffers << SslUnsafeRingBuffer();
 
     buffer.m_buf = &readBuffers[0];
     writeBuffer.m_buf = &writeBuffers[0];
