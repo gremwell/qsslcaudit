@@ -49,7 +49,7 @@ public slots:
             socket->waitForReadyRead();
 
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if ((sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED)
@@ -103,7 +103,7 @@ public slots:
             QThread::msleep(5500);
 
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
@@ -150,7 +150,7 @@ public slots:
             int res = QString::compare(socket->errorString(),
                                        "The host name did not match any of the valid hosts for this certificate");
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if ((res == 0) && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
@@ -202,7 +202,7 @@ public slots:
             int res = QString::compare(socket->errorString(),
                                        "The issuer certificate of a locally looked up certificate could not be found");
             // we should wait until test finishes prior to querying for test results
-            while (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+            while (sslTest->result() == SslTest::SSLTEST_RESULT_NOT_READY)
                 QThread::msleep(50);
 
             if ((res == 0) && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
