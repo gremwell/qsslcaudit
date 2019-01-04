@@ -24,7 +24,7 @@ install:
   - SH="docker exec -t ${NAME} bash -c"
 
 script:
-  - #echo 'Running autotests ...' && echo -en 'travis_fold:start:script.1\\r'
-  - #$SH "tools/run-autotests.sh"
-  - #echo -en 'travis_fold:end:script.1\\r'
+  - echo 'Running autotests ...' && echo -en 'travis_fold:start:script.1\\r'
+  - $SH "tools/run-autotests.sh"
+  - echo -en 'travis_fold:end:script.1\\r'
   - $SH "tools/run-e2e-tests.sh $MODE"
