@@ -256,15 +256,7 @@ public:
 
     QRingBufferRef buffer;
     QRingBufferRef writeBuffer;
-    qint64 pos;
-    qint64 devicePos;
-    int readChannelCount;
-    int writeChannelCount;
-    int currentReadChannel;
-    int currentWriteChannel;
     qint64 transactionPos;
-    bool transactionStarted;
-    bool baseReadLineDataCalled;
 
 private:
     static bool ensureLibraryLoaded();

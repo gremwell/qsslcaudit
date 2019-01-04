@@ -1944,7 +1944,6 @@ void SslUnsafeSocket::connectToHost(const QString &hostName, quint16 port, OpenM
     d->plainSocket->setProxy(proxy());
 #endif
     QIODevice::open(openMode);
-    d->readChannelCount = d->writeChannelCount = 0;
     d->plainSocket->connectToHost(hostName, port, openMode, d->preferredNetworkLayerProtocol);
     d->cachedSocketDescriptor = d->plainSocket->socketDescriptor();
 }
@@ -2370,7 +2369,6 @@ bool SslUnsafeSocketPrivate::bind(const QHostAddress &address, quint16 port, QAb
     setLocalPort(plainSocket->localPort());
     setLocalAddress(plainSocket->localAddress());
     cachedSocketDescriptor = plainSocket->socketDescriptor();
-    readChannelCount = writeChannelCount = 0;
     return ret;
 }
 
@@ -2386,8 +2384,6 @@ void SslUnsafeSocketPrivate::_q_connectedSlot()
     q->setPeerAddress(plainSocket->peerAddress());
     q->setPeerName(plainSocket->peerName());
     cachedSocketDescriptor = plainSocket->socketDescriptor();
-    readChannelCount = 0; // plainSocket->readChannelCount();
-    writeChannelCount = 0; // plainSocket->writeChannelCount();
 
 #ifdef SSLUNSAFESOCKET_DEBUG
     qCDebug(lcSsl) << "SslUnsafeSocket::_q_connectedSlot()";
