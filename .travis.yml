@@ -13,7 +13,6 @@ matrix:
   include:
   - env: DIST=xenial MODE=safe
   - env: DIST=xenial MODE=unsafe
-  - env: DIST=bionic MODE=safe
   - env: DIST=bionic MODE=unsafe
 
 before_install:
