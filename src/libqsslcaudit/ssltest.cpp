@@ -73,6 +73,7 @@ const QString SslTest::resultToStatus(enum SslTest::SslTestResult result)
     case SslTest::SSLTEST_RESULT_SUCCESS:
         ret = "PASSED";
         break;
+    case SslTest::SSLTEST_RESULT_NOT_READY:
     case SslTest::SSLTEST_RESULT_UNDEFINED:
     case SslTest::SSLTEST_RESULT_INIT_FAILED:
         ret = "UNDEFINED";
@@ -104,7 +105,7 @@ void SslTest::clear()
     m_socketErrors = QList<QAbstractSocket::SocketError>();
     m_sslConnectionEstablished = false;
     m_interceptedData = QByteArray();
-    m_result = SSLTEST_RESULT_UNDEFINED;
+    m_result = SSLTEST_RESULT_NOT_READY;
     m_report = QString("test results undefined");
 }
 
