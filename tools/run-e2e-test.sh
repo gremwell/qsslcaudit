@@ -52,7 +52,13 @@ for _ in `seq 100` ; do
 	sleep .5
 done > "$CLIENT_OUT"
 if [ -e "$PID" ] ; then
-	echo "ERROR: too many client interations" >&2
+       echo "===== $SERVER_OUT ====="
+       cat "$SERVER_OUT"
+       echo
+       echo "===== $CLIENT_OUT ====="
+       cat "$CLIENT_OUT"
+       echo "======================="
+       echo "ERROR: qsslcaudit is still running, after 100 client iterations" >&2
 	exit 3
 fi
 
@@ -62,7 +68,9 @@ if ! diff -b -u "$REFXML" "$XML" ; then
 	echo
 	echo "===== $CLIENT_OUT ====="
 	cat "$CLIENT_OUT"
-	false
+       echo "======================="
+       echo "ERROR: refxml mismatch" >&2
+       exit 3
 else
 	rm "$XML" "$SERVER_OUT" "$CLIENT_OUT"
 fi
