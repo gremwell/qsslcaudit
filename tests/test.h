@@ -5,6 +5,8 @@
 #include "sslcaudit.h"
 
 #include <QThread>
+#include <QTimer>
+#include <QEventLoop>
 
 
 class Test : public QObject
@@ -31,10 +33,13 @@ public:
             return;
         }
 
-        launchSslCAudit();
+        if (!launchSslCAudit()) {
+            RED("failed to launch sslcaudit instance");
+            return;
+        }
     }
 
-    void launchSslCAudit() {
+    bool launchSslCAudit() {
         QThread *sslCAuditThread = new QThread;
         SslCAudit *caudit = new SslCAudit(testSettings);
 
@@ -45,9 +50,19 @@ public:
 
         sslCAuditThread->start();
 
-        // wait a bit until it is fully operational
-        // (technically, corresponding signal can be used...)
-        QThread::msleep(200);
+        // we have to wait until listener is ready
+        QTimer timer;
+        timer.setSingleShot(true);
+        QEventLoop loop;
+        connect(caudit, &SslCAudit::sslTestReady, &loop, &QEventLoop::quit);
+        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        timer.start(2000);
+        loop.exec();
+
+        if (!timer.isActive()) {
+            return false;
+        }
+        return true;
     }
 
     void printTestFailed() {
