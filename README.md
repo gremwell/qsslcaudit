@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/gremwell/qsslcaudit.svg?branch=master)](https://travis-ci.com/gremwell/qsslcaudit)
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
