@@ -101,7 +101,7 @@ For these reasons we advise you to compile `qsslcaudit` using OpenSSL versions 1
 
 As even 1.0.x versions are too safe for some of the tests included, we prepared so-called *unsafe* build of OpenSSL library. See repositories https://github.com/gremwell/unsafeopenssl-pkg-debian and https://github.com/gremwell/unsafeopenssl-pkg-alt
 
-Packages backed from these repos follow filesystem hierarchy standard but install renamed OpenSSL libraries, i.e. `libunsafessl` and `libunsafecrypto`. This makes it impossible to occasionally link your program against these libraries. Additionally, they provide `openssl-unsafe` binary which can be useful by itself with tools like https://testssl.sh/
+Packages backed from these repos follow filesystem hierarchy standard but install renamed OpenSSL libraries, i.e. `libunsafessl` and `libunsafecrypto`. This makes it impossible to accidentally link your program against these libraries. Additionally, they provide `openssl-unsafe` binary which can be useful by itself with tools like https://testssl.sh/
 
 Build system of `qsslcaudit` determines which OpenSSL variant is installed and will use *unsafe* version if it is available.
 
