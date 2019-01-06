@@ -2063,6 +2063,12 @@ SslUnsafeSocketPrivate::SslUnsafeSocketPrivate()
 
     transactionPos = 0;
     readBufferMaxSize = 0;
+    emittedBytesWritten = false;
+    pendingClose = false;
+    cachedSocketDescriptor = -1;
+    readBufferMaxSize = 0;
+    socketError = QAbstractSocket::UnknownSocketError;
+    preferredNetworkLayerProtocol = QAbstractSocket::UnknownNetworkLayerProtocol;
 }
 
 /*!
