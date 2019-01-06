@@ -17,6 +17,12 @@ public:
         testResult = -1;
     }
 
+    ~Test() {
+        sslCAuditThread.quit();
+        sslCAuditThread.wait();
+        delete caudit;
+    }
+
     virtual int getId() = 0;
 
     virtual void setTestSettings() = 0;
@@ -33,6 +39,21 @@ public:
             return;
         }
 
+        caudit = new SslCAudit(testSettings);
+
+        caudit->setSslTests(QList<SslTest *>() << sslTest);
+        caudit->moveToThread(&sslCAuditThread);
+
+        connect(caudit, &SslCAudit::sslTestsFinished, [=](){
+            testIsFinished = true;
+        });
+
+        connect(caudit, &SslCAudit::sslTestReady, [=](){
+            testIsReady = true;
+        });
+
+        connect(&sslCAuditThread, &QThread::started, caudit, &SslCAudit::run, Qt::QueuedConnection);
+
         if (!launchSslCAudit()) {
             RED("failed to launch sslcaudit instance");
             return;
@@ -40,32 +61,20 @@ public:
     }
 
     bool launchSslCAudit() {
-        QThread *sslCAuditThread = new QThread;
-        SslCAudit *caudit = new SslCAudit(testSettings);
+        testIsReady = false;
+        testIsFinished = false;
 
-        caudit->setSslTests(QList<SslTest *>() << sslTest);
-        caudit->moveToThread(sslCAuditThread);
-        QObject::connect(sslCAuditThread, SIGNAL(started()), caudit, SLOT(run()));
-        QObject::connect(sslCAuditThread, SIGNAL(finished()), sslCAuditThread, SLOT(deleteLater()));
+        sslCAuditThread.quit();
+        sslCAuditThread.wait();
 
-        sslCAuditThread->start();
+        sslCAuditThread.start();
 
-        // setup test finished signal so the actual verify result procedure can start synchronously
-        connect(caudit, &SslCAudit::sslTestsFinished, this, &Test::sslTestsFinished);
+        int count = 0;
+        int to = 5000;
+        while (!testIsReady && ++count < to/10)
+            QThread::msleep(10);
 
-        // we have to wait until listener is ready
-        QTimer timer;
-        timer.setSingleShot(true);
-        QEventLoop loop;
-        connect(caudit, &SslCAudit::sslTestReady, &loop, &QEventLoop::quit);
-        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        timer.start(2000);
-        loop.exec();
-
-        if (!timer.isActive()) {
-            return false;
-        }
-        return true;
+        return testIsReady;
     }
 
     void printTestFailed() {
@@ -83,22 +92,13 @@ public:
     int getResult() { return testResult; }
 
     bool waitForSslTestFinished() {
-        if (sslTest->result() != SslTest::SSLTEST_RESULT_NOT_READY)
-            return true;
-
-        QTimer timer;
-        timer.setSingleShot(true);
-        QEventLoop loop;
-        connect(this, &Test::sslTestsFinished, &loop, &QEventLoop::quit);
-        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        int count = 0;
         // we have to wait more than the test will be executed
-        timer.start(static_cast<int>(2 * testSettings.getWaitDataTimeout()));
-        loop.exec();
+        int to = static_cast<int>(2 * testSettings.getWaitDataTimeout());
+        while (!testIsFinished && ++count < to/10)
+            QThread::msleep(10);
 
-        if (!timer.isActive())
-            return false;
-
-        return true;
+        return testIsFinished;
     }
 
     QString targetTest;
@@ -112,9 +112,10 @@ protected:
 
 private:
     int testResult;
-
-signals:
-    void sslTestsFinished();
+    bool testIsReady;
+    bool testIsFinished;
+    QThread sslCAuditThread;
+    SslCAudit *caudit;
 
 };
 
