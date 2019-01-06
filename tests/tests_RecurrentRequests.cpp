@@ -212,6 +212,9 @@ int main(int argc, char *argv[])
             ret = -1;
         }
         test->deleteLater();
+        // in this case, exit immideately
+        if (ret != 0)
+            break;
     }
 
     return ret;
