@@ -153,6 +153,7 @@ public slots:
             if ((i != (times - 1)) && !launchSslCAudit()) {
                 setResult(-1);
                 printTestFailed(QString("%1 attempts failed").arg(i));
+                break;
             }
         }
 
