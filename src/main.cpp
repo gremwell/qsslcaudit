@@ -296,13 +296,13 @@ int main(int argc, char *argv[])
 
     QList<SslTest *> sslTests = prepareSslTests(settings);
 
-    QThread *thread = new QThread;
+    QThread thread;
     SslCAudit *caudit = new SslCAudit(settings);
 
     caudit->setSslTests(sslTests);
-    caudit->moveToThread(thread);
-    QObject::connect(thread, SIGNAL(started()), caudit, SLOT(run()));
-    QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    caudit->moveToThread(&thread);
+    QObject::connect(&thread, &QThread::finished, caudit, &QObject::deleteLater);
+    QObject::connect(&thread, &QThread::started, caudit, &SslCAudit::run);
 
     QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){
         caudit->printSummary();
@@ -317,8 +317,12 @@ int main(int argc, char *argv[])
     if (pidFile.length() > 0)
         createPidFile(pidFile);
 
-    thread->start();
+    thread.start();
+
     int exitCode = a.exec();
+
+    thread.quit();
+    thread.wait();
 
     if (pidFile.length() > 0)
         deletePidFile(pidFile);

@@ -216,9 +216,6 @@ void SslCAudit::run()
     } while (settings.getLoopTests());
 
     emit sslTestsFinished();
-
-    this->deleteLater();
-    QThread::currentThread()->quit();
 }
 
 void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)
