@@ -8,7 +8,7 @@
 #include <QFile>
 #include <QXmlStreamWriter>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafesocket.h"
 #include "sslunsafeconfiguration.h"
 #else

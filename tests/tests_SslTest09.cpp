@@ -3,7 +3,7 @@
 
 #include <QCoreApplication>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafesocket.h"
 #else
 #include <QSslSocket>

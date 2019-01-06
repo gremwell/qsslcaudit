@@ -23,7 +23,7 @@
 #include <QTcpServer>
 #include <QString>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafecertificate.h"
 #include "sslunsafekey.h"
 #include "sslunsafeellipticcurve.h"

@@ -38,7 +38,7 @@
 
 #include <QDateTime>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafekey.h"
 #else
 #include <QSslKey>

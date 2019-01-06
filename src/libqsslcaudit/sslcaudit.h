@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QAbstractSocket>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafeerror.h"
 #else
 #include <QSslError>

@@ -39,7 +39,7 @@
 #ifndef CERTIFICATEREQUESTBUILDER_H
 #define CERTIFICATEREQUESTBUILDER_H
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafekey.h"
 #else
 #include <QSslKey>

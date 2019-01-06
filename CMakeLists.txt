@@ -35,6 +35,8 @@ if(OPENSSLUNSAFE_FOUND)
   endif()
 
   set(UNSAFE_MODE "yes")
+
+  add_definitions(-DUNSAFE)
 endif()
 
 # in some cases we need native version too
@@ -56,8 +58,9 @@ if(OPENSSL_FOUND)
   endif()
 endif()
 
-if(UNSAFE_MODE)
-  add_definitions(-DUNSAFE)
+set(UNSAFE_QSSL "yes")
+if(UNSAFE_QSSL)
+  add_definitions(-DUNSAFE_QSSL)
   add_definitions(-DXSsl=SslUnsafe)
   add_definitions(-DXSslConfiguration=SslUnsafeConfiguration)
   add_definitions(-DXSslSocket=SslUnsafeSocket)

@@ -46,7 +46,7 @@
 #include "certificate_global.h"
 #include "certificate.h"
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafe.h"
 #else
 #include <QtNetwork/QSsl>

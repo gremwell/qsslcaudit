@@ -2,7 +2,7 @@
 #define SSLCERTGEN_H
 
 #include <QPair>
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafecertificate.h"
 #include "sslunsafekey.h"
 #else

@@ -3,7 +3,7 @@
 #include "sslcertgen.h"
 #include "debug.h"
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafeconfiguration.h"
 #else
 #include <QSslConfiguration>

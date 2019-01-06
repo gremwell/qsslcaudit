@@ -42,7 +42,7 @@
 #include <QString>
 #include <QFlags>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafecertificate.h"
 #else
 #include <QSslCertificate>

@@ -1,7 +1,7 @@
 #ifndef SSLTEST_H
 #define SSLTEST_H
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafecertificate.h"
 #include "sslunsafekey.h"
 #include "sslunsafecipher.h"

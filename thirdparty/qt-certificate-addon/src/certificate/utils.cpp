@@ -40,7 +40,7 @@
 
 #include <QByteArray>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafekey.h"
 #include "sslunsafecertificate.h"
 #else

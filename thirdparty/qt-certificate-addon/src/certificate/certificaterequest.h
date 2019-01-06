@@ -39,7 +39,7 @@
 #ifndef CERTIFICATEREQUEST_H
 #define CERTIFICATEREQUEST_H
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafe.h"
 #else
 #include <QtNetwork/QSsl>

@@ -28,7 +28,7 @@ include_directories(
     ${THIRDPARTY_DIR}/qt-certificate-addon/src/certificate
     )
 
-if(UNSAFE_MODE)
+if(UNSAFE_QSSL)
   include_directories(${UNSAFESSL_DIR})
 endif()
 
@@ -37,6 +37,6 @@ set_target_properties(qsslcaudit_lib PROPERTIES AUTOMOC TRUE)
 
 target_link_libraries(qsslcaudit_lib qtcertificateaddon)
 
-if(UNSAFE_MODE)
+if(UNSAFE_QSSL)
     target_link_libraries(qsslcaudit_lib unsafessl)
 endif()

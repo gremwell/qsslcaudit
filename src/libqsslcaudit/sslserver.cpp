@@ -22,7 +22,7 @@
 
 #include <QFile>
 
-#ifdef UNSAFE
+#ifdef UNSAFE_QSSL
 #include "sslunsafeconfiguration.h"
 #else
 #include <QSslConfiguration>
