@@ -252,10 +252,20 @@ long SslUnsafeSocketBackendPrivate::setupOpenSslOptions(SslUnsafe::SslProtocol p
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3;
     else if (protocol == SslUnsafe::TlsV1_0OrLater)
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3;
+    else if (protocol == SslUnsafe::SslV2)
+        options = SSL_OP_ALL|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TLSv1_2;
+    else if (protocol == SslUnsafe::SslV3)
+        options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TLSv1_2;
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
     // Choosing Tlsv1_1OrLater or TlsV1_2OrLater on OpenSSL < 1.0.1
     // will cause an error in SslUnsafeContext::fromConfiguration, meaning
     // we will never get here.
+    else if (protocol == SslUnsafe::TlsV1_0)
+        options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1_1|SSL_OP_NO_TLSv1_2;
+    else if (protocol == SslUnsafe::TlsV1_1)
+        options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_2;
+    else if (protocol == SslUnsafe::TlsV1_2)
+        options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1;
     else if (protocol == SslUnsafe::TlsV1_1OrLater)
         options = SSL_OP_ALL|SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1;
     else if (protocol == SslUnsafe::TlsV1_2OrLater)
