@@ -6,21 +6,6 @@
         <result>FAILED</result>
     </test>
     <test>
-        <id>8</id>
-        <name>SSLv2 protocol support</name>
-        <result>UNDEFINED</result>
-    </test>
-    <test>
-        <id>9</id>
-        <name>SSLv3 protocol support</name>
-        <result>UNDEFINED</result>
-    </test>
-    <test>
-        <id>12</id>
-        <name>SSLv3 protocol and MEDIUM grade ciphers support</name>
-        <result>UNDEFINED</result>
-    </test>
-    <test>
         <id>13</id>
         <name>TLS 1.0 protocol support</name>
         <result>FAILED</result>
