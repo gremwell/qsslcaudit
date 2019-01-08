@@ -93,6 +93,8 @@ public:
     const QByteArray &interceptedData() { return m_interceptedData; }
 
 private:
+    bool checkProtoSupport(XSsl::SslProtocol proto);
+
     int m_id;
     int m_group;
     QString m_name;
@@ -131,6 +133,7 @@ public:
     virtual bool prepare(const SslUserSettings &settings);
     virtual void calcResults();
     virtual bool setProtoAndCiphers() = 0;
+    bool setProtoOnly(XSsl::SslProtocol proto);
     bool setProtoAndSupportedCiphers(XSsl::SslProtocol proto);
     bool setProtoAndExportCiphers(XSsl::SslProtocol proto);
     bool setProtoAndLowCiphers(XSsl::SslProtocol proto);

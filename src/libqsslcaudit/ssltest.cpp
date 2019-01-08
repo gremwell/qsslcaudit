@@ -4,6 +4,11 @@
 #include "ssltests.h"
 #include "ciphers.h"
 
+#ifdef UNSAFE
+#include <openssl-unsafe/ssl.h>
+#else
+#include <openssl/ssl.h>
+#endif
 
 SslTest::SslTest()
 {
@@ -109,6 +114,45 @@ void SslTest::clear()
     m_report = QString("test results undefined");
 }
 
+bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)
+{
+    bool isSsl2Supported = false;
+    bool isSsl3Supported = true;
+    bool isTls1Supported = true;
+    bool isTls11Supported = true;
+
+    // OpenSSL does not have API that returns supported protocols
+    // internally it relies on compile-time defines, see ssl_check_allowed_versions()
+
+    // to check for SSLv2 support the most reliable way is to check for protocol-specific define
+#ifdef SSL2_MT_ERROR
+    isSsl2Supported = true;
+#endif
+    if ((proto == XSsl::SslV2) && !isSsl2Supported)
+        return false;
+
+    // the similar is for SSLv3 and others support but defines are a bit different
+#if defined(OPENSSL_NO_SSL3_METHOD) || defined(OPENSSL_NO_SSL3)
+    isSsl3Supported = false;
+#endif
+    if ((proto == XSsl::SslV3) && !isSsl3Supported)
+        return false;
+
+#if defined(OPENSSL_NO_TLS1_METHOD) || defined(OPENSSL_NO_TLS1)
+    isTls1Supported = false;
+#endif
+    if ((proto == XSsl::TlsV1_0) && !isTls1Supported)
+        return false;
+
+#if defined(OPENSSL_NO_TLS1_1_METHOD) || defined(OPENSSL_NO_TLS1_1)
+    isSsl3Supported = false;
+#endif
+    if ((proto == XSsl::TlsV1_1) && !isTls11Supported)
+        return false;
+
+    return true;
+}
+
 void SslCertificatesTest::calcResults()
 {
     if (m_interceptedData.size() > 0) {
@@ -206,12 +250,36 @@ bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
     return setProtoAndCiphers();
 }
 
+bool SslProtocolsCiphersTest::setProtoOnly(XSsl::SslProtocol proto)
+{
+    if (!checkProtoSupport(proto)) {
+        QString protoStr = "unknown";
+        if (proto == SslUnsafe::SslV2) {
+            protoStr = "SSLv2";
+        } else if (proto == SslUnsafe::SslV3) {
+            protoStr = "SSLv3";
+        } else if (proto == SslUnsafe::TlsV1_0) {
+            protoStr = "TLSv1.0";
+        } else if (proto == SslUnsafe::TlsV1_1) {
+            protoStr = "TLSv1.1";
+        }
+        VERBOSE(QString("the requested protocol (%1) is not supported").arg(protoStr));
+        return false;
+    }
+
+    setSslProtocol(proto);
+
+    return true;
+}
+
 bool SslProtocolsCiphersTest::setProtoAndSupportedCiphers(XSsl::SslProtocol proto)
 {
     QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
 
+    if (!setProtoOnly(proto))
+        return false;
+
     setSslCiphers(ciphers);
-    setSslProtocol(proto);
 
     return true;
 }
@@ -220,6 +288,9 @@ bool SslProtocolsCiphersTest::setProtoAndSpecifiedCiphers(XSsl::SslProtocol prot
 {
     QList<XSslCipher> ciphers;
     QStringList opensslCiphers = ciphersString.split(":");
+
+    if (!setProtoOnly(proto))
+        return false;
 
     for (int i = 0; i < opensslCiphers.size(); i++) {
         XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
@@ -233,7 +304,6 @@ bool SslProtocolsCiphersTest::setProtoAndSpecifiedCiphers(XSsl::SslProtocol prot
     }
 
     setSslCiphers(ciphers);
-    setSslProtocol(proto);
 
     return true;
 }
