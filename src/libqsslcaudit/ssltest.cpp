@@ -125,8 +125,10 @@ bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)
     // internally it relies on compile-time defines, see ssl_check_allowed_versions()
 
     // to check for SSLv2 support the most reliable way is to check for protocol-specific define
-#ifdef SSL2_MT_ERROR
+#if defined(SSL2_MT_ERROR) && !defined(OPENSSL_NO_SSL2)
     isSsl2Supported = true;
+#else
+    isSsl2Supported = false;
 #endif
     if ((proto == XSsl::SslV2) && !isSsl2Supported)
         return false;
