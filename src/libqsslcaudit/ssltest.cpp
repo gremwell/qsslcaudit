@@ -111,6 +111,8 @@ void SslTest::clear()
     m_sslConnectionEstablished = false;
     m_interceptedData = QByteArray();
     m_result = SSLTEST_RESULT_NOT_READY;
+    m_rawDataRecv = QByteArray();
+    m_rawDataSent = QByteArray();
     m_report = QString("test results undefined");
 }
 

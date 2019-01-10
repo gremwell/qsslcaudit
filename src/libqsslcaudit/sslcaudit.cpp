@@ -138,6 +138,11 @@ void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
         } else {
             VERBOSE("no data received (" + sslSocket->errorString() + ")");
         }
+
+#ifdef UNSAFE_QSSL
+        test->addRawDataRecv(sslSocket->getRawReadData());
+        test->addRawDataSent(sslSocket->getRawWrittenData());
+#endif
     }
 }
 

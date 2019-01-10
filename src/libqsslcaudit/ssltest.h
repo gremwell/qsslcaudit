@@ -89,8 +89,12 @@ public:
     void addSocketErrors(const QList<QAbstractSocket::SocketError> errors) { m_socketErrors << errors; }
     void setSslConnectionStatus(bool isEstablished) { m_sslConnectionEstablished = isEstablished; }
     void addInterceptedData(const QByteArray &data) { m_interceptedData.append(data); }
+    void addRawDataRecv(const QByteArray &data) { m_rawDataRecv.append(data); }
+    void addRawDataSent(const QByteArray &data) { m_rawDataSent.append(data); }
 
     const QByteArray &interceptedData() { return m_interceptedData; }
+    const QByteArray &rawDataRecv() { return m_rawDataRecv; }
+    const QByteArray &rawDataSent() { return m_rawDataSent; }
 
 private:
     bool checkProtoSupport(XSsl::SslProtocol proto);
@@ -111,6 +115,8 @@ private:
     QList<QAbstractSocket::SocketError> m_socketErrors;
     bool m_sslConnectionEstablished;
     QByteArray m_interceptedData;
+    QByteArray m_rawDataRecv;
+    QByteArray m_rawDataSent;
 
     friend class SslCertificatesTest;
     friend class SslProtocolsCiphersTest;
