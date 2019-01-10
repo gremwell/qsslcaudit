@@ -136,7 +136,7 @@ void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
             sslSocket->waitForDisconnected();
             VERBOSE("disconnected");
         } else {
-            VERBOSE("no data received (" + sslSocket->errorString() + ")");
+            VERBOSE("no unencrypted data received (" + sslSocket->errorString() + ")");
         }
 
 #ifdef UNSAFE_QSSL
