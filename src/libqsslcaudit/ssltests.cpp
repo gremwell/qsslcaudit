@@ -35,7 +35,7 @@ bool SslTest01::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::AnyProtocol);
 
     return true;
 }
@@ -65,7 +65,7 @@ bool SslTest02::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::AnyProtocol);
 
     return true;
 }
@@ -83,7 +83,7 @@ bool SslTest03::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::AnyProtocol);
 
     return true;
 }
@@ -120,7 +120,7 @@ bool SslTest04::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::AnyProtocol);
 
     return true;
 }
@@ -145,7 +145,7 @@ bool SslTest05::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::AnyProtocol);
 
     return true;
 }
@@ -181,7 +181,7 @@ bool SslTest06::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::AnyProtocol);
 
     return true;
 }
@@ -206,7 +206,7 @@ bool SslTest07::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::TlsV1_0OrLater);
+    setSslProtocol(XSsl::AnyProtocol);
 
     return true;
 }
