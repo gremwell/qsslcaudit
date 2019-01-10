@@ -258,6 +258,9 @@ public:
     QRingBufferRef writeBuffer;
     qint64 transactionPos;
 
+    QByteArray rawReadBuffer;
+    QByteArray rawWriteBuffer;
+
 private:
     static bool ensureLibraryLoaded();
     static void ensureCiphersAndCertsLoaded();

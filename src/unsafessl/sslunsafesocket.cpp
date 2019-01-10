@@ -810,6 +810,8 @@ void SslUnsafeSocket::close()
     // must be cleared, reading/writing not possible on closed socket:
     d->buffer.clear();
     d->writeBuffer.clear();
+
+    // do not clear raw*Buffer as we need them even after connection was closed
 }
 
 /*!
@@ -1998,6 +2000,7 @@ qint64 SslUnsafeSocket::readData(char *data, qint64 maxlen)
 
     if (d->mode == UnencryptedMode && !d->autoStartHandshake) {
         readBytes = d->plainSocket->read(data, maxlen);
+        d->rawReadBuffer.append(data, readBytes);
 #ifdef SSLUNSAFESOCKET_DEBUG
         qCDebug(lcSsl) << "SslUnsafeSocket::readData(" << (void *)data << ',' << maxlen << ") =="
                  << readBytes;
@@ -2008,6 +2011,7 @@ qint64 SslUnsafeSocket::readData(char *data, qint64 maxlen)
             QMetaObject::invokeMethod(this, "_q_flushReadBuffer", Qt::QueuedConnection);
         } else {
             readBytes = d->buffer.read(data, maxlen);
+            // do not append this data to raw buffer, it will be handled in transmit()
         }
     }
 
@@ -2023,10 +2027,13 @@ qint64 SslUnsafeSocket::writeData(const char *data, qint64 len)
 #ifdef SSLUNSAFESOCKET_DEBUG
     qCDebug(lcSsl) << "SslUnsafeSocket::writeData(" << (void *)data << ',' << len << ')';
 #endif
-    if (d->mode == UnencryptedMode && !d->autoStartHandshake)
+    if (d->mode == UnencryptedMode && !d->autoStartHandshake) {
+        d->rawWriteBuffer.append(data, len);
         return d->plainSocket->write(data, len);
+    }
 
     d->writeBuffer.append(data, len);
+    // do not append this data to raw buffer as it will be handled later in transmit()
 
     // make sure we flush to the plain socket's buffer
     if (!d->flushTriggered) {
@@ -2035,6 +2042,18 @@ qint64 SslUnsafeSocket::writeData(const char *data, qint64 len)
     }
 
     return len;
+}
+
+QByteArray SslUnsafeSocket::getRawReadData()
+{
+    Q_D(SslUnsafeSocket);
+    return d->rawReadBuffer;
+}
+
+QByteArray SslUnsafeSocket::getRawWrittenData()
+{
+    Q_D(SslUnsafeSocket);
+    return d->rawWriteBuffer;
 }
 
 /*!
@@ -2099,6 +2118,9 @@ void SslUnsafeSocketPrivate::init()
     writeBuffer.clear();
     configuration.peerCertificate.clear();
     configuration.peerCertificateChain.clear();
+
+    rawReadBuffer.clear();
+    rawWriteBuffer.clear();
 }
 
 /*!
@@ -2332,6 +2354,8 @@ void SslUnsafeSocketPrivate::createPlainSocket(QIODevice::OpenMode openMode)
 
     buffer.clear();
     writeBuffer.clear();
+    rawReadBuffer.clear();
+    rawWriteBuffer.clear();
     connectionEncrypted = false;
     configuration.peerCertificate.clear();
     configuration.peerCertificateChain.clear();
@@ -2640,13 +2664,17 @@ qint64 SslUnsafeSocketPrivate::peek(char *data, qint64 maxSize)
             qint64 r2 = plainSocket->peek(data, maxSize - r);
             if (r2 < 0)
                 return (r > 0 ? r : r2);
+            rawReadBuffer.append(data, r2);
             return r + r2;
         } else {
             return -1;
         }
     } else {
         //encrypted mode - the socket engine will read and decrypt data into the QIODevice buffer
-        return QTcpSocket::peek(data, maxSize);
+        qint64 bytes = QTcpSocket::peek(data, maxSize);
+        if (bytes > 0)
+            rawReadBuffer.append(data, bytes);
+        return bytes;
     }
 }
 

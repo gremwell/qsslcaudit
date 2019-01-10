@@ -710,6 +710,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                 setErrorAndEmit(plainSocket->error(), plainSocket->errorString());
                 return;
             }
+            rawWriteBuffer.append(data.constData(), actualWritten);
             transmitting = true;
         }
 
@@ -720,6 +721,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                 data.resize(pendingBytes);
                 // just peek() here because q_BIO_write could write less data than expected
                 int encryptedBytesRead = plainSocket->peek(data.data(), pendingBytes);
+                rawReadBuffer.append(data.constData(), encryptedBytesRead);
 
 #ifdef SSLUNSAFESOCKET_DEBUG
                 qCDebug(lcSsl) << "SslUnsafeSocketBackendPrivate::transmit: read" << encryptedBytesRead << "encrypted bytes from the socket";

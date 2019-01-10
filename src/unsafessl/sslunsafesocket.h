@@ -196,6 +196,9 @@ public:
 
     void ignoreSslErrors(const QList<SslUnsafeError> &errors);
 
+    QByteArray getRawReadData();
+    QByteArray getRawWrittenData();
+
 public Q_SLOTS:
     void startClientEncryption();
     void startServerEncryption();
