@@ -157,8 +157,40 @@ bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)
     return true;
 }
 
+bool SslTest::checkForSocketErrors()
+{
+    // all errors should be here except those which we handle below in a particular test
+    if (m_socketErrors.contains(QAbstractSocket::ConnectionRefusedError)
+            || m_socketErrors.contains(QAbstractSocket::HostNotFoundError)
+            || m_socketErrors.contains(QAbstractSocket::SocketAccessError)
+            || m_socketErrors.contains(QAbstractSocket::SocketResourceError)
+            || m_socketErrors.contains(QAbstractSocket::DatagramTooLargeError)
+            || m_socketErrors.contains(QAbstractSocket::NetworkError)
+            || m_socketErrors.contains(QAbstractSocket::AddressInUseError)
+            || m_socketErrors.contains(QAbstractSocket::SocketAddressNotAvailableError)
+            || m_socketErrors.contains(QAbstractSocket::UnsupportedSocketOperationError)
+            || m_socketErrors.contains(QAbstractSocket::UnfinishedSocketOperationError)
+            || m_socketErrors.contains(QAbstractSocket::OperationError)
+            || m_socketErrors.contains(QAbstractSocket::TemporaryError)) {
+        m_report = QString("socket/network error occuried");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    if (m_socketErrors.contains(QAbstractSocket::UnknownSocketError)) {
+        m_report = QString("unknown socket error occuried");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    return false;
+}
+
 void SslCertificatesTest::calcResults()
 {
+    if (checkForSocketErrors())
+        return;
+
     if (m_interceptedData.size() > 0) {
         m_report = QString("test failed, client accepted fake certificate, data was intercepted");
         setResult(SSLTEST_RESULT_DATA_INTERCEPTED);
@@ -185,6 +217,9 @@ void SslCertificatesTest::calcResults()
 
 void SslProtocolsCiphersTest::calcResults()
 {
+    if (checkForSocketErrors())
+        return;
+
     if (m_interceptedData.size() > 0) {
         m_report = QString("test failed, client accepted fake certificate and weak protocol, data was intercepted");
         setResult(SSLTEST_RESULT_DATA_INTERCEPTED);

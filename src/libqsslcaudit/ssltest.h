@@ -98,6 +98,7 @@ public:
 
 private:
     bool checkProtoSupport(XSsl::SslProtocol proto);
+    bool checkForSocketErrors();
 
     int m_id;
     int m_group;
