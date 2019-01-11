@@ -98,6 +98,7 @@ public:
 
 private:
     bool checkProtoSupport(XSsl::SslProtocol proto);
+    bool checkForNonSslClient();
     bool checkForSocketErrors();
     bool checkForGenericSslErrors();
 

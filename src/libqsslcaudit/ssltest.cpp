@@ -186,6 +186,66 @@ bool SslTest::checkForSocketErrors()
     return false;
 }
 
+bool SslTest::checkForNonSslClient()
+{
+#ifdef UNSAFE_QSSL
+    // some conditions below are excessive, this is for purpose to make our decisions clear
+
+    if ((m_rawDataRecv.size() == 0)
+            && !m_sslConnectionEstablished
+            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
+            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
+        m_report = QString("no data was transmitted before timeout expired");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    if ((m_rawDataRecv.size() == 0)
+            && !m_sslConnectionEstablished
+            && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
+            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
+        m_report = QString("client closed the connection without transmitting any data");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    if ((m_rawDataRecv.size() > 0)
+            && !m_sslConnectionEstablished
+            && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
+            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
+        m_report = QString("secure connection was not established, %1 bytes were received before client closed the connection")
+                .arg(m_rawDataRecv.size());
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    if ((m_rawDataRecv.size() > 0)
+            && !m_sslConnectionEstablished
+            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
+            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
+        m_report = QString("secure connection was not established, %1 bytes were received before client was disconnected")
+                .arg(m_rawDataRecv.size());
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    if ((m_rawDataRecv.size() > 0)
+            && !m_sslConnectionEstablished
+            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
+            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
+            && (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
+                && ((m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:http request")).size() > 0)
+                    || (m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)))) {
+        m_report = QString("secure connection was not established, %1 bytes of unexpected protocol were received before client was disconnected")
+                .arg(m_rawDataRecv.size());
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+#endif
+
+    return false;
+}
+
 bool SslTest::checkForGenericSslErrors()
 {
     if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
@@ -201,6 +261,9 @@ bool SslTest::checkForGenericSslErrors()
 void SslCertificatesTest::calcResults()
 {
     if (checkForSocketErrors())
+        return;
+
+    if (checkForNonSslClient())
         return;
 
     if (checkForGenericSslErrors())
@@ -233,6 +296,9 @@ void SslCertificatesTest::calcResults()
 void SslProtocolsCiphersTest::calcResults()
 {
     if (checkForSocketErrors())
+        return;
+
+    if (checkForNonSslClient())
         return;
 
     if (checkForGenericSslErrors())
