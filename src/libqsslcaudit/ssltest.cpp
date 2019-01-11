@@ -275,22 +275,31 @@ void SslCertificatesTest::calcResults()
         return;
     }
 
-    if (m_sslConnectionEstablished && (m_interceptedData.size() == 0)
+    if (m_sslConnectionEstablished
+            && (m_interceptedData.size() == 0)
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
         m_report = QString("test failed, client accepted fake certificate, but no data transmitted");
         setResult(SSLTEST_RESULT_CERT_ACCEPTED);
         return;
     }
 
-    if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
-            || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
-        m_report = QString("failure during SSL initialization");
-        setResult(SSLTEST_RESULT_INIT_FAILED);
+    if (!m_sslConnectionEstablished) {
+        m_report = QString("test passed, client refused fake certificate");
+        setResult(SSLTEST_RESULT_SUCCESS);
         return;
     }
 
-    m_report = QString("test passed, client refused fake certificate");
-    setResult(SSLTEST_RESULT_SUCCESS);
+    // this is a controversion decision
+    if (m_sslConnectionEstablished
+            && (m_interceptedData.size() == 0)
+            && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
+        m_report = QString("test succeeded, client accepted fake certificate but disconnected without data transmission");
+        setResult(SSLTEST_RESULT_SUCCESS);
+        return;
+    }
+
+    m_report = QString("unhandled case! please report it to developers!");
+    setResult(SSLTEST_RESULT_UNDEFINED);
 }
 
 void SslProtocolsCiphersTest::calcResults()
@@ -310,7 +319,8 @@ void SslProtocolsCiphersTest::calcResults()
         return;
     }
 
-    if (m_sslConnectionEstablished && (m_interceptedData.size() == 0)
+    if (m_sslConnectionEstablished
+            && (m_interceptedData.size() == 0)
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
         m_report = QString("test failed, client accepted fake certificate and weak protocol, but no data transmitted");
         setResult(SSLTEST_RESULT_CERT_ACCEPTED);
@@ -323,24 +333,22 @@ void SslProtocolsCiphersTest::calcResults()
         return;
     }
 
-    if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
-            || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
-        m_report = QString("failure during SSL initialization");
-        setResult(SSLTEST_RESULT_INIT_FAILED);
-        return;
-    }
-
-    if (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
+    if (!m_sslConnectionEstablished
+            && m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
             && ((m_sslErrorsStr.filter(QString("certificate unknown")).size() > 0)
                 || (m_sslErrorsStr.filter(QString("unknown ca")).size() > 0)
                 || (m_sslErrorsStr.filter(QString("bad certificate")).size() > 0))) {
         m_report = QString("test failed, client accepted weak protocol");
         setResult(SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR);
         return;
+    } else if (!m_sslConnectionEstablished) {
+        m_report = QString("test passed, client does not accept weak protocol");
+        setResult(SSLTEST_RESULT_SUCCESS);
+        return;
     }
 
-    m_report = QString("test passed, client does not accept weak protocol");
-    setResult(SSLTEST_RESULT_SUCCESS);
+    m_report = QString("unhandled case! please report it to developers!");
+    setResult(SSLTEST_RESULT_UNDEFINED);
 }
 
 bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
