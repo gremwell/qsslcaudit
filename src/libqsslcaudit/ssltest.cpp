@@ -186,9 +186,24 @@ bool SslTest::checkForSocketErrors()
     return false;
 }
 
+bool SslTest::checkForGenericSslErrors()
+{
+    if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
+            || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
+        m_report = QString("failure during SSL initialization");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    return false;
+}
+
 void SslCertificatesTest::calcResults()
 {
     if (checkForSocketErrors())
+        return;
+
+    if (checkForGenericSslErrors())
         return;
 
     if (m_interceptedData.size() > 0) {
@@ -218,6 +233,9 @@ void SslCertificatesTest::calcResults()
 void SslProtocolsCiphersTest::calcResults()
 {
     if (checkForSocketErrors())
+        return;
+
+    if (checkForGenericSslErrors())
         return;
 
     if (m_interceptedData.size() > 0) {
