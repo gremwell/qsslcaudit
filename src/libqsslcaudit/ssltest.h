@@ -101,6 +101,8 @@ private:
     bool checkForNonSslClient();
     bool checkForSocketErrors();
     bool checkForGenericSslErrors();
+    bool isHelloMessage(const QByteArray &buf);
+    int helloPosInBuffer(const QByteArray &buf);
 
     int m_id;
     int m_group;

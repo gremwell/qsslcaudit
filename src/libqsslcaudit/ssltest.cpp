@@ -3,6 +3,7 @@
 #include "sslcertgen.h"
 #include "ssltests.h"
 #include "ciphers.h"
+#include "tlshello.h"
 
 #ifdef UNSAFE
 #include <openssl-unsafe/ssl.h>
@@ -186,11 +187,41 @@ bool SslTest::checkForSocketErrors()
     return false;
 }
 
+bool SslTest::isHelloMessage(const QByteArray &packet)
+{
+    if (is_sslv3_or_tls(packet)) {
+        if (is_sslv3_or_tls_hello(packet)) {
+            return true;
+        }
+    } else if (is_sslv2_clienthello(packet)) {
+        return true;
+    }
+
+    return false;
+}
+
+int SslTest::helloPosInBuffer(const QByteArray &buf)
+{
+    int size = buf.size();
+
+    for (int i = 0; i < size; i++) {
+        if (isHelloMessage(buf.right(size - i)))
+            return i;
+    }
+
+    return -1;
+}
+
 bool SslTest::checkForNonSslClient()
 {
 #ifdef UNSAFE_QSSL
-    // some conditions below are excessive, this is for purpose to make our decisions clear
+    bool hasHelloMessage = false;
 
+    // test for HELLO message in advance
+    if ((m_rawDataRecv.size() > 0) && (helloPosInBuffer(m_rawDataRecv) >= 0))
+        hasHelloMessage = true;
+
+    // some conditions below are excessive, this is for purpose to make our decisions clear
     if ((m_rawDataRecv.size() == 0)
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
@@ -212,17 +243,37 @@ bool SslTest::checkForNonSslClient()
     if ((m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
+            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
+            && !hasHelloMessage) {
         m_report = QString("secure connection was not established, %1 bytes were received before client closed the connection")
                 .arg(m_rawDataRecv.size());
         setResult(SSLTEST_RESULT_UNDEFINED);
         return true;
     }
 
+    // this case is the same for broken SSL clients and perfectly valid ones
+#if 0
+    if ((m_rawDataRecv.size() > 0)
+            && !m_sslConnectionEstablished
+            && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
+            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
+            && hasHelloMessage
+            && (m_sslErrorsStr.size() == 1)
+            && m_sslErrorsStr.contains("The remote host closed the connection")) {
+        // client sent HELLO, but as SSL errors list is empty and encrypted connection
+        // was not established, something went wrong in the middle of handshake
+        // thus, consider client as non-SSL
+        m_report = QString("secure connection was not properly established (however, the attempt was made), client closed the connection");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+#endif
+
     if ((m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
+            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
+            && !hasHelloMessage) {
         m_report = QString("secure connection was not established, %1 bytes were received before client was disconnected")
                 .arg(m_rawDataRecv.size());
         setResult(SSLTEST_RESULT_UNDEFINED);
@@ -232,7 +283,23 @@ bool SslTest::checkForNonSslClient()
     if ((m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
+            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
+            && hasHelloMessage
+            && (m_sslErrorsStr.size() == 1)
+            && m_sslErrorsStr.contains("Network operation timed out")) {
+        // client sent HELLO, but as SSL errors list is empty and encrypted connection
+        // was not established, something went wrong in the middle of handshake
+        // thus, consider client as non-SSL
+        m_report = QString("secure connection was not properly established (however, the attempt was made), client was disconnected");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        return true;
+    }
+
+    if ((m_rawDataRecv.size() > 0)
+            && !m_sslConnectionEstablished
+            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
+            && !hasHelloMessage
             && (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
                 && ((m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:http request")).size() > 0)
                     || (m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)))) {

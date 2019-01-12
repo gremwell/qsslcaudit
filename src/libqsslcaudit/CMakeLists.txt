@@ -8,6 +8,7 @@ set(qsslcauditSources
     ssltests.cpp
     sslusersettings.cpp
     starttls.cpp
+    tlshello.cpp
     )
 
 set(qsslcauditHeaders
@@ -21,6 +22,7 @@ set(qsslcauditHeaders
     ssltests.h
     sslusersettings.h
     starttls.h
+    tlshello.h
     )
 
 include_directories(
