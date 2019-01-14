@@ -28,6 +28,66 @@ static const QString SSLTESTS_GROUP_CERTS_STR = QString("certs");
 static const QString SSLTESTS_GROUP_PROTOS_STR = QString("protos");
 static const QString SSLTESTS_GROUP_CIPHERS_STR = QString("ciphers");
 
+class TlsClientHelloExt
+{
+public:
+    TlsClientHelloExt() :
+        heartbeat_mode(0),
+        padding(0),
+        record_size_limit(0),
+        supported_version(0),
+        encrypt_then_mac(0),
+        extended_master_secret(0)
+    {}
+
+    QList<QPair<quint8, QByteArray>> server_name;
+
+    quint8 heartbeat_mode;
+    quint16 padding;
+    quint16 record_size_limit;
+    quint16 supported_version;
+    quint8 encrypt_then_mac;
+    quint8 extended_master_secret;
+    QByteArray cert_status_type_ocsp_responder_id_list;
+    QByteArray cert_status_type_ocsp_request_extensions;
+    QList<quint16> supported_versions;
+    QList<quint8> ec_point_formats;
+    QList<quint16> supported_groups;
+    QByteArray session_ticket_data;
+    QList<QPair<quint8, quint8>> sig_hash_algs;
+    QList<QByteArray> npn;
+    QList<QByteArray> alpn;
+
+};
+
+class TlsClientHelloInfo
+{
+public:
+    TlsClientHelloInfo() :
+        version(0),
+        random_time(0)
+    {}
+
+    quint16 version;
+    QList<quint32> ciphers;
+    QByteArray session_id;
+    QByteArray challenge;
+    QList<quint8> comp_methods;
+    quint32 random_time;
+    QByteArray random;
+
+    TlsClientHelloExt hnd_hello;
+};
+
+class TlsClientInfo
+{
+public:
+    TlsClientInfo() {}
+
+    TlsClientHelloInfo tlsHelloInfo;
+};
+
+QDebug operator<<(QDebug, const TlsClientInfo &);
 
 class SslTest
 {
@@ -96,13 +156,15 @@ public:
     const QByteArray &rawDataRecv() { return m_rawDataRecv; }
     const QByteArray &rawDataSent() { return m_rawDataSent; }
 
+    TlsClientInfo clientInfo() { return m_clientInfo; }
+
 private:
     bool checkProtoSupport(XSsl::SslProtocol proto);
     bool checkForNonSslClient();
     bool checkForSocketErrors();
     bool checkForGenericSslErrors();
-    bool isHelloMessage(const QByteArray &buf);
-    int helloPosInBuffer(const QByteArray &buf);
+    bool isHelloMessage(const QByteArray &buf, bool *isSsl2);
+    int helloPosInBuffer(const QByteArray &buf, bool *isSsl2);
 
     int m_id;
     int m_group;
@@ -122,6 +184,7 @@ private:
     QByteArray m_interceptedData;
     QByteArray m_rawDataRecv;
     QByteArray m_rawDataSent;
+    TlsClientInfo m_clientInfo;
 
     friend class SslCertificatesTest;
     friend class SslProtocolsCiphersTest;

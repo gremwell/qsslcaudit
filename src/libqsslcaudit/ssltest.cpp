@@ -187,39 +187,82 @@ bool SslTest::checkForSocketErrors()
     return false;
 }
 
-bool SslTest::isHelloMessage(const QByteArray &packet)
+bool SslTest::isHelloMessage(const QByteArray &packet, bool *isSsl2)
 {
     if (is_sslv3_or_tls(packet)) {
         if (is_sslv3_or_tls_hello(packet)) {
+            *isSsl2 = false;
             return true;
         }
     } else if (is_sslv2_clienthello(packet)) {
+        *isSsl2 = true;
         return true;
     }
 
     return false;
 }
 
-int SslTest::helloPosInBuffer(const QByteArray &buf)
+int SslTest::helloPosInBuffer(const QByteArray &buf, bool *isSsl2)
 {
     int size = buf.size();
 
     for (int i = 0; i < size; i++) {
-        if (isHelloMessage(buf.right(size - i)))
+        if (isHelloMessage(buf.right(size - i), isSsl2))
             return i;
     }
 
     return -1;
 }
 
+QDebug operator<<(QDebug dbg, const TlsClientInfo &clientInfo)
+{
+    QDebugStateSaver saver(dbg);
+    dbg.nospace();
+
+    dbg << "tls version(" << clientInfo.tlsHelloInfo.version << ")\r\n";
+    dbg << "tls ciphers(" << clientInfo.tlsHelloInfo.ciphers << ")\r\n";
+    dbg << "tls session_id(" << clientInfo.tlsHelloInfo.session_id << ")\r\n";
+    dbg << "tls challenge(" << clientInfo.tlsHelloInfo.challenge << ")\r\n";
+    dbg << "tls comp_methods(" << clientInfo.tlsHelloInfo.comp_methods << ")\r\n";
+    dbg << "tls random_time(" << clientInfo.tlsHelloInfo.random_time << ")\r\n";
+    dbg << "tls random(" << clientInfo.tlsHelloInfo.random << ")\r\n";
+    dbg << "tls hnd_hello_ext_heartbeat_mode(" << clientInfo.tlsHelloInfo.hnd_hello.heartbeat_mode << ")\r\n";
+    dbg << "tls hnd_hello_ext_padding(" << clientInfo.tlsHelloInfo.hnd_hello.padding << ")\r\n";
+    dbg << "tls hnd_hello_ext_record_size_limit(" << clientInfo.tlsHelloInfo.hnd_hello.record_size_limit << ")\r\n";
+    dbg << "tls hnd_hello_ext_supported_version(" << clientInfo.tlsHelloInfo.hnd_hello.supported_version << ")\r\n";
+    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_responder_id_list(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_responder_id_list << ")\r\n";
+    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_request_extensions(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_request_extensions << ")\r\n";
+    dbg << "tls hnd_hello_ext_supported_versions(" << clientInfo.tlsHelloInfo.hnd_hello.supported_versions << ")\r\n";
+    dbg << "tls hnd_hello_ext_ec_point_formats(" << clientInfo.tlsHelloInfo.hnd_hello.ec_point_formats << ")\r\n";
+    dbg << "tls hnd_hello_ext_supported_groups(" << clientInfo.tlsHelloInfo.hnd_hello.supported_groups << ")\r\n";
+    dbg << "tls hnd_hello_ext_session_ticket_data(" << clientInfo.tlsHelloInfo.hnd_hello.session_ticket_data << ")\r\n";
+    dbg << "tls hnd_hello_ext_sig_hash_algs(" << clientInfo.tlsHelloInfo.hnd_hello.sig_hash_algs << ")\r\n";
+    dbg << "tls hnd_hello_ext_npn(" << clientInfo.tlsHelloInfo.hnd_hello.npn << ")\r\n";
+    dbg << "tls hnd_hello_ext_alpn(" << clientInfo.tlsHelloInfo.hnd_hello.alpn << ")\r\n";
+    dbg << "tls hnd_hello_ext_ext_encrypt_then_mac(" << clientInfo.tlsHelloInfo.hnd_hello.encrypt_then_mac << ")\r\n";
+    dbg << "tls hnd_hello_ext_extended_master_secret(" << clientInfo.tlsHelloInfo.hnd_hello.extended_master_secret << ")\r\n";
+    dbg << "tls hnd_hello_ext_server_name(" << clientInfo.tlsHelloInfo.hnd_hello.server_name << ")\r\n";
+
+    return dbg;
+}
+
 bool SslTest::checkForNonSslClient()
 {
 #ifdef UNSAFE_QSSL
     bool hasHelloMessage = false;
+    int helloPos = -1;
+    bool isSsl2 = false;
 
     // test for HELLO message in advance
-    if ((m_rawDataRecv.size() > 0) && (helloPosInBuffer(m_rawDataRecv) >= 0))
+    if ((m_rawDataRecv.size() > 0) && ((helloPos = helloPosInBuffer(m_rawDataRecv, &isSsl2)) >= 0)) {
         hasHelloMessage = true;
+
+        if (isSsl2) {
+            dissect_ssl2_hnd_client_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo);
+        } else {
+            ssl_dissect_hnd_cli_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo);
+        }
+    }
 
     // some conditions below are excessive, this is for purpose to make our decisions clear
     if ((m_rawDataRecv.size() == 0)
