@@ -19,16 +19,13 @@ class Test01 : public Test
 {
     Q_OBJECT
 public:
-    Test01(int times) : times(times) {}
-
-    int getId() { return 1; }
+    Test01(int times, int id, QString testBaseName, SslTest *sslTest) :
+        Test(id, testBaseName, sslTest), times(times) {}
 
     void setTestSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
-
-    void setSslTest() { targetTest = QString("RecurrentRequests/SslTest02_1"); sslTest = new SslTest02; }
 
 public slots:
 
@@ -99,16 +96,13 @@ class Test02 : public Test
 {
     Q_OBJECT
 public:
-    Test02(int times) : times(times) {}
-
-    int getId() { return 2; }
+    Test02(int times, int id, QString testBaseName, SslTest *sslTest) :
+        Test(id, testBaseName, sslTest), times(times) {}
 
     void setTestSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
-
-    void setSslTest() { targetTest = QString("RecurrentRequests/SslTest02_2"); sslTest = new SslTest02; }
 
 public slots:
 
@@ -201,8 +195,8 @@ int main(int argc, char *argv[])
     }
 
     QList<Test *> autotests = QList<Test *>()
-            << new Test01(times)
-            << new Test02(times)
+            << new Test01(times, 1, "RecurrentRequests", new SslTest02)
+            << new Test02(times, 2, "RecurrentRequests", new SslTest02)
                ;
 
     while (autotests.size() > 0) {

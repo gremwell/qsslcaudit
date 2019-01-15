@@ -21,14 +21,12 @@ class Test01 : public Test
 {
     Q_OBJECT
 public:
-    int getId() { return 1; }
+    Test01(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
 
     void setTestSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
-
-    void setSslTest() { targetTest = QString("SslTest12"); sslTest = new SslTest12; }
 
 public slots:
 
@@ -70,14 +68,12 @@ class Test02 : public Test
 {
     Q_OBJECT
 public:
-    int getId() { return 2; }
+    Test02(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
 
     void setTestSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
-
-    void setSslTest() { targetTest = QString("SslTest12"); sslTest = new SslTest12; }
 
 public slots:
 
@@ -135,14 +131,12 @@ class Test03 : public Test
 {
     Q_OBJECT
 public:
-    int getId() { return 3; }
+    Test03(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
 
     void setTestSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
-
-    void setSslTest() { targetTest = QString("SslTest12"); sslTest = new SslTest12; }
 
 public slots:
 
@@ -200,14 +194,12 @@ class Test04 : public Test
 {
     Q_OBJECT
 public:
-    int getId() { return 4; }
+    Test04(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
 
     void setTestSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
-
-    void setSslTest() { targetTest = QString("SslTest12"); sslTest = new SslTest12; }
 
 public slots:
 
@@ -283,10 +275,10 @@ int main(int argc, char *argv[])
     int ret = 0;
 
     QList<Test *> autotests = QList<Test *>()
-            << new Test01
-            << new Test02
-            << new Test03
-            << new Test04
+            << new Test01(1, "SslTest12", new SslTest12)
+            << new Test02(2, "SslTest12", new SslTest12)
+            << new Test03(3, "SslTest12", new SslTest12)
+            << new Test04(4, "SslTest12", new SslTest12)
                ;
 
     while (autotests.size() > 0) {

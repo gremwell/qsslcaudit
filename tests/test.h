@@ -13,7 +13,12 @@ class Test : public QObject
 {
     Q_OBJECT
 public:
-    Test(QObject *parent = nullptr) : QObject(parent) {
+    Test(int id, QString testBaseName, SslTest *sslTest, QObject *parent = nullptr) :
+        QObject(parent),
+        sslTest(sslTest),
+        id(id),
+        testBaseName(testBaseName)
+    {
         testResult = -1;
     }
 
@@ -23,16 +28,14 @@ public:
         delete caudit;
     }
 
-    virtual int getId() = 0;
+    SslTest *sslTest;
+
+    int getId() { return id; }
 
     virtual void setTestSettings() = 0;
 
-    virtual void setSslTest() = 0;
-
     void prepare() {
         setTestSettings();
-
-        setSslTest();
 
         if (!sslTest->prepare(testSettings)) {
             RED("failed to prepare test " + sslTest->name());
@@ -78,15 +81,15 @@ public:
     }
 
     void printTestFailed() {
-        RED(QString("autotest #%1 for %2 failed").arg(getId()).arg(targetTest));
+        RED(QString("autotest #%1 for %2 failed").arg(getId()).arg(testName()));
     }
 
     void printTestFailed(const QString &details) {
-        RED(QString("autotest #%1 for %2 failed: %3").arg(getId()).arg(targetTest).arg(details));
+        RED(QString("autotest #%1 for %2 failed: %3").arg(getId()).arg(testName()).arg(details));
     }
 
     void printTestSucceeded() {
-        GREEN(QString("autotest #%1 for %2 succeeded").arg(getId()).arg(targetTest));
+        GREEN(QString("autotest #%1 for %2 succeeded").arg(getId()).arg(testName()));
     }
 
     int getResult() { return testResult; }
@@ -101,8 +104,7 @@ public:
         return testIsFinished;
     }
 
-    QString targetTest;
-    SslTest *sslTest;
+    QString testName() { return QString("%1_%2").arg(testBaseName).arg(id); }
     SslUserSettings testSettings;
 
 protected:
@@ -111,6 +113,8 @@ protected:
     }
 
 private:
+    int id;
+    QString testBaseName;
     int testResult;
     bool testIsReady;
     bool testIsFinished;
