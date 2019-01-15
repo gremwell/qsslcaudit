@@ -58,6 +58,26 @@ public:
     QList<QByteArray> npn;
     QList<QByteArray> alpn;
 
+    QString printable() const;
+
+    bool operator==(const TlsClientHelloExt &other) const {
+        if ((server_name != other.server_name)
+                || (heartbeat_mode != other.heartbeat_mode)
+                || (supported_version != other.supported_version)
+                || (encrypt_then_mac != other.encrypt_then_mac)
+                || (supported_versions != other.supported_versions)
+                || (ec_point_formats != other.ec_point_formats)
+                || (supported_groups != other.supported_groups)
+                || (sig_hash_algs != other.sig_hash_algs)
+                || (npn != other.npn)
+                || (alpn != other.alpn))
+            return false;
+        return true;
+    }
+
+    bool operator!=(const TlsClientHelloExt &other) const {
+        return !operator==(other);
+    }
 };
 
 class TlsClientHelloInfo
@@ -77,6 +97,21 @@ public:
     QByteArray random;
 
     TlsClientHelloExt hnd_hello;
+
+    QString printable() const;
+
+    bool operator==(const TlsClientHelloInfo &other) const {
+        if ((version != other.version)
+                || (ciphers != other.ciphers)
+                || (comp_methods != other.comp_methods)
+                || (hnd_hello != other.hnd_hello))
+            return false;
+        return true;
+    }
+
+    bool operator!=(const TlsClientHelloInfo &other) const {
+        return !operator==(other);
+    }
 };
 
 class TlsClientInfo
@@ -93,6 +128,21 @@ public:
     bool isBrokenSslClient;
 
     TlsClientHelloInfo tlsHelloInfo;
+
+    QString printable() const;
+
+    bool operator==(const TlsClientInfo &other) const {
+        if ((sourceHost != other.sourceHost)
+                || (hasHelloMessage != other.hasHelloMessage)
+                || (isBrokenSslClient != other.isBrokenSslClient)
+                || (tlsHelloInfo != other.tlsHelloInfo))
+            return false;
+        return true;
+    }
+
+    bool operator!=(const TlsClientInfo &other) const {
+        return !operator==(other);
+    }
 };
 
 QDebug operator<<(QDebug, const TlsClientInfo &);

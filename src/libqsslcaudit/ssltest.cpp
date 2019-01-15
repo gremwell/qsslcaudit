@@ -214,6 +214,96 @@ int SslTest::helloPosInBuffer(const QByteArray &buf, bool *isSsl2)
     return -1;
 }
 
+QString TlsClientHelloExt::printable() const
+{
+    QString ret;
+    QTextStream out(&ret);
+
+    if (heartbeat_mode)
+        out << "heartbeat mode" << endl;
+
+    if (server_name.size() > 0) {
+        out << "SNI: ";
+        for (int i = 0; i < server_name.size(); i++) {
+            out << server_name.at(i).second;
+            if (i != server_name.size() - 1)
+                out << ", ";
+        }
+        out << endl;
+    }
+
+    if (alpn.size() > 0) {
+        out << "ALPN: ";
+        for (int i = 0; i < alpn.size(); i++) {
+            out << QString::fromStdString(alpn.at(i).toStdString());
+            if (i != alpn.size() - 1)
+                out << ", ";
+        }
+        out << endl;
+    }
+
+    return ret;
+}
+
+QString TlsClientHelloInfo::printable() const
+{
+    QString ret;
+    QTextStream out(&ret);
+
+    out << "protocol: ";
+    switch (version) {
+    case 0x300:
+        out << "SSLv3";
+        break;
+    case 0x301:
+        out << "TLSv1.0";
+        break;
+    case 0x302:
+        out << "TLSv1.1";
+        break;
+    case 0x303:
+        out << "TLSv1.2";
+        break;
+    case 0x304:
+        out << "TLSv1.3";
+        break;
+    default:
+        out << "SSLv2/unknown";
+    }
+    out << endl;
+
+    out << "accepted ciphers: ";
+    for (int i = 0; i < ciphers.size(); i++) {
+        QString cipher = cipherStringFromId(ciphers.at(i));
+        if (cipher.size() > 0) {
+            out << cipher;
+            if (i != ciphers.size() - 1)
+                out << ":";
+        }
+    }
+    out << endl;
+
+    out << hnd_hello.printable();
+
+    return ret;
+}
+
+QString TlsClientInfo::printable() const
+{
+    QString ret;
+    QTextStream out(&ret);
+
+    out << "source host: " << sourceHost << endl;
+
+    if (isBrokenSslClient)
+        out << "not a valid TLS/SSL client" << endl;
+
+    if (hasHelloMessage)
+        out << tlsHelloInfo.printable();
+
+    return ret;
+}
+
 QDebug operator<<(QDebug dbg, const TlsClientInfo &clientInfo)
 {
     QDebugStateSaver saver(dbg);
