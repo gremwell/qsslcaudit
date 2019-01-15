@@ -306,6 +306,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){
         caudit->printSummary();
+        caudit->isSameClient(true);
 
         if (settings.getOutputXml().length() > 0)
             caudit->writeXmlSummary(settings.getOutputXml());
