@@ -27,6 +27,7 @@ public:
     static void showCiphers();
     void printSummary();
     void writeXmlSummary(const QString &filename);
+    bool isSameClient(bool doPrint);
 
 public slots:
     void run();
@@ -50,6 +51,7 @@ private:
     SslUserSettings settings;
     QList<SslTest *> sslTests;
     SslTest *currentTest;
+    QList<TlsClientInfo> clientsInfo;
 
 };
 
