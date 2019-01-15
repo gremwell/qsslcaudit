@@ -353,8 +353,19 @@ bool SslTest::checkForNonSslClient()
             && !m_clientInfo.hasHelloMessage
             && (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
                 && ((m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:http request")).size() > 0)
-                    || (m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)))) {
-        m_report = QString("secure connection was not established, %1 bytes of unexpected protocol were received before client was disconnected")
+                    || (m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)
+                    || (m_sslErrorsStr.filter(QString("SSL3_GET_RECORD:wrong version number")).size() > 0)))) {
+        m_report = QString("secure connection was not established, %1 bytes of unexpected protocol were received before the connection was closed")
+                .arg(m_rawDataRecv.size());
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
+        return true;
+    }
+
+    // failsafe check. this can't be SSL client without HELLO message intercepted
+    if ((m_rawDataRecv.size() > 0)
+            && !m_clientInfo.hasHelloMessage) {
+        m_report = QString("secure connection was not established, %1 bytes were received before the connection was closed")
                 .arg(m_rawDataRecv.size());
         setResult(SSLTEST_RESULT_UNDEFINED);
         m_clientInfo.isBrokenSslClient = true;
