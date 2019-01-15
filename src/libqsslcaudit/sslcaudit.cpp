@@ -111,6 +111,8 @@ void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
 {
     VERBOSE(QString("connection from: %1:%2").arg(sslSocket->peerAddress().toString()).arg(sslSocket->peerPort()));
 
+    test->setClientSourceHost(sslSocket->peerAddress().toString());
+
     if (!settings.getForwardHostAddr().isNull()) {
         // this will loop until connection is interrupted
         proxyConnection(sslSocket, test);

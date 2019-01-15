@@ -219,29 +219,32 @@ QDebug operator<<(QDebug dbg, const TlsClientInfo &clientInfo)
     QDebugStateSaver saver(dbg);
     dbg.nospace();
 
-    dbg << "tls version(" << clientInfo.tlsHelloInfo.version << ")\r\n";
-    dbg << "tls ciphers(" << clientInfo.tlsHelloInfo.ciphers << ")\r\n";
-    dbg << "tls session_id(" << clientInfo.tlsHelloInfo.session_id << ")\r\n";
-    dbg << "tls challenge(" << clientInfo.tlsHelloInfo.challenge << ")\r\n";
-    dbg << "tls comp_methods(" << clientInfo.tlsHelloInfo.comp_methods << ")\r\n";
-    dbg << "tls random_time(" << clientInfo.tlsHelloInfo.random_time << ")\r\n";
-    dbg << "tls random(" << clientInfo.tlsHelloInfo.random << ")\r\n";
-    dbg << "tls hnd_hello_ext_heartbeat_mode(" << clientInfo.tlsHelloInfo.hnd_hello.heartbeat_mode << ")\r\n";
-    dbg << "tls hnd_hello_ext_padding(" << clientInfo.tlsHelloInfo.hnd_hello.padding << ")\r\n";
-    dbg << "tls hnd_hello_ext_record_size_limit(" << clientInfo.tlsHelloInfo.hnd_hello.record_size_limit << ")\r\n";
-    dbg << "tls hnd_hello_ext_supported_version(" << clientInfo.tlsHelloInfo.hnd_hello.supported_version << ")\r\n";
-    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_responder_id_list(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_responder_id_list << ")\r\n";
-    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_request_extensions(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_request_extensions << ")\r\n";
-    dbg << "tls hnd_hello_ext_supported_versions(" << clientInfo.tlsHelloInfo.hnd_hello.supported_versions << ")\r\n";
-    dbg << "tls hnd_hello_ext_ec_point_formats(" << clientInfo.tlsHelloInfo.hnd_hello.ec_point_formats << ")\r\n";
-    dbg << "tls hnd_hello_ext_supported_groups(" << clientInfo.tlsHelloInfo.hnd_hello.supported_groups << ")\r\n";
-    dbg << "tls hnd_hello_ext_session_ticket_data(" << clientInfo.tlsHelloInfo.hnd_hello.session_ticket_data << ")\r\n";
-    dbg << "tls hnd_hello_ext_sig_hash_algs(" << clientInfo.tlsHelloInfo.hnd_hello.sig_hash_algs << ")\r\n";
-    dbg << "tls hnd_hello_ext_npn(" << clientInfo.tlsHelloInfo.hnd_hello.npn << ")\r\n";
-    dbg << "tls hnd_hello_ext_alpn(" << clientInfo.tlsHelloInfo.hnd_hello.alpn << ")\r\n";
-    dbg << "tls hnd_hello_ext_ext_encrypt_then_mac(" << clientInfo.tlsHelloInfo.hnd_hello.encrypt_then_mac << ")\r\n";
-    dbg << "tls hnd_hello_ext_extended_master_secret(" << clientInfo.tlsHelloInfo.hnd_hello.extended_master_secret << ")\r\n";
-    dbg << "tls hnd_hello_ext_server_name(" << clientInfo.tlsHelloInfo.hnd_hello.server_name << ")\r\n";
+    dbg << "source host(" << clientInfo.sourceHost << ")" << endl;
+    dbg << "has hello message(" << clientInfo.hasHelloMessage << ")" << endl;
+    dbg << "is broken SSL client(" << clientInfo.isBrokenSslClient << ")" << endl;
+    dbg << "tls version(" << clientInfo.tlsHelloInfo.version << ")" << endl;
+    dbg << "tls ciphers(" << clientInfo.tlsHelloInfo.ciphers << ")" << endl;
+    dbg << "tls session_id(" << clientInfo.tlsHelloInfo.session_id << ")" << endl;
+    dbg << "tls challenge(" << clientInfo.tlsHelloInfo.challenge << ")" << endl;
+    dbg << "tls comp_methods(" << clientInfo.tlsHelloInfo.comp_methods << ")" << endl;
+    dbg << "tls random_time(" << clientInfo.tlsHelloInfo.random_time << ")" << endl;
+    dbg << "tls random(" << clientInfo.tlsHelloInfo.random << ")" << endl;
+    dbg << "tls hnd_hello_ext_heartbeat_mode(" << clientInfo.tlsHelloInfo.hnd_hello.heartbeat_mode << ")" << endl;
+    dbg << "tls hnd_hello_ext_padding(" << clientInfo.tlsHelloInfo.hnd_hello.padding << ")" << endl;
+    dbg << "tls hnd_hello_ext_record_size_limit(" << clientInfo.tlsHelloInfo.hnd_hello.record_size_limit << ")" << endl;
+    dbg << "tls hnd_hello_ext_supported_version(" << clientInfo.tlsHelloInfo.hnd_hello.supported_version << ")" << endl;
+    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_responder_id_list(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_responder_id_list << ")" << endl;
+    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_request_extensions(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_request_extensions << ")" << endl;
+    dbg << "tls hnd_hello_ext_supported_versions(" << clientInfo.tlsHelloInfo.hnd_hello.supported_versions << ")" << endl;
+    dbg << "tls hnd_hello_ext_ec_point_formats(" << clientInfo.tlsHelloInfo.hnd_hello.ec_point_formats << ")" << endl;
+    dbg << "tls hnd_hello_ext_supported_groups(" << clientInfo.tlsHelloInfo.hnd_hello.supported_groups << ")" << endl;
+    dbg << "tls hnd_hello_ext_session_ticket_data(" << clientInfo.tlsHelloInfo.hnd_hello.session_ticket_data << ")" << endl;
+    dbg << "tls hnd_hello_ext_sig_hash_algs(" << clientInfo.tlsHelloInfo.hnd_hello.sig_hash_algs << ")" << endl;
+    dbg << "tls hnd_hello_ext_npn(" << clientInfo.tlsHelloInfo.hnd_hello.npn << ")" << endl;
+    dbg << "tls hnd_hello_ext_alpn(" << clientInfo.tlsHelloInfo.hnd_hello.alpn << ")" << endl;
+    dbg << "tls hnd_hello_ext_ext_encrypt_then_mac(" << clientInfo.tlsHelloInfo.hnd_hello.encrypt_then_mac << ")" << endl;
+    dbg << "tls hnd_hello_ext_extended_master_secret(" << clientInfo.tlsHelloInfo.hnd_hello.extended_master_secret << ")" << endl;
+    dbg << "tls hnd_hello_ext_server_name(" << clientInfo.tlsHelloInfo.hnd_hello.server_name << ")" << endl;
 
     return dbg;
 }
@@ -249,13 +252,12 @@ QDebug operator<<(QDebug dbg, const TlsClientInfo &clientInfo)
 bool SslTest::checkForNonSslClient()
 {
 #ifdef UNSAFE_QSSL
-    bool hasHelloMessage = false;
     int helloPos = -1;
     bool isSsl2 = false;
 
     // test for HELLO message in advance
     if ((m_rawDataRecv.size() > 0) && ((helloPos = helloPosInBuffer(m_rawDataRecv, &isSsl2)) >= 0)) {
-        hasHelloMessage = true;
+        m_clientInfo.hasHelloMessage = true;
 
         if (isSsl2) {
             dissect_ssl2_hnd_client_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo);
@@ -271,6 +273,7 @@ bool SslTest::checkForNonSslClient()
             && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
         m_report = QString("no data was transmitted before timeout expired");
         setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
         return true;
     }
 
@@ -280,6 +283,7 @@ bool SslTest::checkForNonSslClient()
             && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
         m_report = QString("client closed the connection without transmitting any data");
         setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
         return true;
     }
 
@@ -287,10 +291,11 @@ bool SslTest::checkForNonSslClient()
             && !m_sslConnectionEstablished
             && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && !hasHelloMessage) {
+            && !m_clientInfo.hasHelloMessage) {
         m_report = QString("secure connection was not established, %1 bytes were received before client closed the connection")
                 .arg(m_rawDataRecv.size());
         setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
         return true;
     }
 
@@ -308,6 +313,7 @@ bool SslTest::checkForNonSslClient()
         // thus, consider client as non-SSL
         m_report = QString("secure connection was not properly established (however, the attempt was made), client closed the connection");
         setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
         return true;
     }
 #endif
@@ -316,10 +322,11 @@ bool SslTest::checkForNonSslClient()
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && !hasHelloMessage) {
+            && !m_clientInfo.hasHelloMessage) {
         m_report = QString("secure connection was not established, %1 bytes were received before client was disconnected")
                 .arg(m_rawDataRecv.size());
         setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
         return true;
     }
 
@@ -327,7 +334,7 @@ bool SslTest::checkForNonSslClient()
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && hasHelloMessage
+            && m_clientInfo.hasHelloMessage
             && (m_sslErrorsStr.size() == 1)
             && m_sslErrorsStr.contains("Network operation timed out")) {
         // client sent HELLO, but as SSL errors list is empty and encrypted connection
@@ -335,6 +342,7 @@ bool SslTest::checkForNonSslClient()
         // thus, consider client as non-SSL
         m_report = QString("secure connection was not properly established (however, the attempt was made), client was disconnected");
         setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
         return true;
     }
 
@@ -342,13 +350,14 @@ bool SslTest::checkForNonSslClient()
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && !hasHelloMessage
+            && !m_clientInfo.hasHelloMessage
             && (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
                 && ((m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:http request")).size() > 0)
                     || (m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)))) {
         m_report = QString("secure connection was not established, %1 bytes of unexpected protocol were received before client was disconnected")
                 .arg(m_rawDataRecv.size());
         setResult(SSLTEST_RESULT_UNDEFINED);
+        m_clientInfo.isBrokenSslClient = true;
         return true;
     }
 #endif

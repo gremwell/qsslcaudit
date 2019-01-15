@@ -82,7 +82,15 @@ public:
 class TlsClientInfo
 {
 public:
-    TlsClientInfo() {}
+    TlsClientInfo() :
+        hasHelloMessage(false),
+        isBrokenSslClient(false)
+    {}
+
+    QString sourceHost;
+
+    bool hasHelloMessage;
+    bool isBrokenSslClient;
 
     TlsClientHelloInfo tlsHelloInfo;
 };
@@ -157,6 +165,8 @@ public:
     const QByteArray &rawDataSent() { return m_rawDataSent; }
 
     TlsClientInfo clientInfo() { return m_clientInfo; }
+
+    void setClientSourceHost(const QString &host) { m_clientInfo.sourceHost = host; }
 
 private:
     bool checkProtoSupport(XSsl::SslProtocol proto);
