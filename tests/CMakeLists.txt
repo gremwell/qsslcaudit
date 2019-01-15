@@ -56,3 +56,8 @@ add_executable(tests_RecurrentRequests tests_RecurrentRequests.cpp test.h)
 set_target_properties(tests_RecurrentRequests PROPERTIES AUTOMOC TRUE)
 target_link_libraries(tests_RecurrentRequests qsslcaudit_lib)
 add_test(NAME tests_RecurrentRequests COMMAND tests_RecurrentRequests 100)
+
+add_executable(tests_DifferentClientTypes tests_DifferentClientTypes.cpp test.h)
+set_target_properties(tests_DifferentClientTypes PROPERTIES AUTOMOC TRUE)
+target_link_libraries(tests_DifferentClientTypes qsslcaudit_lib)
+add_test(tests_DifferentClientTypes tests_DifferentClientTypes)
