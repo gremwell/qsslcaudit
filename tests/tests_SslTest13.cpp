@@ -20,7 +20,7 @@ class Test01 : public Test
 {
     Q_OBJECT
 public:
-    Test01(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test01(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -42,7 +42,7 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -66,7 +66,7 @@ class Test02 : public Test
 {
     Q_OBJECT
 public:
-    Test02(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test02(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -88,7 +88,7 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -130,8 +130,8 @@ int main(int argc, char *argv[])
     int ret = 0;
 
     QList<Test *> autotests = QList<Test *>()
-            << new Test01(1, "SslTest13", new SslTest13)
-            << new Test02(2, "SslTest13", new SslTest13)
+            << new Test01(1, "SslTest13", QList<SslTest *>() << new SslTest13)
+            << new Test02(2, "SslTest13", QList<SslTest *>() << new SslTest13)
                ;
 
     while (autotests.size() > 0) {

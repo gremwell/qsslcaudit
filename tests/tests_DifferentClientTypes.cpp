@@ -47,7 +47,7 @@ class Test01 : public Test
 {
     Q_OBJECT
 public:
-    Test01(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test01(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -72,12 +72,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -90,7 +90,7 @@ class Test02 : public Test
 {
     Q_OBJECT
 public:
-    Test02(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test02(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -112,12 +112,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -131,7 +131,7 @@ class Test03 : public Test
 {
     Q_OBJECT
 public:
-    Test03(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test03(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -159,12 +159,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -177,7 +177,7 @@ class Test04 : public Test
 {
     Q_OBJECT
 public:
-    Test04(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test04(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -203,12 +203,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -222,7 +222,7 @@ class Test05 : public Test
 {
     Q_OBJECT
 public:
-    Test05(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test05(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -250,12 +250,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -268,7 +268,7 @@ class Test06 : public Test
 {
     Q_OBJECT
 public:
-    Test06(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test06(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -294,12 +294,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -314,7 +314,7 @@ class Test07 : public Test
 {
     Q_OBJECT
 public:
-    Test07(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test07(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -342,12 +342,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -360,7 +360,7 @@ class Test08 : public Test
 {
     Q_OBJECT
 public:
-    Test08(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test08(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -386,12 +386,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
 
@@ -407,7 +407,7 @@ class Test09 : public Test
 {
     Q_OBJECT
 public:
-    Test09(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test09(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -429,12 +429,12 @@ public slots:
                 printTestFailed("test was not finished in time");
             } else if ((QString::compare(socket->errorString(),
                                          "The host name did not match any of the valid hosts for this certificate") == 0)
-                       && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+                       && (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
 
         } else {
@@ -452,7 +452,7 @@ class Test10 : public Test
 {
     Q_OBJECT
 public:
-    Test10(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test10(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -475,12 +475,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -494,7 +494,7 @@ class Test11 : public Test
 {
     Q_OBJECT
 public:
-    Test11(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test11(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -520,12 +520,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -539,7 +539,7 @@ class Test12 : public Test
 {
     Q_OBJECT
 public:
-    Test12(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test12(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -566,12 +566,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -584,7 +584,7 @@ class Test13 : public Test
 {
     Q_OBJECT
 public:
-    Test13(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test13(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -613,12 +613,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -632,7 +632,7 @@ class Test14 : public Test
 {
     Q_OBJECT
 public:
-    Test14(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test14(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -654,12 +654,12 @@ public slots:
                 printTestFailed("test was not finished in time");
             } else if ((QString::compare(socket->errorString(),
                                          "The host name did not match any of the valid hosts for this certificate") == 0)
-                       && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+                       && (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
 
         } else {
@@ -677,7 +677,7 @@ class Test15 : public Test
 {
     Q_OBJECT
 public:
-    Test15(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test15(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -700,12 +700,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -719,7 +719,7 @@ class Test16 : public Test
 {
     Q_OBJECT
 public:
-    Test16(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test16(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -745,12 +745,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -764,7 +764,7 @@ class Test17 : public Test
 {
     Q_OBJECT
 public:
-    Test17(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test17(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -791,12 +791,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -809,7 +809,7 @@ class Test18 : public Test
 {
     Q_OBJECT
 public:
-    Test18(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test18(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -838,12 +838,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -856,7 +856,7 @@ class Test19 : public Test
 {
     Q_OBJECT
 public:
-    Test19(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test19(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -906,12 +906,12 @@ public slots:
                 printTestFailed("test was not finished in time");
             } else if ((QString::compare(socket->errorString(),
                                          "The host name did not match any of the valid hosts for this certificate") == 0)
-                       && (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+                       && (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
 
         } else {
@@ -928,7 +928,7 @@ class Test20 : public Test
 {
     Q_OBJECT
 public:
-    Test20(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test20(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -979,12 +979,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -997,7 +997,7 @@ class Test21 : public Test
 {
     Q_OBJECT
 public:
-    Test21(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test21(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -1051,12 +1051,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -1069,7 +1069,7 @@ class Test22 : public Test
 {
     Q_OBJECT
 public:
-    Test22(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test22(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -1124,12 +1124,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -1142,7 +1142,7 @@ class Test23 : public Test
 {
     Q_OBJECT
 public:
-    Test23(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test23(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -1199,12 +1199,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -1217,7 +1217,7 @@ class Test24 : public Test
 {
     Q_OBJECT
 public:
-    Test24(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test24(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -1251,12 +1251,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -1269,7 +1269,7 @@ class Test25 : public Test
 {
     Q_OBJECT
 public:
-    Test25(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test25(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -1305,12 +1305,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -1323,7 +1323,7 @@ class Test26 : public Test
 {
     Q_OBJECT
 public:
-    Test26(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test26(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -1357,12 +1357,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -1375,7 +1375,7 @@ class Test27 : public Test
 {
     Q_OBJECT
 public:
-    Test27(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test27(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -1411,12 +1411,12 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed("test was not finished in time");
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
                 setResult(-1);
-                printTestFailed(QString("unexpected test result (%1)").arg(sslTest->result()));
+                printTestFailed(QString("unexpected test result (%1)").arg(sslTests.first()->result()));
             }
         }
         socket->disconnectFromHost();
@@ -1449,35 +1449,35 @@ int main(int argc, char *argv[])
     int ret = 0;
 
     QList<Test *> autotests = QList<Test *>()
-            << new Test01(1, "DifferentClientTypes", new SslTest02)
-            << new Test02(2, "DifferentClientTypes", new SslTest02)
-            << new Test03(3, "DifferentClientTypes", new SslTest02)
-            << new Test04(4, "DifferentClientTypes", new SslTest02)
-            << new Test05(5, "DifferentClientTypes", new SslTest02)
-            << new Test06(6, "DifferentClientTypes", new SslTest02)
-            << new Test07(7, "DifferentClientTypes", new SslTest02)
-            << new Test08(8, "DifferentClientTypes", new SslTest02)
+            << new Test01(1, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test02(2, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test03(3, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test04(4, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test05(5, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test06(6, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test07(7, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test08(8, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
            #ifdef UNSAFE
-            << new Test09(9, "DifferentClientTypes", new SslTest02)
-            << new Test10(10, "DifferentClientTypes", new SslTest02)
-//            << new Test11(11, "DifferentClientTypes", new SslTest02)
-            << new Test12(12, "DifferentClientTypes", new SslTest02)
-            << new Test13(13, "DifferentClientTypes", new SslTest02)
+            << new Test09(9, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test10(10, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+//            << new Test11(11, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test12(12, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test13(13, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
            #endif
-            << new Test14(14, "DifferentClientTypes", new SslTest02)
-            << new Test15(15, "DifferentClientTypes", new SslTest02)
-//            << new Test16(16, "DifferentClientTypes", new SslTest02)
-            << new Test17(17, "DifferentClientTypes", new SslTest02)
-            << new Test18(18, "DifferentClientTypes", new SslTest02)
-            << new Test19(19, "DifferentClientTypes", new SslTest02)
-            << new Test20(20, "DifferentClientTypes", new SslTest02)
-//            << new Test21(21, "DifferentClientTypes", new SslTest02)
-            << new Test22(22, "DifferentClientTypes", new SslTest02)
-            << new Test23(23, "DifferentClientTypes", new SslTest02)
-            << new Test24(24, "DifferentClientTypes", new SslTest02)
-//            << new Test25(25, "DifferentClientTypes", new SslTest02)
-            << new Test26(26, "DifferentClientTypes", new SslTest02)
-//            << new Test27(27, "DifferentClientTypes", new SslTest02)
+            << new Test14(14, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test15(15, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+//            << new Test16(16, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test17(17, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test18(18, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test19(19, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test20(20, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+//            << new Test21(21, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test22(22, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test23(23, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test24(24, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+//            << new Test25(25, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+            << new Test26(26, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
+//            << new Test27(27, "DifferentClientTypes", QList<SslTest *>() << new SslTest02)
                ;
 
     while (autotests.size() > 0) {

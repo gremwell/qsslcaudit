@@ -19,8 +19,8 @@ class Test01 : public Test
 {
     Q_OBJECT
 public:
-    Test01(int times, int id, QString testBaseName, SslTest *sslTest) :
-        Test(id, testBaseName, sslTest), times(times) {}
+    Test01(int times, int id, QString testBaseName, QList<SslTest *> sslTests) :
+        Test(id, testBaseName, sslTests), times(times) {}
 
     void setTestSettings()
     {
@@ -60,8 +60,8 @@ public slots:
                     break;
                 }
 
-                if ((sslTest->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED)
-                        && (sslTest->interceptedData() == data)) {
+                if ((sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED)
+                        && (sslTests.first()->interceptedData() == data)) {
                     ;
                 } else {
                     socket->disconnectFromHost();
@@ -96,8 +96,8 @@ class Test02 : public Test
 {
     Q_OBJECT
 public:
-    Test02(int times, int id, QString testBaseName, SslTest *sslTest) :
-        Test(id, testBaseName, sslTest), times(times) {}
+    Test02(int times, int id, QString testBaseName, QList<SslTest *> sslTests) :
+        Test(id, testBaseName, sslTests), times(times) {}
 
     void setTestSettings()
     {
@@ -124,7 +124,7 @@ public slots:
                     setResult(-1);
                     printTestFailed(QString("%1 attempts failed").arg(i));
                     break;
-                } else if ((sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS)
+                } else if ((sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS)
                            && (QString::compare(socket->errorString(),
                                                 "The host name did not match any of the valid hosts for this certificate") == 0)) {
                     ;
@@ -195,8 +195,8 @@ int main(int argc, char *argv[])
     }
 
     QList<Test *> autotests = QList<Test *>()
-            << new Test01(times, 1, "RecurrentRequests", new SslTest02)
-            << new Test02(times, 2, "RecurrentRequests", new SslTest02)
+            << new Test01(times, 1, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
+            << new Test02(times, 2, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
                ;
 
     while (autotests.size() > 0) {

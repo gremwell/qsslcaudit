@@ -13,9 +13,10 @@ class Test : public QObject
 {
     Q_OBJECT
 public:
-    Test(int id, QString testBaseName, SslTest *sslTest, QObject *parent = nullptr) :
+    Test(int id, QString testBaseName,
+         QList<SslTest *>sslTests, QObject *parent = nullptr) :
         QObject(parent),
-        sslTest(sslTest),
+        sslTests(sslTests),
         id(id),
         testBaseName(testBaseName)
     {
@@ -28,7 +29,7 @@ public:
         delete caudit;
     }
 
-    SslTest *sslTest;
+    QList<SslTest *> sslTests;
 
     int getId() { return id; }
 
@@ -37,14 +38,16 @@ public:
     void prepare() {
         setTestSettings();
 
-        if (!sslTest->prepare(testSettings)) {
-            RED("failed to prepare test " + sslTest->name());
-            return;
+        for (int i = 0; i < sslTests.size(); i++) {
+            if (!sslTests.at(i)->prepare(testSettings)) {
+                RED("failed to prepare test " + sslTests.at(i)->name());
+                return;
+            }
         }
 
         caudit = new SslCAudit(testSettings);
 
-        caudit->setSslTests(QList<SslTest *>() << sslTest);
+        caudit->setSslTests(sslTests);
         caudit->moveToThread(&sslCAuditThread);
 
         connect(caudit, &SslCAudit::sslTestsFinished, [=](){

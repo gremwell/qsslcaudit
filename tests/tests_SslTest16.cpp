@@ -20,7 +20,7 @@ class Test01 : public Test
 {
     Q_OBJECT
 public:
-    Test01(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test01(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -42,7 +42,7 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -67,7 +67,7 @@ class Test02 : public Test
 {
     Q_OBJECT
 public:
-    Test02(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test02(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -105,7 +105,7 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -130,7 +130,7 @@ class Test03 : public Test
 {
     Q_OBJECT
 public:
-    Test03(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test03(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -168,7 +168,7 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -193,7 +193,7 @@ class Test04 : public Test
 {
     Q_OBJECT
 public:
-    Test04(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test04(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -234,7 +234,7 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -255,7 +255,7 @@ class Test05 : public Test
 {
     Q_OBJECT
 public:
-    Test05(int id, QString testBaseName, SslTest *sslTest) : Test(id, testBaseName, sslTest){}
+    Test05(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
 
     void setTestSettings()
     {
@@ -296,7 +296,7 @@ public slots:
             if (!waitForSslTestFinished()) {
                 setResult(-1);
                 printTestFailed();
-            } else if (sslTest->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
                 setResult(0);
                 printTestSucceeded();
             } else {
@@ -340,11 +340,11 @@ int main(int argc, char *argv[])
     int ret = 0;
 
     QList<Test *> autotests = QList<Test *>()
-            << new Test01(1, "SslTest16", new SslTest16)
-            << new Test02(2, "SslTest16", new SslTest16)
-            << new Test03(3, "SslTest16", new SslTest16)
-            << new Test04(4, "SslTest16", new SslTest16)
-            << new Test05(5, "SslTest16", new SslTest16)
+            << new Test01(1, "SslTest16", QList<SslTest *>() << new SslTest16)
+            << new Test02(2, "SslTest16", QList<SslTest *>() << new SslTest16)
+            << new Test03(3, "SslTest16", QList<SslTest *>() << new SslTest16)
+            << new Test04(4, "SslTest16", QList<SslTest *>() << new SslTest16)
+            << new Test05(5, "SslTest16", QList<SslTest *>() << new SslTest16)
                ;
 
     while (autotests.size() > 0) {
