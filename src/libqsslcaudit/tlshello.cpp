@@ -613,16 +613,14 @@ void dissect_ssl2_hnd_client_hello(const QByteArray &packet, TlsClientHelloInfo 
 
     /* if there's a session id, show it */
     if (session_id_length > 0) {
-        tlsHelloInfo->session_id.resize(session_id_length);
-        memcpy(tlsHelloInfo->session_id.data(), packet.mid(offset, session_id_length).constData(), session_id_length);
+        tlsHelloInfo->session_id = packet.mid(offset, session_id_length);
 
         offset += session_id_length;
     }
 
     /* if there's a challenge, show it */
     if (challenge_length > 0) {
-        tlsHelloInfo->challenge.resize(challenge_length);
-        memcpy(tlsHelloInfo->challenge.data(), packet.mid(offset, challenge_length).constData(), challenge_length);
+        tlsHelloInfo->challenge = packet.mid(offset, challenge_length);
     }
 }
 
@@ -638,8 +636,7 @@ static int ssl_dissect_hnd_hello_common(const QByteArray &packet, int offset, Tl
         offset += 4;
 
         /* show the random bytes */
-        ret->random.resize(28);
-        memcpy(ret->random.data(), packet.mid(offset, 28).constData(), 28);
+        ret->random = packet.mid(offset, 28);
         offset += 28;
     } else {
         offset += 32;
@@ -652,7 +649,7 @@ static int ssl_dissect_hnd_hello_common(const QByteArray &packet, int offset, Tl
         offset++;
 
         if (sessid_length > 0) {
-            memcpy(ret->session_id.data(), packet.mid(offset, sessid_length).constData(), sessid_length);
+            ret->session_id = packet.mid(offset, sessid_length);
             offset += sessid_length;
         }
     }
@@ -699,10 +696,7 @@ static int ssl_dissect_hnd_hello_ext_status_request(const QByteArray &packet, in
             responder_id_list_len = getUint16(packet, offset);
             offset += 2;
             if (responder_id_list_len != 0) {
-                ret->hnd_hello.cert_status_type_ocsp_responder_id_list.resize(static_cast<int>(responder_id_list_len));
-                memcpy(ret->hnd_hello.cert_status_type_ocsp_responder_id_list.data(),
-                       packet.mid(offset, static_cast<int>(responder_id_list_len)),
-                       responder_id_list_len);
+                ret->hnd_hello.cert_status_type_ocsp_responder_id_list = packet.mid(offset, static_cast<int>(responder_id_list_len));
             }
             offset += responder_id_list_len;
 
@@ -711,10 +705,7 @@ static int ssl_dissect_hnd_hello_ext_status_request(const QByteArray &packet, in
             offset += 2;
             if (request_extensions_len != 0) {
                 if (responder_id_list_len != 0) {
-                    ret->hnd_hello.cert_status_type_ocsp_responder_id_list.resize(static_cast<int>(responder_id_list_len));
-                    memcpy(ret->hnd_hello.cert_status_type_ocsp_request_extensions.data(),
-                           packet.mid(offset, static_cast<int>(request_extensions_len)),
-                           request_extensions_len);
+                    ret->hnd_hello.cert_status_type_ocsp_responder_id_list = packet.mid(offset, static_cast<int>(request_extensions_len));
                 }
             }
             offset += request_extensions_len;
@@ -838,10 +829,7 @@ static int ssl_dissect_hnd_hello_ext_supported_groups(const QByteArray &packet, 
 static int ssl_dissect_hnd_hello_ext_session_ticket(const QByteArray &packet, int offset, int offset_end, TlsClientHelloInfo *ret)
 {
     int ext_len = offset_end - offset;
-    ret->hnd_hello.session_ticket_data.resize(ext_len);
-    memcpy(ret->hnd_hello.session_ticket_data.data(),
-           packet.mid(offset, ext_len).constData(),
-           static_cast<size_t>(ext_len));
+    ret->hnd_hello.session_ticket_data = packet.mid(offset, ext_len);
     return offset + ext_len;
 }
 
@@ -907,11 +895,7 @@ static int ssl_dissect_hnd_hello_ext_npn(const QByteArray &packet, int offset, i
         npn_length = getUint8(packet, offset);
         offset++;
 
-        QByteArray npn;
-        memcpy(npn.data(),
-               packet.mid(offset, static_cast<int>(npn_length)).constData(),
-               npn_length);
-        ret->hnd_hello.npn << npn;
+        ret->hnd_hello.npn << packet.mid(offset, static_cast<int>(npn_length));
 
         offset += npn_length;
     }
@@ -943,12 +927,7 @@ static int ssl_dissect_hnd_hello_ext_alpn(const QByteArray &packet, int offset, 
         name_length = getUint8(packet, offset);
         offset++;
 
-        QByteArray alpn_str;
-        alpn_str.resize(static_cast<int>(name_length));
-        memcpy(alpn_str.data(),
-               packet.mid(offset, static_cast<int>(name_length)).constData(),
-               name_length);
-        ret->hnd_hello.alpn << alpn_str;
+        ret->hnd_hello.alpn << packet.mid(offset, static_cast<int>(name_length));
 
         offset += name_length;
     }
@@ -998,13 +977,8 @@ static int ssl_dissect_hnd_hello_ext_server_name(const QByteArray &packet, int o
         server_name_length = getUint16(packet, offset);
         offset += 2;
 
-        QByteArray server_name;
-        server_name.resize(static_cast<int>(server_name_length));
-        memcpy(server_name.data(),
-               packet.mid(offset, static_cast<int>(server_name_length)).constData(),
-               server_name_length);
-
-        ret->hnd_hello.server_name << QPair<quint8, QByteArray>(server_name_type, server_name);
+        QByteArray server_name(packet.mid(offset, static_cast<int>(server_name_length)));
+        ret->hnd_hello.server_name << qMakePair(server_name_type, server_name);
         offset += server_name_length;
     }
     return offset;
