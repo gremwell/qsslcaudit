@@ -208,6 +208,8 @@ void SslCAudit::runTest(SslTest *test)
     test->printReport();
 
     WHITE("test finished");
+
+    emit sslTestFinished();
 }
 
 void SslCAudit::run()

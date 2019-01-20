@@ -34,6 +34,7 @@ public slots:
 
 signals:
     void sslTestReady();
+    void sslTestFinished();
     void sslTestsFinished();
 
 private slots:
