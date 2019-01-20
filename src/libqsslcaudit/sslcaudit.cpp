@@ -212,6 +212,8 @@ void SslCAudit::runTest(SslTest *test)
 
 void SslCAudit::run()
 {
+    clientsInfo.clear();
+
     do {
         for (int i = 0; i < sslTests.size(); i++) {
             VERBOSE("");

@@ -115,6 +115,7 @@ void SslTest::clear()
     m_rawDataRecv = QByteArray();
     m_rawDataSent = QByteArray();
     m_report = QString("test results undefined");
+    m_clientInfo.clear();
 }
 
 bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)

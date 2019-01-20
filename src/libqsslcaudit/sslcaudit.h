@@ -51,7 +51,7 @@ private:
     SslUserSettings settings;
     QList<SslTest *> sslTests;
     SslTest *currentTest;
-    QList<TlsClientInfo> clientsInfo;
+    QVector<TlsClientInfo> clientsInfo;
 
 };
 

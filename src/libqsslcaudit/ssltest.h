@@ -31,16 +31,11 @@ static const QString SSLTESTS_GROUP_CIPHERS_STR = QString("ciphers");
 class TlsClientHelloExt
 {
 public:
-    TlsClientHelloExt() :
-        heartbeat_mode(0),
-        padding(0),
-        record_size_limit(0),
-        supported_version(0),
-        encrypt_then_mac(0),
-        extended_master_secret(0)
-    {}
+    TlsClientHelloExt() {
+        clear();
+    }
 
-    QList<QPair<quint8, QByteArray>> server_name;
+    QVector<QPair<quint8, QByteArray>> server_name;
 
     quint8 heartbeat_mode;
     quint16 padding;
@@ -50,13 +45,13 @@ public:
     quint8 extended_master_secret;
     QByteArray cert_status_type_ocsp_responder_id_list;
     QByteArray cert_status_type_ocsp_request_extensions;
-    QList<quint16> supported_versions;
-    QList<quint8> ec_point_formats;
-    QList<quint16> supported_groups;
+    QVector<quint16> supported_versions;
+    QVector<quint8> ec_point_formats;
+    QVector<quint16> supported_groups;
     QByteArray session_ticket_data;
-    QList<QPair<quint8, quint8>> sig_hash_algs;
-    QList<QByteArray> npn;
-    QList<QByteArray> alpn;
+    QVector<QPair<quint8, quint8>> sig_hash_algs;
+    QVector<QByteArray> npn;
+    QVector<QByteArray> alpn;
 
     QString printable() const;
 
@@ -78,21 +73,49 @@ public:
     bool operator!=(const TlsClientHelloExt &other) const {
         return !operator==(other);
     }
+
+    void clear() {
+        server_name.clear();
+        server_name.squeeze();
+        heartbeat_mode = 0;
+        padding = 0;
+        record_size_limit = 0;
+        supported_version = 0;
+        encrypt_then_mac = 0;
+        extended_master_secret = 0;
+        cert_status_type_ocsp_responder_id_list.clear();
+        cert_status_type_ocsp_responder_id_list.squeeze();
+        cert_status_type_ocsp_request_extensions.clear();
+        cert_status_type_ocsp_request_extensions.squeeze();
+        supported_versions.clear();
+        supported_versions.squeeze();
+        ec_point_formats.clear();
+        ec_point_formats.squeeze();
+        supported_groups.clear();
+        supported_groups.squeeze();
+        session_ticket_data.clear();
+        session_ticket_data.squeeze();
+        sig_hash_algs.clear();
+        sig_hash_algs.squeeze();
+        npn.clear();
+        npn.squeeze();
+        alpn.clear();
+        alpn.squeeze();
+    }
 };
 
 class TlsClientHelloInfo
 {
 public:
-    TlsClientHelloInfo() :
-        version(0),
-        random_time(0)
-    {}
+    TlsClientHelloInfo() {
+        clear();
+    }
 
     quint16 version;
-    QList<quint32> ciphers;
+    QVector<quint32> ciphers;
     QByteArray session_id;
     QByteArray challenge;
-    QList<quint8> comp_methods;
+    QVector<quint8> comp_methods;
     quint32 random_time;
     QByteArray random;
 
@@ -112,15 +135,30 @@ public:
     bool operator!=(const TlsClientHelloInfo &other) const {
         return !operator==(other);
     }
+
+    void clear() {
+        version = 0;
+        ciphers.clear();
+        ciphers.squeeze();
+        session_id.clear();
+        session_id.squeeze();
+        challenge.clear();
+        challenge.squeeze();
+        comp_methods.clear();
+        comp_methods.squeeze();
+        random_time = 0;
+        random.clear();
+        random.squeeze();
+        hnd_hello.clear();
+    }
 };
 
 class TlsClientInfo
 {
 public:
-    TlsClientInfo() :
-        hasHelloMessage(false),
-        isBrokenSslClient(false)
-    {}
+    TlsClientInfo() {
+        clear();
+    }
 
     QString sourceHost;
 
@@ -142,6 +180,13 @@ public:
 
     bool operator!=(const TlsClientInfo &other) const {
         return !operator==(other);
+    }
+
+    void clear() {
+        sourceHost = QString();
+        hasHelloMessage = false;
+        isBrokenSslClient = false;
+        tlsHelloInfo.clear();
     }
 };
 
