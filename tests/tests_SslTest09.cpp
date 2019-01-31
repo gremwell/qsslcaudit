@@ -20,18 +20,23 @@ class Test01 : public Test
 {
     Q_OBJECT
 public:
-    Test01(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
+    Test01(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests) {
+        socket = nullptr;
+    }
 
-    void setTestSettings()
+    ~Test01() {
+        delete socket;
+    }
+
+    void setTestsSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
 
-public slots:
-
-    void run()
+    void executeNextSslTest()
     {
-        XSslSocket *socket = new XSslSocket;
+        if (!socket)
+            socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
         socket->setProtocol(XSsl::TlsV1_1OrLater);
@@ -39,26 +44,26 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            if (!waitForSslTestFinished()) {
-                setResult(-1);
-                printTestFailed();
-            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
-                setResult(0);
-                printTestSucceeded();
-            } else {
-                setResult(-1);
-                printTestFailed();
-            }
-
+            ;
         } else {
             setResult(-1);
-            printTestFailed();
+            printTestFailed("encrypted session was established, but should not");
         }
-        socket->disconnectFromHost();
-
-        QThread::currentThread()->quit();
     }
 
+    void verifySslTestResult()
+    {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            setResult(0);
+            printTestSucceeded();
+        } else {
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+        }
+    }
+
+private:
+    XSslSocket *socket;
 };
 
 // do verify peer certificate, use SSLv3 protocol
@@ -67,18 +72,23 @@ class Test02 : public Test
 {
     Q_OBJECT
 public:
-    Test02(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
+    Test02(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests) {
+        socket = nullptr;
+    }
 
-    void setTestSettings()
+    ~Test02() {
+        delete socket;
+    }
+
+    void setTestsSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
 
-public slots:
-
-    void run()
+    void executeNextSslTest()
     {
-        XSslSocket *socket = new XSslSocket;
+        if (!socket)
+            socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
         socket->setProtocol(XSsl::SslV3);
@@ -86,25 +96,26 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            if (!waitForSslTestFinished()) {
-                setResult(-1);
-                printTestFailed();
-            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
-                setResult(0);
-                printTestSucceeded();
-            } else {
-                setResult(-1);
-                printTestFailed();
-            }
-
+            ;
         } else {
             setResult(-1);
-            printTestFailed();
+            printTestFailed("encrypted session was established, but should not");
         }
-        socket->disconnectFromHost();
-
-        QThread::currentThread()->quit();
     }
+
+    void verifySslTestResult()
+    {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
+            setResult(0);
+            printTestSucceeded();
+        } else {
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+        }
+    }
+
+private:
+    XSslSocket *socket;
 
 };
 
@@ -114,18 +125,23 @@ class Test03 : public Test
 {
     Q_OBJECT
 public:
-    Test03(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
+    Test03(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests) {
+        socket = nullptr;
+    }
 
-    void setTestSettings()
+    ~Test03() {
+        delete socket;
+    }
+
+    void setTestsSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
 
-public slots:
-
-    void run()
+    void executeNextSslTest()
     {
-        XSslSocket *socket = new XSslSocket;
+        if (!socket)
+            socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyNone);
         socket->setProtocol(XSsl::TlsV1_1OrLater);
@@ -133,25 +149,26 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            if (!waitForSslTestFinished()) {
-                setResult(-1);
-                printTestFailed();
-            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
-                setResult(0);
-                printTestSucceeded();
-            } else {
-                setResult(-1);
-                printTestFailed();
-            }
-
+            ;
         } else {
             setResult(-1);
-            printTestFailed();
+            printTestFailed("encrypted session was established, but should not");
         }
-        socket->disconnectFromHost();
-
-        QThread::currentThread()->quit();
     }
+
+    void verifySslTestResult()
+    {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+            setResult(0);
+            printTestSucceeded();
+        } else {
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+        }
+    }
+
+private:
+    XSslSocket *socket;
 
 };
 
@@ -161,18 +178,23 @@ class Test04 : public Test
 {
     Q_OBJECT
 public:
-    Test04(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests){}
+    Test04(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests) {
+        socket = nullptr;
+    }
 
-    void setTestSettings()
+    ~Test04() {
+        delete socket;
+    }
+
+    void setTestsSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
 
-public slots:
-
-    void run()
+    void executeNextSslTest()
     {
-        XSslSocket *socket = new XSslSocket;
+        if (!socket)
+            socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyNone);
         socket->setProtocol(XSsl::SslV3);
@@ -180,69 +202,60 @@ public slots:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            socket->disconnectFromHost();
-
             setResult(-1);
-            printTestFailed();
+            printTestFailed("can not establish encrypted connection");
         } else {
             socket->disconnectFromHost();
-
-            if (!waitForSslTestFinished()) {
-                setResult(-1);
-                printTestFailed();
-            } else if (sslTests.first()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
-                setResult(0);
-                printTestSucceeded();
-            } else {
-                setResult(-1);
-                printTestFailed();
-            }
         }
-
-        QThread::currentThread()->quit();
     }
+
+    void verifySslTestResult()
+    {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+            setResult(0);
+            printTestSucceeded();
+        } else {
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+        }
+    }
+
+private:
+    XSslSocket *socket;
 
 };
 
 
-void launchTest(Test *autotest)
+QList<Test *> createAutotests()
 {
-    WHITE(QString("launching autotest #%1").arg(autotest->getId()));
-
-    // we should call it outside of its own thread
-    autotest->prepare();
-
-    QThread *autotestThread = new QThread;
-    autotest->moveToThread(autotestThread);
-    QObject::connect(autotestThread, SIGNAL(started()), autotest, SLOT(run()));
-    QObject::connect(autotestThread, SIGNAL(finished()), autotestThread, SLOT(deleteLater()));
-
-    autotestThread->start();
-
-    autotestThread->wait();
-}
-
-int main(int argc, char *argv[])
-{
-    // we need QCoreApplication instance to initialize Qt internals
-    QCoreApplication a(argc, argv);
-    int ret = 0;
-
-    QList<Test *> autotests = QList<Test *>()
+    return QList<Test *>()
             << new Test01(1, "SslTest09", QList<SslTest *>() << new SslTest09)
             << new Test02(2, "SslTest09", QList<SslTest *>() << new SslTest09)
             << new Test03(3, "SslTest09", QList<SslTest *>() << new SslTest09)
             << new Test04(4, "SslTest09", QList<SslTest *>() << new SslTest09)
                ;
+}
 
-    while (autotests.size() > 0) {
-        Test *test = autotests.takeFirst();
-        launchTest(test);
-        if (test->getResult() != 0) {
-            ret = -1;
-        }
-        test->deleteLater();
-    }
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+    QThread thread;
+    TestsLauncher *testsLauncher;
+
+    testsLauncher = new TestsLauncher(createAutotests());
+    testsLauncher->moveToThread(&thread);
+    QObject::connect(&thread, &QThread::finished, testsLauncher, &QObject::deleteLater);
+    QObject::connect(&thread, &QThread::started, testsLauncher, &TestsLauncher::launchTests);
+    QObject::connect(testsLauncher, &TestsLauncher::autotestsFinished, [=](){
+        qApp->exit(testsLauncher->testsResult());
+    });
+
+    thread.start();
+
+    int ret = a.exec();
+
+    thread.quit();
+    thread.wait();
 
     return ret;
 }

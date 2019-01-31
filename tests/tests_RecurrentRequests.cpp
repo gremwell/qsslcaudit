@@ -20,74 +20,95 @@ class Test01 : public Test
     Q_OBJECT
 public:
     Test01(int times, int id, QString testBaseName, QList<SslTest *> sslTests) :
-        Test(id, testBaseName, sslTests), times(times) {}
+        Test(id, testBaseName, sslTests), times(times) {
+        socket = nullptr;
+        currentAttempt = 1;
+        isRunning = true;
+        data = QByteArray("GET / HTTP/1.0\r\n\r\n");
+    }
 
-    void setTestSettings()
+    ~Test01() {
+        delete socket;
+    }
+
+    void setTestsSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
 
-public slots:
+    void startTests() {
+        prepareTests();
+        launchSslCAudit();
 
-    void run()
+        int count = 0;
+        // we have to wait more than the test will be executed
+        int to = 2 * times * 100;
+        while (isRunning && ++count < to/100)
+            QThread::msleep(100);
+
+        if (isRunning) {
+            setResult(-1);
+            printTestFailed(QString("tests are not finished in time, attempt %1").arg(currentAttempt));
+        }
+    }
+
+    void executeNextSslTest()
     {
-        XSslSocket *socket = new XSslSocket;
-        QByteArray data = QByteArray("GET / HTTP/1.0\r\n\r\n");
+        if (!socket)
+            socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyNone);
         socket->setProtocol(XSsl::TlsV1_1OrLater);
 
         setResult(0);
 
-        for (int i = 0; i < times; i++) {
-            socket->connectToHostEncrypted("localhost", 8443);
+        socket->connectToHostEncrypted("localhost", 8443);
 
-            if (!socket->waitForEncrypted()) {
-                qDebug() << socket->error();
-                qDebug() << socket->errorString();
+        if (!socket->waitForEncrypted()) {
+            setResult(-1);
+            printTestFailed(QString("can not establish encrypted connection, attempt %1").arg(currentAttempt));
+            isRunning = false;
+        } else {
+            socket->write(data);
+            socket->flush();
+        }
+    }
 
-                setResult(-1);
-                printTestFailed(QString("%1 attempts failed").arg(i));
-                break;
-            } else {
-                socket->write(data);
-                socket->waitForReadyRead();
-
-                if (!waitForSslTestFinished()) {
-                    socket->disconnectFromHost();
-                    setResult(-1);
-                    printTestFailed(QString("%1 attempts failed").arg(i));
-                    break;
-                }
-
-                if ((sslTests.first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED)
-                        && (sslTests.first()->interceptedData() == data)) {
-                    ;
-                } else {
-                    socket->disconnectFromHost();
-                    setResult(-1);
-                    printTestFailed(QString("%1 attempts failed").arg(i));
-                    break;
-                }
-            }
-
+    void verifySslTestResult()
+    {
+        // we can't use currentSslTest as it becomes broken due to manual relaunch of SslCAudit
+        if ((allSslTests().first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED)
+                && (allSslTests().first()->interceptedData() == data)) {
+            ;
+        } else {
             socket->disconnectFromHost();
-
-            // skip the listener launch for the last time
-            if ((i != (times - 1)) && !launchSslCAudit()) {
-                setResult(-1);
-                printTestFailed(QString("%1 attempts failed").arg(i));
-            }
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1), attempt %2")
+                            .arg(allSslTests().first()->result())
+                            .arg(currentAttempt));
+            isRunning = false;
         }
 
-        if (getResult() == 0)
-            printTestSucceeded();
+        socket->disconnectFromHost();
+        if (socket->state() != QAbstractSocket::UnconnectedState)
+            socket->waitForDisconnected();
 
-        QThread::currentThread()->quit();
+        if (currentAttempt++ >= times) {
+            setResult(0);
+            printTestSucceeded();
+            isRunning = false;
+        } else {
+            launchSslCAudit();
+        }
     }
 
 private:
+    XSslSocket *socket;
+    QByteArray data;
     int times;
+    int currentAttempt;
+    bool isRunning;
+
 };
 
 // do verify peer certificate, use TLSv1.1 and stronger protocols
@@ -97,119 +118,133 @@ class Test02 : public Test
     Q_OBJECT
 public:
     Test02(int times, int id, QString testBaseName, QList<SslTest *> sslTests) :
-        Test(id, testBaseName, sslTests), times(times) {}
+        Test(id, testBaseName, sslTests), times(times) {
+        socket = nullptr;
+        currentAttempt = 1;
+        isRunning = true;
+    }
 
-    void setTestSettings()
+    ~Test02() {
+        delete socket;
+    }
+
+    void setTestsSettings()
     {
         testSettings.setUserCN("www.example.com");
     }
 
-public slots:
+    void startTests() {
+        prepareTests();
+        launchSslCAudit();
 
-    void run()
+        int count = 0;
+        // we have to wait more than the test will be executed
+        int to = 2 * times * 100;
+        while (isRunning && ++count < to/100)
+            QThread::msleep(100);
+
+        if (isRunning) {
+            setResult(-1);
+            printTestFailed(QString("tests are not finished in time, attempt %1").arg(currentAttempt));
+        }
+    }
+
+    void executeNextSslTest()
     {
-        XSslSocket *socket = new XSslSocket;
+        if (!socket)
+            socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
         socket->setProtocol(XSsl::TlsV1_1OrLater);
 
         setResult(0);
 
-        for (int i = 0; i < times; i++) {
-            socket->connectToHostEncrypted("localhost", 8443);
+        socket->connectToHostEncrypted("localhost", 8443);
 
-            if (!socket->waitForEncrypted()) {
-                if (!waitForSslTestFinished()) {
-                    socket->disconnectFromHost();
-                    setResult(-1);
-                    printTestFailed(QString("%1 attempts failed").arg(i));
-                    break;
-                } else if ((sslTests.first()->result() == SslTest::SSLTEST_RESULT_SUCCESS)
-                           && (QString::compare(socket->errorString(),
-                                                "The host name did not match any of the valid hosts for this certificate") == 0)) {
-                    ;
-                } else {
-                    socket->disconnectFromHost();
-                    setResult(-1);
-                    printTestFailed(QString("%1 attempts failed, incorrect test result").arg(i));
-                    break;
-                }
-            } else {
-                socket->disconnectFromHost();
-                setResult(-1);
-                printTestFailed(QString("%1 attempts failed").arg(i));
-                break;
-            }
+        if (!socket->waitForEncrypted()) {
+            ;
+        } else {
+            setResult(-1);
+            printTestFailed(QString("encrypted connection established but shouldnot, attempt %1").arg(currentAttempt));
+            isRunning = false;
+        }
+    }
 
+    void verifySslTestResult()
+    {
+        // we can't use currentSslTest as it becomes broken due to manual relaunch of SslCAudit
+        if ((allSslTests().first()->result() == SslTest::SSLTEST_RESULT_SUCCESS)
+                && (QString::compare(socket->errorString(),
+                                     "The host name did not match any of the valid hosts for this certificate") == 0)) {
+            ;
+        } else {
             socket->disconnectFromHost();
-
-            // skip the listener launch for the last time
-            if ((i != (times - 1)) && !launchSslCAudit()) {
-                setResult(-1);
-                printTestFailed(QString("%1 attempts failed").arg(i));
-                break;
-            }
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1), attempt %2")
+                            .arg(allSslTests().first()->result())
+                            .arg(currentAttempt));
+            isRunning = false;
         }
 
-        if (getResult() == 0)
-            printTestSucceeded();
+        socket->disconnectFromHost();
+        if (socket->state() != QAbstractSocket::UnconnectedState)
+            socket->waitForDisconnected();
 
-        QThread::currentThread()->quit();
+        if (currentAttempt++ >= times) {
+            setResult(0);
+            printTestSucceeded();
+            isRunning = false;
+        } else {
+            launchSslCAudit();
+        }
     }
 
 private:
+    XSslSocket *socket;
     int times;
+    int currentAttempt;
+    bool isRunning;
+
 };
 
 
-void launchTest(Test *autotest)
+QList<Test *> createAutotests(int times)
 {
-    WHITE(QString("launching autotest #%1").arg(autotest->getId()));
-
-    // we should call it outside of its own thread
-    autotest->prepare();
-
-    QThread *autotestThread = new QThread;
-    autotest->moveToThread(autotestThread);
-    QObject::connect(autotestThread, SIGNAL(started()), autotest, SLOT(run()));
-    QObject::connect(autotestThread, SIGNAL(finished()), autotestThread, SLOT(deleteLater()));
-
-    autotestThread->start();
-
-    autotestThread->wait();
+    return QList<Test *>()
+            << new Test01(times, 1, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
+            << new Test02(times, 2, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
+               ;
 }
 
 int main(int argc, char *argv[])
 {
-    // we need QCoreApplication instance to initialize Qt internals
     QCoreApplication a(argc, argv);
-    int ret = 0;
+    QThread thread;
+    TestsLauncher *testsLauncher;
+
     int times = 20;
+    bool ok;
 
-    if (argc > 1) {
-        QString arg(argv[1]);
-        bool ok;
-        int t = arg.toInt(&ok);
-        if (ok)
-            times = t;
+    if (argc == 2) {
+        times = QString(argv[1]).toInt(&ok);
+        if (!ok)
+            times = 20;
     }
 
-    QList<Test *> autotests = QList<Test *>()
-            << new Test01(times, 1, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
-            << new Test02(times, 2, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
-               ;
+    testsLauncher = new TestsLauncher(createAutotests(times));
+    testsLauncher->moveToThread(&thread);
+    QObject::connect(&thread, &QThread::finished, testsLauncher, &QObject::deleteLater);
+    QObject::connect(&thread, &QThread::started, testsLauncher, &TestsLauncher::launchTests);
+    QObject::connect(testsLauncher, &TestsLauncher::autotestsFinished, [=](){
+        qApp->exit(testsLauncher->testsResult());
+    });
 
-    while (autotests.size() > 0) {
-        Test *test = autotests.takeFirst();
-        launchTest(test);
-        if (test->getResult() != 0) {
-            ret = -1;
-        }
-        test->deleteLater();
-        // in this case, exit immideately
-        if (ret != 0)
-            break;
-    }
+    thread.start();
+
+    int ret = a.exec();
+
+    thread.quit();
+    thread.wait();
 
     return ret;
 }
