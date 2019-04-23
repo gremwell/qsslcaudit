@@ -75,6 +75,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -123,7 +124,7 @@ public:
             setResult(-1);
             printTestFailed("can not connect to qsslcaudit");
         } else {
-            ;
+            setResult(0);
         }
     }
 
@@ -180,6 +181,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -233,6 +235,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -290,6 +293,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -343,6 +347,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -400,6 +405,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -453,6 +459,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -503,7 +510,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
@@ -560,7 +567,7 @@ public:
             setResult(-1);
             printTestFailed("can not establish encrypted connection");
         } else {
-            ;
+            setResult(0);
         }
     }
 
@@ -616,6 +623,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -671,6 +679,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -731,6 +740,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -781,7 +791,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
@@ -838,7 +848,7 @@ public:
             setResult(-1);
             printTestFailed("can not establish encrypted connection");
         } else {
-            ;
+            setResult(0);
         }
     }
 
@@ -894,6 +904,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -949,6 +960,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -1009,6 +1021,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -1082,7 +1095,7 @@ public:
         socket->startClientEncryption();
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("session was encrypted but should not");
@@ -1164,7 +1177,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session not established");
         } else {
-            ;
+            setResult(0);
         }
     }
 
@@ -1245,6 +1258,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -1324,6 +1338,7 @@ public:
         } else {
             socket->write(userData);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -1407,6 +1422,7 @@ public:
             socket->disconnectFromHost();
             if (socket->state() != QAbstractSocket::UnconnectedState)
                 socket->waitForDisconnected();
+            setResult(0);
         }
     }
 
@@ -1468,6 +1484,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -1531,6 +1548,7 @@ public:
             socket->flush();
             QThread::msleep(500);
             socket->close();
+            setResult(0);
         }
     }
 
@@ -1592,6 +1610,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -1655,6 +1674,7 @@ public:
             socket->flush();
             QThread::msleep(500);
             socket->close();
+            setResult(0);
         }
     }
 

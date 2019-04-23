@@ -48,6 +48,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -102,6 +103,7 @@ public:
             printTestFailed("can not establish encrypted connection");
         } else {
             QThread::msleep(5500);
+            setResult(0);
         }
     }
 
@@ -150,7 +152,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
@@ -205,7 +207,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443, "www.example.com");
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");

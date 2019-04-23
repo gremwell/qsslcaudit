@@ -44,7 +44,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
@@ -96,7 +96,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
@@ -149,7 +149,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
@@ -206,6 +206,7 @@ public:
             printTestFailed("can not establish encrypted connection");
         } else {
             socket->disconnectFromHost();
+            setResult(0);
         }
     }
 

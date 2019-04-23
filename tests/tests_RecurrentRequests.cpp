@@ -71,6 +71,7 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            setResult(0);
         }
     }
 
@@ -162,7 +163,7 @@ public:
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            ;
+            setResult(0);
         } else {
             setResult(-1);
             printTestFailed(QString("encrypted connection established but shouldnot, attempt %1").arg(currentAttempt));
