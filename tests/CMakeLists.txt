@@ -61,3 +61,8 @@ add_executable(tests_DifferentClientTypes tests_DifferentClientTypes.cpp test.h)
 set_target_properties(tests_DifferentClientTypes PROPERTIES AUTOMOC TRUE)
 target_link_libraries(tests_DifferentClientTypes qsslcaudit_lib)
 add_test(tests_DifferentClientTypes tests_DifferentClientTypes)
+
+add_executable(tests_MultipleClients tests_MultipleClients.cpp test.h)
+set_target_properties(tests_MultipleClients PROPERTIES AUTOMOC TRUE)
+target_link_libraries(tests_MultipleClients qsslcaudit_lib)
+add_test(tests_MultipleClients tests_MultipleClients)
