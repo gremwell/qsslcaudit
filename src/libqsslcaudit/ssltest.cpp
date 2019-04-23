@@ -531,8 +531,9 @@ void SslCertificatesTest::calcResults()
     if (m_sslConnectionEstablished
             && (m_interceptedData.size() == 0)
             && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)) {
-        m_report = QString("test succeeded, client accepted fake certificate but disconnected without data transmission");
-        setResult(SSLTEST_RESULT_SUCCESS);
+        m_report = QString("test result not clear, client established TLS session but disconnected without data transmission and explicit error message");
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        m_resultComment = QString("Invalid clients refuse cert in this way. Clients without data transmitted accept fake cert with the same diagnostics. Setup MitM proxy to be sure.");
         return;
     }
 
