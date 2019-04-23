@@ -135,7 +135,8 @@ void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
             test->addInterceptedData(message);
 
             sslSocket->disconnectFromHost();
-            sslSocket->waitForDisconnected();
+            if (sslSocket->state() != QAbstractSocket::UnconnectedState)
+                sslSocket->waitForDisconnected();
             VERBOSE("disconnected");
         } else {
             VERBOSE("no unencrypted data received (" + sslSocket->errorString() + ")");
