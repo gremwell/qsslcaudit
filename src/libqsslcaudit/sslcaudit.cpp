@@ -233,30 +233,41 @@ void SslCAudit::run()
 bool SslCAudit::isSameClient(bool doPrint)
 {
     TlsClientInfo client0;
+    bool ret = true;
 
     if (!clientsInfo.size())
-        return true;
+        return ret;
 
     client0 = clientsInfo.at(0);
 
     for (int i = 1; i < clientsInfo.size(); i++) {
         if (client0 != clientsInfo.at(i)) {
+            ret = false;
+
             if (doPrint) {
-                RED("not all connections were established by the same client, compare the following:");
-                VERBOSE(client0.printable());
-                VERBOSE("");
+                static bool headerPrinted = false;
+
+                if (!headerPrinted) {
+                    RED("not all connections were established by the same client, compare the following:");
+                    VERBOSE("client #0");
+                    VERBOSE(client0.printable());
+                    headerPrinted = true;
+                }
+
+                VERBOSE(QString("client #%1").arg(i));
                 VERBOSE(clientsInfo.at(i).printable());
+            } else {
+                break;
             }
-            return false;
         }
     }
 
-    if (doPrint) {
+    if (ret && doPrint) {
         GREEN("most likely all connections were established by the same client, some collected details:");
         VERBOSE(client0.printable());
     }
 
-    return true;
+    return ret;
 }
 
 void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)

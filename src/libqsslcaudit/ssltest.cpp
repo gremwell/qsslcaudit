@@ -298,8 +298,8 @@ QString TlsClientInfo::printable() const
 
     if (isBrokenSslClient) {
         out << "not a valid TLS/SSL client, "
-            << rawDataRecv.size() << " byte(s) of raw data received: "
-            << rawDataRecv.left(16) << endl;
+            << rawDataRecv.size() << " byte(s) of raw data received, i.e.: "
+            << rawDataRecv.left(32).simplified() << endl;
     }
 
     if (hasHelloMessage)
