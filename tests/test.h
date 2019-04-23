@@ -17,7 +17,8 @@ public:
         testBaseName(testBaseName),
         sslTests(sslTests)
     {
-        testResult = -1;
+        testResults.resize(sslTests.size());
+        testResults.fill(-1);
         currentTestNum = 0;
     }
 
@@ -29,7 +30,15 @@ public:
 
     int getId() { return id; }
 
-    int getResult() { return testResult; }
+    bool isFailed() {
+        for (int i = 0; i < sslTests.size(); i++) {
+            if (testResults.at(i) != 0)
+                return true;
+        }
+        return false;
+    }
+
+    int getResult() { return testResults.at(currentTestNum); }
 
     SslUserSettings testSettings;
 
@@ -158,7 +167,7 @@ public:
 
 protected:
     void setResult(int result) {
-        testResult = result;
+        testResults[currentTestNum] = result;
     }
 
 private slots:
@@ -170,21 +179,32 @@ private slots:
         testIsReady = true;
         testIsFinished = false;
 
+        // executeNextSslTest() must set current test result to '0' if this stage succeeded
+        setResult(-1);
         executeNextSslTest();
     }
 
     void handleTestFinished() {
         testIsFinished = true;
 
-        verifySslTestResult();
+        // if test failed during execution, do not even run results
+        // verification because it could produce false-positives
+        if (getResult() != 0) {
+            printTestFailed("test failed on execution");
+        } else {
+            verifySslTestResult();
+        }
 
         currentTestNum++;
+        if (currentTestNum >= sslTests.size()) {
+            currentTestNum = sslTests.size()-1;
+        }
     }
 
 private:
     int id;
     QString testBaseName;
-    int testResult;
+    QVector<int> testResults;
     bool testIsReady;
     bool testIsFinished;
     bool testsAreFinished;
