@@ -296,8 +296,11 @@ QString TlsClientInfo::printable() const
 
     out << "source host: " << sourceHost << endl;
 
-    if (isBrokenSslClient)
-        out << "not a valid TLS/SSL client" << endl;
+    if (isBrokenSslClient) {
+        out << "not a valid TLS/SSL client, "
+            << rawDataRecv.size() << " byte(s) of raw data received: "
+            << rawDataRecv.left(16) << endl;
+    }
 
     if (hasHelloMessage)
         out << tlsHelloInfo.printable();
