@@ -239,6 +239,8 @@ public:
     enum SslTest::SslTestResult result() const { return m_result; }
     void setResult(enum SslTest::SslTestResult result) { m_result = result; }
 
+    QString resultComment() const { return m_resultComment; }
+
     void setLocalCert(const QList<XSslCertificate> &chain) { m_localCertsChain = chain; }
     QList<XSslCertificate> localCert() const { return m_localCertsChain; }
 
@@ -283,6 +285,7 @@ private:
     QString m_name;
     QString m_description;
     enum SslTest::SslTestResult m_result;
+    QString m_resultComment;
     QString m_report;
     QList<XSslCertificate> m_localCertsChain;
     XSslKey m_privateKey;
