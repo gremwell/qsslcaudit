@@ -167,13 +167,16 @@ public:
 
     TlsClientHelloInfo tlsHelloInfo;
 
+    QByteArray rawDataRecv;
+
     QString printable() const;
 
     bool operator==(const TlsClientInfo &other) const {
         if ((sourceHost != other.sourceHost)
                 || (hasHelloMessage != other.hasHelloMessage)
                 || (isBrokenSslClient != other.isBrokenSslClient)
-                || (tlsHelloInfo != other.tlsHelloInfo))
+                || (tlsHelloInfo != other.tlsHelloInfo)
+                || (isBrokenSslClient && (rawDataRecv != other.rawDataRecv)))
             return false;
         return true;
     }
@@ -187,6 +190,7 @@ public:
         hasHelloMessage = false;
         isBrokenSslClient = false;
         tlsHelloInfo.clear();
+        rawDataRecv.clear();
     }
 };
 
@@ -252,7 +256,10 @@ public:
     void addSocketErrors(const QList<QAbstractSocket::SocketError> errors) { m_socketErrors << errors; }
     void setSslConnectionStatus(bool isEstablished) { m_sslConnectionEstablished = isEstablished; }
     void addInterceptedData(const QByteArray &data) { m_interceptedData.append(data); }
-    void addRawDataRecv(const QByteArray &data) { m_rawDataRecv.append(data); }
+    void addRawDataRecv(const QByteArray &data) {
+        m_rawDataRecv.append(data);
+        m_clientInfo.rawDataRecv.append(data);
+    }
     void addRawDataSent(const QByteArray &data) { m_rawDataSent.append(data); }
 
     const QByteArray &interceptedData() { return m_interceptedData; }
