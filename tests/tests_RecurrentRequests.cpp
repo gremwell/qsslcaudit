@@ -174,7 +174,7 @@ public:
     void verifySslTestResult()
     {
         // we can't use currentSslTest as it becomes broken due to manual relaunch of SslCAudit
-        if ((allSslTests().first()->result() == SslTest::SSLTEST_RESULT_SUCCESS)
+        if ((allSslTests().first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
                 && (QString::compare(socket->errorString(),
                                      "The host name did not match any of the valid hosts for this certificate") == 0)) {
             ;
