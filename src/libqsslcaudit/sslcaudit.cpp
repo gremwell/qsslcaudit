@@ -133,11 +133,6 @@ void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
             VERBOSE("received data: " + QString(message));
 
             test->addInterceptedData(message);
-
-            sslSocket->disconnectFromHost();
-            if (sslSocket->state() != QAbstractSocket::UnconnectedState)
-                sslSocket->waitForDisconnected();
-            VERBOSE("disconnected");
         } else {
             VERBOSE("no unencrypted data received (" + sslSocket->errorString() + ")");
         }
@@ -146,6 +141,11 @@ void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
         test->addRawDataRecv(sslSocket->getRawReadData());
         test->addRawDataSent(sslSocket->getRawWrittenData());
 #endif
+
+        sslSocket->disconnectFromHost();
+        if (sslSocket->state() != QAbstractSocket::UnconnectedState)
+            sslSocket->waitForDisconnected();
+        VERBOSE("disconnected");
     }
 }
 

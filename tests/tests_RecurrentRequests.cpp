@@ -82,7 +82,7 @@ public:
                 && (allSslTests().first()->interceptedData() == data)) {
             ;
         } else {
-            socket->disconnectFromHost();
+            socket->close();
             setResult(-1);
             printTestFailed(QString("unexpected test result (%1), attempt %2")
                             .arg(allSslTests().first()->result())
@@ -90,7 +90,7 @@ public:
             isRunning = false;
         }
 
-        socket->disconnectFromHost();
+        socket->close();
         if (socket->state() != QAbstractSocket::UnconnectedState)
             socket->waitForDisconnected();
 
@@ -179,7 +179,7 @@ public:
                                      "The host name did not match any of the valid hosts for this certificate") == 0)) {
             ;
         } else {
-            socket->disconnectFromHost();
+            socket->close();
             setResult(-1);
             printTestFailed(QString("unexpected test result (%1), attempt %2")
                             .arg(allSslTests().first()->result())
@@ -187,7 +187,7 @@ public:
             isRunning = false;
         }
 
-        socket->disconnectFromHost();
+        socket->close();
         if (socket->state() != QAbstractSocket::UnconnectedState)
             socket->waitForDisconnected();
 

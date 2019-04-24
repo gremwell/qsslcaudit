@@ -50,6 +50,7 @@ public:
             socket->flush();
             setResult(0);
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -105,6 +106,7 @@ public:
             QThread::msleep(5500);
             setResult(0);
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -157,6 +159,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -212,6 +215,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()

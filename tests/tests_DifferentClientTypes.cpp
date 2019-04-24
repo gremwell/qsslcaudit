@@ -124,6 +124,8 @@ public:
             setResult(-1);
             printTestFailed("can not connect to qsslcaudit");
         } else {
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -235,6 +237,8 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -347,6 +351,8 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -459,6 +465,8 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -515,6 +523,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -568,6 +577,8 @@ public:
             printTestFailed("can not establish encrypted connection");
         } else {
             setResult(0);
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
         }
     }
 
@@ -620,9 +631,7 @@ public:
             printTestFailed("can not establish encrypted connection");
         } else {
             QThread::msleep(10);
-            socket->disconnectFromHost();
-            if (socket->state() != QAbstractSocket::UnconnectedState)
-                socket->waitForDisconnected();
+            socket->close();
             setResult(0);
         }
     }
@@ -680,6 +689,8 @@ public:
             socket->write(data);
             socket->flush();
             setResult(0);
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
         }
     }
 
@@ -796,6 +807,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -848,6 +860,8 @@ public:
             setResult(-1);
             printTestFailed("can not establish encrypted connection");
         } else {
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -901,9 +915,7 @@ public:
             printTestFailed("can not establish encrypted connection");
         } else {
             QThread::msleep(10);
-            socket->disconnectFromHost();
-            if (socket->state() != QAbstractSocket::UnconnectedState)
-                socket->waitForDisconnected();
+            socket->close();
             setResult(0);
         }
     }
@@ -960,6 +972,8 @@ public:
         } else {
             socket->write(data);
             socket->flush();
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -1100,6 +1114,7 @@ public:
             setResult(-1);
             printTestFailed("session was encrypted but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -1178,6 +1193,8 @@ public:
             printTestFailed("encrypted session not established");
         } else {
             setResult(0);
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
         }
     }
 
@@ -1255,9 +1272,7 @@ public:
             printTestFailed("encrypted session not established");
         } else {
             QThread::msleep(10);
-            socket->disconnectFromHost();
-            if (socket->state() != QAbstractSocket::UnconnectedState)
-                socket->waitForDisconnected();
+            socket->close();
             setResult(0);
         }
     }
@@ -1338,6 +1353,8 @@ public:
         } else {
             socket->write(userData);
             socket->flush();
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -1485,6 +1502,8 @@ public:
             socket->write(data);
             socket->flush();
             setResult(0);
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
         }
     }
 
@@ -1547,7 +1566,7 @@ public:
             socket->write(data);
             socket->flush();
             QThread::msleep(500);
-            socket->close();
+            socket->disconnectFromHost();
             setResult(0);
         }
     }
@@ -1611,6 +1630,8 @@ public:
             socket->write(data);
             socket->flush();
             setResult(0);
+            QThread::msleep(5500);
+            socket->disconnectFromHost();
         }
     }
 
@@ -1673,7 +1694,7 @@ public:
             socket->write(data);
             socket->flush();
             QThread::msleep(500);
-            socket->close();
+            socket->disconnectFromHost();
             setResult(0);
         }
     }

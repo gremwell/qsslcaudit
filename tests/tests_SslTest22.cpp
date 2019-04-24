@@ -49,6 +49,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -118,6 +119,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -187,6 +189,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -254,9 +257,9 @@ public:
             setResult(-1);
             printTestFailed("can not establish encrypted connection");
         } else {
-            socket->disconnectFromHost();
             setResult(0);
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()

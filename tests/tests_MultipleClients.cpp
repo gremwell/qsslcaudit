@@ -254,6 +254,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -319,6 +320,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -370,7 +372,7 @@ public:
             socket = new XSslSocket;
 
         socket->setProtocol(XSsl::TlsV1_2);
-        if (currentSslTestNum() == 0) {
+        if (currentSslTestNum() == 1) {
             QList<XSslCipher> mediumCiphers;
             QStringList opensslCiphers = ciphers_medium_str.split(":");
 
@@ -398,6 +400,7 @@ public:
             setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -463,6 +466,7 @@ public:
             socket->write(data);
             socket->flush();
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -534,6 +538,7 @@ public:
             socket->write(data);
             socket->flush();
         }
+        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -571,9 +576,9 @@ QList<Test *> createAutotests()
             << new Test03(3, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
             << new Test04(4, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
             << new Test05(5, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test05(6, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test05(7, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test05(8, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
+            << new Test06(6, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
+            << new Test07(7, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
+            << new Test08(8, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
                ;
 }
 
