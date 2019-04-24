@@ -434,17 +434,17 @@ static void printTableLineFormatted(int testId, const QString &testName, const Q
 
 static void printTableLineFailed(int testId, const QString &testName, const QString &testComment)
 {
-    printTableLineFormatted(testId, testName, "\033[1;31mFAILED (!)\033[0m", 11, testComment);
+    printTableLineFormatted(testId, testName, "\033[1;31mFAILED !!!\033[0m", 11, testComment);
 }
 
 static void printTableLinePassed(int testId, const QString &testName, const QString &testComment)
 {
-    printTableLineFormatted(testId, testName, "\033[1;32mPASSED (+)\033[0m", 11, testComment);
+    printTableLineFormatted(testId, testName, "\033[1;32mPASSED\033[0m", 11, testComment);
 }
 
 static void printTableLineUndefined(int testId, const QString &testName, const QString &testComment)
 {
-    printTableLineFormatted(testId, testName, "\033[1mUNDEF (?)\033[0m", 8, testComment);
+    printTableLineFormatted(testId, testName, "\033[1mUNDEF ???\033[0m", 8, testComment);
 }
 
 void SslCAudit::printSummary()
