@@ -261,7 +261,7 @@ public:
     {
         setResult(-1);
 
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
             if (currentSslTestNum() == 1) {
                 if (!isSameClient(false)) {
                     setResult(-1);
@@ -327,7 +327,7 @@ public:
     {
         setResult(-1);
 
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
             if (currentSslTestNum() == 1) {
                 if (isSameClient(false)) {
                     setResult(-1);
@@ -407,7 +407,7 @@ public:
     {
         setResult(-1);
 
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
             if (currentSslTestNum() == 1) {
                 if (isSameClient(false)) {
                     setResult(-1);
