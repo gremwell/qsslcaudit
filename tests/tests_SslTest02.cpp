@@ -161,9 +161,7 @@ public:
 
     void verifySslTestResult()
     {
-        if ((QString::compare(socket->errorString(),
-                              "The host name did not match any of the valid hosts for this certificate") == 0)
-                && (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -216,9 +214,7 @@ public:
 
     void verifySslTestResult()
     {
-        if ((QString::compare(socket->errorString(),
-                              "The issuer certificate of a locally looked up certificate could not be found") == 0)
-                && (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS)) {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
             setResult(0);
             printTestSucceeded();
         } else {
