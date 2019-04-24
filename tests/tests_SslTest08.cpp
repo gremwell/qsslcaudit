@@ -216,7 +216,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
             setResult(0);
             printTestSucceeded();
         } else {
