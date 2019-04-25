@@ -308,6 +308,8 @@ int main(int argc, char *argv[])
         caudit->printSummary();
         caudit->isSameClient(true);
 
+        VERBOSE(QString("%1 version: %2").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion()));
+
         if (settings.getOutputXml().length() > 0)
             caudit->writeXmlSummary(settings.getOutputXml());
 
