@@ -519,6 +519,17 @@ void SslCertificatesTest::calcResults()
         return;
     }
 
+    if (!m_sslConnectionEstablished
+            && (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
+                && ((m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)
+                    || (m_sslErrorsStr.filter(QString("ssl3_get_client_hello:wrong version number")).size() > 0)))) {
+        m_report = QString("secure connection was not established, %1 bytes of unsupported TLS/SSL protocol were received before the connection was closed")
+                .arg(m_rawDataRecv.size());
+        setResult(SSLTEST_RESULT_UNDEFINED);
+        m_resultComment = QString("client proposed unsupported TLS/SSL protocol");
+        return;
+    }
+
     if (!m_sslConnectionEstablished) {
         m_report = QString("test passed, client refused fake certificate");
         setResult(SSLTEST_RESULT_SUCCESS);
