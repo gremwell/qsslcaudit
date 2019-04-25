@@ -438,14 +438,14 @@ static quint8 getUint8(const QByteArray &packet, int offset)
 static quint16 getUint16(const QByteArray &packet, int offset)
 {
     if (offset + 1 < packet.size())
-        return qFromBigEndian<quint16>(packet.mid(offset, 2).constData());
+        return qFromBigEndian<quint16>((uchar *)packet.mid(offset, 2).data());
     return 0;
 }
 
 static quint32 getUint32(const QByteArray &packet, int offset)
 {
     if (offset + 3 < packet.size())
-        return qFromBigEndian<quint32>(packet.mid(offset, 4).constData());
+        return qFromBigEndian<quint32>((uchar *)packet.mid(offset, 4).data());
     return 0;
 }
 
