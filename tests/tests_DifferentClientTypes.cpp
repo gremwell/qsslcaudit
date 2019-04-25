@@ -1571,8 +1571,15 @@ public:
 
     void verifySslTestResult()
     {
-        // we can't handle this case for now as we would like to, test result will be success instead of undefined
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+        if (currentSslTest()->result() ==
+        #ifdef UNSAFE
+                // we can't handle this case for now as we would like to, test result will be success instead of undefined
+                SslTest::SSLTEST_RESULT_SUCCESS
+        #else
+                // in safe mode OpenSSL does not know about SSLv3 and will return another error which makes test result undefined
+                SslTest::SSLTEST_RESULT_UNDEFINED
+        #endif
+                ) {
             setResult(0);
             printTestSucceeded();
         } else {
