@@ -1728,11 +1728,13 @@ QList<Test *> createAutotests()
             << new Test06(6, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test07(7, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test08(8, "SslTest02", QList<SslTest *>() << new SslTest02)
+           #ifdef UNSAFE
             << new Test09(9, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test10(10, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test11(11, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test12(12, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test13(13, "SslTest02", QList<SslTest *>() << new SslTest02)
+           #endif
             << new Test14(14, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test15(15, "SslTest02", QList<SslTest *>() << new SslTest02)
             << new Test16(16, "SslTest02", QList<SslTest *>() << new SslTest02)
