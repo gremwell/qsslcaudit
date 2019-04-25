@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qsslcaudit>
+    <test>
+        <id>3</id>
+        <name>self-signed certificate for invalid domain trust</name>
+        <result>FAILED</result>
+    </test>
+    <test>
+        <id>13</id>
+        <name>TLS 1.0 protocol support</name>
+        <result>FAILED</result>
+    </test>
+    <test>
+        <id>16</id>
+        <name>TLS 1.0 protocol and MEDIUM grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>19</id>
+        <name>TLS 1.1 protocol and MEDIUM grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+    <test>
+        <id>22</id>
+        <name>TLS 1.2 protocol and MEDIUM grade ciphers support</name>
+        <result>PASSED</result>
+    </test>
+</qsslcaudit>

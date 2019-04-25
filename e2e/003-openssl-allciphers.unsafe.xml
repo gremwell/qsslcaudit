@@ -3,7 +3,7 @@
     <test>
         <id>3</id>
         <name>self-signed certificate for invalid domain trust</name>
-        <result>PASSED</result>
+        <result>UNDEFINED</result>
     </test>
     <test>
         <id>8</id>
