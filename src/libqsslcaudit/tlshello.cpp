@@ -470,7 +470,7 @@ bool is_sslv2_clienthello(const QByteArray &packet)
      *      // min. length: 11 + 3 + (0 or 16) + 32 = 46 or 62
      *  } V2ClientHello;
      */
-    if (packet.size() < 46) {
+    if (packet.size() < 39) {
         return false;
     }
 
