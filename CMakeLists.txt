@@ -6,6 +6,68 @@ set(QSSLC_VERSION_MAJOR 0)
 set(QSSLC_VERSION_MINOR 3)
 set(QSSLC_VERSION_PATCH 0)
 set(QSSLC_VERSION "${QSSLC_VERSION_MAJOR}.${QSSLC_VERSION_MINOR}.${QSSLC_VERSION_PATCH}")
+# version formatting stolen from KeepAssXC's CMakeLists.txt :-)
+set(OVERRIDE_VERSION "" CACHE STRING "Override the qsslcaudit Version for Snapshot builds")
+
+set(QSSLC_BUILD_TYPE "Snapshot" CACHE STRING "Set qsslcaudit build type to distinguish between stable releases and snapshots")
+set_property(CACHE QSSLC_BUILD_TYPE PROPERTY STRINGS Snapshot Release PreRelease)
+
+# Retrieve git HEAD revision hash
+set(GIT_HEAD_OVERRIDE "" CACHE STRING "Manually set the Git HEAD hash when missing (eg, when no .git folder exists)")
+execute_process(COMMAND git rev-parse --short=7 HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_HEAD
+        ERROR_QUIET)
+string(STRIP "${GIT_HEAD}" GIT_HEAD)
+if(GIT_HEAD STREQUAL "" AND NOT GIT_HEAD_OVERRIDE STREQUAL "")
+    string(SUBSTRING "${GIT_HEAD_OVERRIDE}" 0 7 GIT_HEAD)
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/.gitrev)
+    file(READ ${CMAKE_SOURCE_DIR}/.gitrev GIT_HEAD)
+endif()
+message(STATUS "Found Git HEAD Revision: ${GIT_HEAD}\n")
+
+# Check if on a tag, if so build as a release
+execute_process(COMMAND git tag --points-at HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_TAG
+        ERROR_QUIET)
+if(GIT_TAG)
+    string(STRIP "${GIT_TAG}" GIT_TAG)
+    set(OVERRIDE_VERSION ${GIT_TAG})
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/.version)
+    file(READ ${CMAKE_SOURCE_DIR}/.version OVERRIDE_VERSION)
+endif()
+
+string(REGEX REPLACE "(\r?\n)+" "" OVERRIDE_VERSION "${OVERRIDE_VERSION}")
+string(REGEX REPLACE "v" "" OVERRIDE_VERSION "${OVERRIDE_VERSION}")
+if(OVERRIDE_VERSION)
+    if(OVERRIDE_VERSION MATCHES "^[\\.0-9]+-(alpha|beta)[0-9]+$")
+        set(QSSLC_BUILD_TYPE PreRelease)
+        set(QSSLC_VERSION ${OVERRIDE_VERSION})
+    elseif(OVERRIDE_VERSION MATCHES "^[\\.0-9]+$")
+        set(QSSLC_BUILD_TYPE Release)
+        set(QSSLC_VERSION ${OVERRIDE_VERSION})
+    else()
+        set(QSSLC_BUILD_TYPE Snapshot)
+        set(QSSLC_VERSION ${OVERRIDE_VERSION})
+    endif()
+else()
+    if(QSSLC_BUILD_TYPE STREQUAL "PreRelease")
+        set(QSSLC_VERSION "${QSSLC_VERSION}-preview")
+    elseif(QSSLC_BUILD_TYPE STREQUAL "Snapshot")
+        set(QSSLC_VERSION "${QSSLC_VERSION}-snapshot")
+    endif()
+endif()
+
+if(QSSLC_BUILD_TYPE STREQUAL "Release")
+    set(QSSLC_BUILD_TYPE_RELEASE ON)
+elseif(QSSLC_BUILD_TYPE STREQUAL "PreRelease")
+    set(QSSLC_BUILD_TYPE_PRE_RELEASE ON)
+else()
+    set(QSSLC_BUILD_TYPE_SNAPSHOT ON)
+endif()
+
+message(STATUS "Setting up build for qsslcaudit v${QSSLC_VERSION}\n")
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
