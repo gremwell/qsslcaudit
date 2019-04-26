@@ -71,7 +71,7 @@
     This method starts an immediate SSL handshake once the connection
     has been established.
 
-    \snippet code/src_network_ssl_SslUnsafeSocket.cpp 0
+    \snippet code/src_network_ssl_qsslsocket.cpp 0
 
     As with a plain QTcpSocket, SslUnsafeSocket enters the HostLookupState,
     ConnectingState, and finally the ConnectedState, if the connection
@@ -94,7 +94,7 @@
     the existing one passed in. It then initiates the SSL handshake
     by calling startServerEncryption().
 
-    \snippet code/src_network_ssl_SslUnsafeSocket.cpp 1
+    \snippet code/src_network_ssl_qsslsocket.cpp 1
 
     If an error occurs, SslUnsafeSocket emits the sslErrors() signal. In this
     case, if no action is taken to ignore the error(s), the connection
@@ -122,7 +122,7 @@
     waitForEncrypted(), which will block the calling thread until an
     encrypted connection has been established.
 
-    \snippet code/src_network_ssl_SslUnsafeSocket.cpp 2
+    \snippet code/src_network_ssl_qsslsocket.cpp 2
 
     SslUnsafeSocket provides an extensive, easy-to-use API for handling
     cryptographic ciphers, private keys, and local, peer, and
@@ -215,7 +215,7 @@
 */
 
 /*!
-    \fn SslUnsafeSocket::encrypted()
+    \fn void SslUnsafeSocket::encrypted()
 
     This signal is emitted when SslUnsafeSocket enters encrypted mode. After this
     signal has been emitted, SslUnsafeSocket::isEncrypted() will return true, and
@@ -225,7 +225,7 @@
 */
 
 /*!
-    \fn SslUnsafeSocket::modeChanged(SslUnsafeSocket::SslMode mode)
+    \fn void SslUnsafeSocket::modeChanged(SslUnsafeSocket::SslMode mode)
 
     This signal is emitted when SslUnsafeSocket changes from \l
     SslUnsafeSocket::UnencryptedMode to either \l SslUnsafeSocket::SslClientMode or \l
@@ -235,7 +235,7 @@
 */
 
 /*!
-    \fn SslUnsafeSocket::encryptedBytesWritten(qint64 written)
+    \fn void SslUnsafeSocket::encryptedBytesWritten(qint64 written)
     \since 4.4
 
     This signal is emitted when SslUnsafeSocket writes its encrypted data to the
@@ -288,7 +288,7 @@
 */
 
 /*!
-    \fn void SslUnsafeSocket::preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator)
+    \fn void SslUnsafeSocket::preSharedKeyAuthenticationRequired(SslUnsafePreSharedKeyAuthenticator *authenticator)
     \since 5.5
 
     SslUnsafeSocket emits this signal when it negotiates a PSK ciphersuite, and
@@ -306,7 +306,7 @@
     \note The \a authenticator object is owned by the socket and must not be
     deleted by the application.
 
-    \sa QSslPreSharedKeyAuthenticator
+    \sa SslUnsafePreSharedKeyAuthenticator
 */
 
 #include "sslunsafe_p.h"
@@ -337,12 +337,20 @@ QT_BEGIN_NAMESPACE
 class SslUnsafeSocketGlobalData
 {
 public:
-    SslUnsafeSocketGlobalData() : config(new SslUnsafeConfigurationPrivate) {}
+    SslUnsafeSocketGlobalData()
+        : config(new SslUnsafeConfigurationPrivate),
+          dtlsConfig(new SslUnsafeConfigurationPrivate)
+    {
+#if QT_CONFIG(dtls)
+        dtlsConfig->protocol = SslUnsafe::DtlsV1_2OrLater;
+#endif // dtls
+    }
 
     QMutex mutex;
     QList<SslUnsafeCipher> supportedCiphers;
     QVector<SslUnsafeEllipticCurve> supportedEllipticCurves;
     QExplicitlySharedDataPointer<SslUnsafeConfigurationPrivate> config;
+    QExplicitlySharedDataPointer<SslUnsafeConfigurationPrivate> dtlsConfig;
 };
 Q_GLOBAL_STATIC(SslUnsafeSocketGlobalData, globalData)
 
@@ -373,7 +381,7 @@ SslUnsafeSocket::~SslUnsafeSocket()
     qCDebug(lcSsl) << "SslUnsafeSocket::~SslUnsafeSocket(), this =" << (void *)this;
 #endif
     delete d->plainSocket;
-    d->plainSocket = 0;
+    d->plainSocket = nullptr;
 }
 
 /*!
@@ -390,6 +398,9 @@ SslUnsafeSocket::~SslUnsafeSocket()
 */
 void SslUnsafeSocket::resume()
 {
+    Q_D(SslUnsafeSocket);
+    if (!d->paused)
+        return;
     // continuing might emit signals, rather do this through the event loop
     QMetaObject::invokeMethod(this, "_q_resumeImplementation", Qt::QueuedConnection);
 }
@@ -418,7 +429,7 @@ void SslUnsafeSocket::resume()
 
     If the SSL handshake is successful, SslUnsafeSocket emits encrypted().
 
-    \snippet code/src_network_ssl_SslUnsafeSocket.cpp 3
+    \snippet code/src_network_ssl_qsslsocket.cpp 3
 
     \note The example above shows that text can be written to
     the socket immediately after requesting the encrypted connection,
@@ -441,6 +452,12 @@ void SslUnsafeSocket::connectToHostEncrypted(const QString &hostName, quint16 po
     if (d->state() == ConnectedState || d->state() == ConnectingState) {
         qCWarning(lcSsl,
                   "SslUnsafeSocket::connectToHostEncrypted() called when already connecting/connected");
+        return;
+    }
+
+    if (!supportsSsl()) {
+        qCWarning(lcSsl, "SslUnsafeSocket::connectToHostEncrypted: TLS initialization failed");
+        d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
         return;
     }
 
@@ -472,6 +489,12 @@ void SslUnsafeSocket::connectToHostEncrypted(const QString &hostName, quint16 po
     if (d->state() == ConnectedState || d->state() == ConnectingState) {
         qCWarning(lcSsl,
                   "SslUnsafeSocket::connectToHostEncrypted() called when already connecting/connected");
+        return;
+    }
+
+    if (!supportsSsl()) {
+        qCWarning(lcSsl, "SslUnsafeSocket::connectToHostEncrypted: TLS initialization failed");
+        d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
         return;
     }
 
@@ -926,6 +949,7 @@ void SslUnsafeSocket::setSslConfiguration(const SslUnsafeConfiguration &configur
     d->configuration.peerVerifyDepth = configuration.peerVerifyDepth();
     d->configuration.peerVerifyMode = configuration.peerVerifyMode();
     d->configuration.protocol = configuration.protocol();
+    d->configuration.backendConfig = configuration.backendConfiguration();
     d->configuration.sslOptions = configuration.d->sslOptions;
     d->configuration.sslSession = configuration.sessionTicket();
     d->configuration.sslSessionTicketLifeTimeHint = configuration.sessionTicketLifeTimeHint();
@@ -1242,7 +1266,7 @@ void SslUnsafeSocket::setCiphers(const QList<SslUnsafeCipher> &ciphers)
     is a colon-separated list of cipher suite names. The ciphers are listed in
     order of preference, starting with the most preferred cipher. For example:
 
-    \snippet code/src_network_ssl_SslUnsafeSocket.cpp 4
+    \snippet code/src_network_ssl_qsslsocket.cpp 4
 
     Each cipher name in \a ciphers must be the name of a cipher in the
     list returned by supportedCiphers().  Restricting the cipher suite
@@ -1564,7 +1588,7 @@ bool SslUnsafeSocket::waitForConnected(int msecs)
     The following example waits up to one second for the socket to be
     encrypted:
 
-    \snippet code/src_network_ssl_SslUnsafeSocket.cpp 5
+    \snippet code/src_network_ssl_qsslsocket.cpp 5
 
     If msecs is -1, this function will not time out.
 
@@ -1820,6 +1844,12 @@ void SslUnsafeSocket::startClientEncryption()
                   "SslUnsafeSocket::startClientEncryption: cannot start handshake when not connected");
         return;
     }
+
+    if (!supportsSsl()) {
+        qCWarning(lcSsl, "SslUnsafeSocket::startClientEncryption: TLS initialization failed");
+        d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
+        return;
+    }
 #ifdef SSLUNSAFESOCKET_DEBUG
     qCDebug(lcSsl) << "SslUnsafeSocket::startClientEncryption()";
 #endif
@@ -1858,6 +1888,11 @@ void SslUnsafeSocket::startServerEncryption()
 #ifdef SSLUNSAFESOCKET_DEBUG
     qCDebug(lcSsl) << "SslUnsafeSocket::startServerEncryption()";
 #endif
+    if (!supportsSsl()) {
+        qCWarning(lcSsl, "SslUnsafeSocket::startServerEncryption: TLS initialization failed");
+        d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
+        return;
+    }
     d->mode = SslServerMode;
     emit modeChanged(d->mode);
     d->startServerEncryption();
@@ -1906,7 +1941,7 @@ void SslUnsafeSocket::ignoreSslErrors()
     If, for instance, you want to connect to a server that uses
     a self-signed certificate, consider the following snippet:
 
-    \snippet code/src_network_ssl_SslUnsafeSocket.cpp 6
+    \snippet code/src_network_ssl_qsslsocket.cpp 6
 
     Multiple calls to this function will replace the list of errors that
     were passed in previous calls.
@@ -2066,9 +2101,9 @@ SslUnsafeSocketPrivate::SslUnsafeSocketPrivate()
     , connectionEncrypted(false)
     , shutdown(false)
     , ignoreAllSslErrors(false)
-    , readyReadEmittedPointer(0)
+    , readyReadEmittedPointer(nullptr)
     , allowRootCertOnDemandLoading(true)
-    , plainSocket(0)
+    , plainSocket(nullptr)
     , paused(false)
     , flushTriggered(false)
 {
@@ -2166,6 +2201,26 @@ void SslUnsafeSocketPrivate::setDefaultSupportedCiphers(const QList<SslUnsafeCip
 /*!
     \internal
 */
+void q_setDefaultDtlsCiphers(const QList<SslUnsafeCipher> &ciphers)
+{
+    QMutexLocker locker(&globalData()->mutex);
+    globalData()->dtlsConfig.detach();
+    globalData()->dtlsConfig->ciphers = ciphers;
+}
+
+/*!
+    \internal
+*/
+QList<SslUnsafeCipher> q_getDefaultDtlsCiphers()
+{
+    SslUnsafeSocketPrivate::ensureInitialized();
+    QMutexLocker locker(&globalData()->mutex);
+    return globalData()->dtlsConfig->ciphers;
+}
+
+/*!
+    \internal
+*/
 QVector<SslUnsafeEllipticCurve> SslUnsafeSocketPrivate::supportedEllipticCurves()
 {
     SslUnsafeSocketPrivate::ensureInitialized();
@@ -2180,6 +2235,7 @@ void SslUnsafeSocketPrivate::setDefaultSupportedEllipticCurves(const QVector<Ssl
 {
     const QMutexLocker locker(&globalData()->mutex);
     globalData()->config.detach();
+    globalData()->dtlsConfig.detach();
     globalData()->supportedEllipticCurves = curves;
 }
 
@@ -2202,6 +2258,8 @@ void SslUnsafeSocketPrivate::setDefaultCaCertificates(const QList<SslUnsafeCerti
     QMutexLocker locker(&globalData()->mutex);
     globalData()->config.detach();
     globalData()->config->caCertificates = certs;
+    globalData()->dtlsConfig.detach();
+    globalData()->dtlsConfig->caCertificates = certs;
     // when the certificates are set explicitly, we do not want to
     // load the system certificates on demand
     s_loadRootCertsOnDemand = false;
@@ -2221,6 +2279,8 @@ bool SslUnsafeSocketPrivate::addDefaultCaCertificates(const QString &path, SslUn
     QMutexLocker locker(&globalData()->mutex);
     globalData()->config.detach();
     globalData()->config->caCertificates += certs;
+    globalData()->dtlsConfig.detach();
+    globalData()->dtlsConfig->caCertificates += certs;
     return true;
 }
 
@@ -2233,6 +2293,8 @@ void SslUnsafeSocketPrivate::addDefaultCaCertificate(const SslUnsafeCertificate 
     QMutexLocker locker(&globalData()->mutex);
     globalData()->config.detach();
     globalData()->config->caCertificates += cert;
+    globalData()->dtlsConfig.detach();
+    globalData()->dtlsConfig->caCertificates += cert;
 }
 
 /*!
@@ -2244,6 +2306,8 @@ void SslUnsafeSocketPrivate::addDefaultCaCertificates(const QList<SslUnsafeCerti
     QMutexLocker locker(&globalData()->mutex);
     globalData()->config.detach();
     globalData()->config->caCertificates += certs;
+    globalData()->dtlsConfig.detach();
+    globalData()->dtlsConfig->caCertificates += certs;
 }
 
 /*!
@@ -2295,6 +2359,34 @@ void SslUnsafeConfigurationPrivate::deepCopyDefaultConfiguration(SslUnsafeConfig
     ptr->peerVerifyDepth = global->peerVerifyDepth;
     ptr->sslOptions = global->sslOptions;
     ptr->ellipticCurves = global->ellipticCurves;
+    ptr->backendConfig = global->backendConfig;
+#if QT_CONFIG(dtls)
+    ptr->dtlsCookieEnabled = global->dtlsCookieEnabled;
+#endif
+}
+
+/*!
+    \internal
+*/
+SslUnsafeConfiguration SslUnsafeConfigurationPrivate::defaultDtlsConfiguration()
+{
+    SslUnsafeSocketPrivate::ensureInitialized();
+    QMutexLocker locker(&globalData()->mutex);
+
+    return SslUnsafeConfiguration(globalData()->dtlsConfig.data());
+}
+
+/*!
+    \internal
+*/
+void SslUnsafeConfigurationPrivate::setDefaultDtlsConfiguration(const SslUnsafeConfiguration &configuration)
+{
+    SslUnsafeSocketPrivate::ensureInitialized();
+    QMutexLocker locker(&globalData()->mutex);
+    if (globalData()->dtlsConfig == configuration.d)
+        return;                 // nothing to do
+
+    globalData()->dtlsConfig = const_cast<SslUnsafeConfigurationPrivate*>(configuration.d.constData());
 }
 
 /*!
@@ -2341,8 +2433,8 @@ void SslUnsafeSocketPrivate::createPlainSocket(QIODevice::OpenMode openMode)
     q->connect(plainSocket, SIGNAL(bytesWritten(qint64)),
                q, SLOT(_q_bytesWrittenSlot(qint64)),
                Qt::DirectConnection);
-//    q->connect(plainSocket, SIGNAL(channelBytesWritten(int, qint64)),
-//               q, SLOT(_q_channelBytesWrittenSlot(int, qint64)),
+//    q->connect(plainSocket, SIGNAL(channelBytesWritten(int,qint64)),
+//               q, SLOT(_q_channelBytesWrittenSlot(int,qint64)),
 //               Qt::DirectConnection);
     q->connect(plainSocket, SIGNAL(readChannelFinished()),
                q, SLOT(_q_readChannelFinishedSlot()),
@@ -2613,6 +2705,7 @@ void SslUnsafeSocketPrivate::_q_resumeImplementation()
         if (verifyErrorsHaveBeenIgnored()) {
             continueHandshake();
         } else {
+            Q_ASSERT(!sslErrors.isEmpty());
             setErrorAndEmit(QAbstractSocket::SslHandshakeFailedError, sslErrors.first().errorString());
             plainSocket->disconnectFromHost();
             return;
@@ -2705,6 +2798,20 @@ QByteArray SslUnsafeSocketPrivate::peek(qint64 maxSize)
 /*!
     \internal
 */
+qint64 SslUnsafeSocketPrivate::skip(qint64 maxSize)
+{
+    if (mode == SslUnsafeSocket::UnencryptedMode && !autoStartHandshake)
+        return plainSocket->skip(maxSize);
+
+    // In encrypted mode, the SSL backend writes decrypted data directly into the
+    // QIODevice's read buffer. As this buffer is always emptied by the caller,
+    // we need to wait for more incoming data.
+    return (state() == QAbstractSocket::ConnectedState) ? Q_INT64_C(0) : Q_INT64_C(-1);
+}
+
+/*!
+    \internal
+*/
 bool SslUnsafeSocketPrivate::flush()
 {
 #ifdef SSLUNSAFESOCKET_DEBUG
@@ -2761,12 +2868,12 @@ QSharedPointer<SslUnsafeContext> SslUnsafeSocketPrivate::sslContext(SslUnsafeSoc
 
 bool SslUnsafeSocketPrivate::isMatchingHostname(const SslUnsafeCertificate &cert, const QString &peerName)
 {
-    QStringList commonNameList = cert.subjectInfo(SslUnsafeCertificate::CommonName);
+    const QString lowerPeerName = QString::fromLatin1(QUrl::toAce(peerName));
+    const QStringList commonNames = cert.subjectInfo(SslUnsafeCertificate::CommonName);
 
-    foreach (const QString &commonName, commonNameList) {
-        if (isMatchingHostname(commonName.toLower(), peerName.toLower())) {
+    for (const QString &commonName : commonNames) {
+        if (isMatchingHostname(commonName, lowerPeerName))
             return true;
-        }
     }
 
     foreach (const QString &altName, cert.subjectAlternativeNames().values(SslUnsafe::DnsEntry)) {
