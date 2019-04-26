@@ -45,6 +45,8 @@
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QMetaType>
 
+QT_REQUIRE_CONFIG(ssl);
+
 QT_BEGIN_NAMESPACE
 
 class SslUnsafePreSharedKeyAuthenticatorPrivate;
@@ -76,6 +78,7 @@ public:
 private:
     friend Q_NETWORK_EXPORT bool operator==(const SslUnsafePreSharedKeyAuthenticator &lhs, const SslUnsafePreSharedKeyAuthenticator &rhs);
     friend class SslUnsafeSocketBackendPrivate;
+    friend class SslUnsafeDtlsPrivateOpenSSL;
 
     QSharedDataPointer<SslUnsafePreSharedKeyAuthenticatorPrivate> d;
 };
@@ -92,4 +95,4 @@ QT_END_NAMESPACE
 Q_DECLARE_METATYPE(SslUnsafePreSharedKeyAuthenticator)
 Q_DECLARE_METATYPE(SslUnsafePreSharedKeyAuthenticator*)
 
-#endif // SslUnsafePreSharedKeyAuthenticator_H
+#endif // SSLUNSAFEPRESHAREDKEYAUTHENTICATOR_H
