@@ -81,35 +81,20 @@ SslUnsafePreSharedKeyAuthenticatorPrivate::SslUnsafePreSharedKeyAuthenticatorPri
 
     The SslUnsafePreSharedKeyAuthenticator provides means to client applications for
     completing the PSK handshake. The client application needs to connect a
-    slot to the QSslSocket::preSharedKeyAuthenticationRequired() signal:
+    slot to the SslUnsafeSocket::preSharedKeyAuthenticationRequired() signal:
 
-    \code
-
-    connect(socket, &QSslSocket::preSharedKeyAuthenticationRequired,
-            this, &AuthManager::handlePreSharedKeyAuthentication);
-
-    \endcode
+    \snippet code/src_network_ssl_qsslpresharedkeyauthenticator.cpp 0
 
     The signal carries a SslUnsafePreSharedKeyAuthenticator object containing the
     identity hint the server sent to the client, and which must be filled with the
     corresponding client identity and the derived key:
 
-    \code
-
-    void AuthManager::handlePreSharedKeyAuthentication(SslUnsafePreSharedKeyAuthenticator *authenticator)
-    {
-        authenticator->setIdentity("My Qt App");
-
-        const QByteArray key = deriveKey(authenticator->identityHint(), passphrase);
-        authenticator->setPreSharedKey(key);
-    }
-
-    \endcode
+    \snippet code/src_network_ssl_qsslpresharedkeyauthenticator.cpp 1
 
     \note PSK ciphersuites are supported only when using OpenSSL 1.0.1 (or
     greater) as the SSL backend.
 
-    \sa QSslSocket
+    \sa SslUnsafeSocket
 */
 
 /*!
