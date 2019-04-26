@@ -91,6 +91,14 @@ namespace SslUnsafe {
         TlsV1_1OrLater,
         TlsV1_2OrLater,
 
+        DtlsV1_0,
+        DtlsV1_0OrLater,
+        DtlsV1_2,
+        DtlsV1_2OrLater,
+
+        TlsV1_3,
+        TlsV1_3OrLater,
+
         UnknownProtocol = -1
     };
 
@@ -111,4 +119,4 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(SslUnsafe::SslOptions)
 
 QT_END_NAMESPACE
 
-#endif // QSSL_H
+#endif // SSLUNSAFE_H
