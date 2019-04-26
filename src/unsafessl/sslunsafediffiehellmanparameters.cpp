@@ -49,9 +49,9 @@
     \ingroup shared
     \inmodule QtNetwork
 
-    SslUnsafeDiffieHellmanParameters provides an interface for setting Diffie-Hellman parameters to servers based on QSslSocket.
+    SslUnsafeDiffieHellmanParameters provides an interface for setting Diffie-Hellman parameters to servers based on SslUnsafeSocket.
 
-    \sa QSslSocket, QSslCipher, QSslConfiguration
+    \sa SslUnsafeSocket, SslUnsafeCipher, SslUnsafeConfiguration
 */
 
 #include "sslunsafediffiehellmanparameters.h"
@@ -75,7 +75,7 @@ Q_AUTOTEST_EXPORT const char *qssl_dhparams_default_base64 =
     "/1y29Aa37e44a/taiZ+lrp8kEXxLH+ZJKGZR7OZTgf//////////AgEC";
 
 /*!
-    Returns the default SslUnsafeDiffieHellmanParameters used by QSslSocket.
+    Returns the default SslUnsafeDiffieHellmanParameters used by SslUnsafeSocket.
 
     This is currently the 1024-bit MODP group from RFC 2459, also
     known as the Second Oakley Group.
@@ -91,11 +91,11 @@ SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::defaultParame
     Constructs an empty SslUnsafeDiffieHellmanParameters instance.
 
     If an empty SslUnsafeDiffieHellmanParameters instance is set on a
-    QSslConfiguration object, Diffie-Hellman negotiation will
+    SslUnsafeConfiguration object, Diffie-Hellman negotiation will
     be disabled.
 
     \sa isValid()
-    \sa QSslConfiguration
+    \sa SslUnsafeConfiguration
 */
 SslUnsafeDiffieHellmanParameters::SslUnsafeDiffieHellmanParameters()
     : d(new SslUnsafeDiffieHellmanParametersPrivate)
@@ -112,7 +112,7 @@ SslUnsafeDiffieHellmanParameters::SslUnsafeDiffieHellmanParameters()
     loaded correctly.
 
     \sa isValid()
-    \sa QSslConfiguration
+    \sa SslUnsafeConfiguration
 */
 SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(const QByteArray &encoded, SslUnsafe::EncodingFormat encoding)
 {
@@ -140,7 +140,7 @@ SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(c
     object will be returned.
 
     \sa isValid()
-    \sa QSslConfiguration
+    \sa SslUnsafeConfiguration
 */
 SslUnsafeDiffieHellmanParameters SslUnsafeDiffieHellmanParameters::fromEncoded(QIODevice *device, SslUnsafe::EncodingFormat encoding)
 {
@@ -161,7 +161,7 @@ SslUnsafeDiffieHellmanParameters::SslUnsafeDiffieHellmanParameters(const SslUnsa
 }
 
 /*!
-    \fn SslUnsafeDiffieHellmanParameters(SslUnsafeDiffieHellmanParameters &&other)
+    \fn SslUnsafeDiffieHellmanParameters::SslUnsafeDiffieHellmanParameters(SslUnsafeDiffieHellmanParameters &&other)
 
     Move-constructs from \a other.
 
@@ -210,7 +210,7 @@ SslUnsafeDiffieHellmanParameters &SslUnsafeDiffieHellmanParameters::operator=(co
 /*!
     Returns \c true if this is a an empty SslUnsafeDiffieHellmanParameters instance.
 
-    Setting an empty SslUnsafeDiffieHellmanParameters instance on a QSslSocket-based
+    Setting an empty SslUnsafeDiffieHellmanParameters instance on a SslUnsafeSocket-based
     server will disable Diffie-Hellman key exchange.
 */
 bool SslUnsafeDiffieHellmanParameters::isEmpty() const Q_DECL_NOTHROW
@@ -266,11 +266,11 @@ QString SslUnsafeDiffieHellmanParameters::errorString() const Q_DECL_NOTHROW
 {
     switch (d->error) {
     case SslUnsafeDiffieHellmanParameters::NoError:
-        return QCoreApplication::translate("QSslDiffieHellmanParameter", "No error");
+        return QCoreApplication::translate("SslUnsafeDiffieHellmanParameter", "No error");
     case SslUnsafeDiffieHellmanParameters::InvalidInputDataError:
-        return QCoreApplication::translate("QSslDiffieHellmanParameter", "Invalid input data");
+        return QCoreApplication::translate("SslUnsafeDiffieHellmanParameter", "Invalid input data");
     case SslUnsafeDiffieHellmanParameters::UnsafeParametersError:
-        return QCoreApplication::translate("QSslDiffieHellmanParameter", "The given Diffie-Hellman parameters are deemed unsafe");
+        return QCoreApplication::translate("SslUnsafeDiffieHellmanParameter", "The given Diffie-Hellman parameters are deemed unsafe");
     }
 
     Q_UNREACHABLE();
