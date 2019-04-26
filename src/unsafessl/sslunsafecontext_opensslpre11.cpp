@@ -52,14 +52,29 @@
 
 QT_BEGIN_NAMESPACE
 
-// defined in SslUnsafesocket_openssl.cpp:
+// defined in qsslsocket_openssl.cpp:
 extern int q_X509Callback(int ok, X509_STORE_CTX *ctx);
 extern QString getErrorsFromOpenSsl();
+
+#if QT_CONFIG(dtls)
+// defined in qdtls_openssl.cpp:
+namespace dtlscallbacks
+{
+extern "C" int q_X509DtlsCallback(int ok, X509_STORE_CTX *ctx);
+extern "C" int q_generate_cookie_callback(SSL *ssl, unsigned char *dst,
+                                          unsigned *cookieLength);
+extern "C" int q_verify_cookie_callback(SSL *ssl, const unsigned char *cookie,
+                                        unsigned cookieLength);
+}
+#endif // dtls
 
 static inline QString msgErrorSettingEllipticCurves(const QString &why)
 {
     return SslUnsafeSocket::tr("Error when setting the elliptic curves (%1)").arg(why);
 }
+
+// Defined in qsslsocket.cpp
+QList<SslUnsafeCipher> q_getDefaultDtlsCiphers();
 
 // static
 void SslUnsafeContext::initSslContext(SslUnsafeContext *sslContext, SslUnsafeSocket::SslMode mode, const SslUnsafeConfiguration &configuration, bool allowRootCertOnDemandLoading)
@@ -68,11 +83,37 @@ void SslUnsafeContext::initSslContext(SslUnsafeContext *sslContext, SslUnsafeSoc
     sslContext->errorCode = SslUnsafeError::NoError;
 
     bool client = (mode == SslUnsafeSocket::SslClientMode);
-
     bool reinitialized = false;
     bool unsupportedProtocol = false;
+    bool isDtls = false;
 init_context:
     switch (sslContext->sslConfiguration.protocol()) {
+#if QT_CONFIG(dtls)
+    case SslUnsafe::DtlsV1_0:
+        isDtls = true;
+        sslContext->ctx = q_SSL_CTX_new(client ? q_DTLSv1_client_method() : q_DTLSv1_server_method());
+        break;
+    case SslUnsafe::DtlsV1_2:
+    case SslUnsafe::DtlsV1_2OrLater:
+        // OpenSSL 1.0.2 and below will probably never receive TLS 1.3, so
+        // technically 1.2 or later is 1.2 and will stay so.
+        isDtls = true;
+        sslContext->ctx = q_SSL_CTX_new(client ? q_DTLSv1_2_client_method() : q_DTLSv1_2_server_method());
+        break;
+    case SslUnsafe::DtlsV1_0OrLater:
+        isDtls = true;
+        sslContext->ctx = q_SSL_CTX_new(client ? q_DTLS_client_method() : q_DTLS_server_method());
+        break;
+#else // dtls
+    case SslUnsafe::DtlsV1_0:
+    case SslUnsafe::DtlsV1_0OrLater:
+    case SslUnsafe::DtlsV1_2:
+    case SslUnsafe::DtlsV1_2OrLater:
+        sslContext->ctx = nullptr;
+        unsupportedProtocol = true;
+        qCWarning(lcSsl, "DTLS protocol requested, but feature 'dtls' is disabled");
+        break;
+#endif // dtls
     case SslUnsafe::SslV2:
 #ifndef OPENSSL_NO_SSL2
         sslContext->ctx = q_SSL_CTX_new(client ? q_SSLv2_client_method() : q_SSLv2_server_method());
@@ -136,6 +177,18 @@ init_context:
         unsupportedProtocol = true;
 #endif
         break;
+    case SslUnsafe::TlsV1_3:
+    case SslUnsafe::TlsV1_3OrLater:
+        // TLS 1.3 is not supported by the system, but chosen deliberately -> error
+        sslContext->ctx = nullptr;
+        unsupportedProtocol = true;
+        break;
+    }
+
+    if (!client && isDtls && configuration.peerVerifyMode() != SslUnsafeSocket::VerifyNone) {
+        sslContext->errorStr = SslUnsafeSocket::tr("DTLS server requires a 'VerifyNone' mode with your version of OpenSSL");
+        sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+        return;
     }
 
     if (!sslContext->ctx) {
@@ -155,6 +208,7 @@ init_context:
     }
 
     // Enable bug workarounds.
+    // DTLSTODO: check this setupOpenSslOptions ...
     long options = SslUnsafeSocketBackendPrivate::setupOpenSslOptions(configuration.protocol(), configuration.d->sslOptions);
     q_SSL_CTX_set_options(sslContext->ctx, options);
 
@@ -170,8 +224,8 @@ init_context:
     bool first = true;
     QList<SslUnsafeCipher> ciphers = sslContext->sslConfiguration.ciphers();
     if (ciphers.isEmpty())
-        ciphers = SslUnsafeSocketPrivate::defaultCiphers();
-    for (const SslUnsafeCipher &cipher : const_cast<const QList<SslUnsafeCipher>&>(ciphers)) {
+        ciphers = isDtls ? q_getDefaultDtlsCiphers() : SslUnsafeSocketPrivate::defaultCiphers();
+    for (const SslUnsafeCipher &cipher : const_cast<const QList<SslUnsafeCipher>&>(ciphers)) { // qAsConst(ciphers)
         if (first)
             first = false;
         else
@@ -263,7 +317,7 @@ init_context:
 
         // If we have any intermediate certificates then we need to add them to our chain
         bool first = true;
-        for (const SslUnsafeCertificate &cert : const_cast<const QList<SslUnsafeCertificate>&>(configuration.d->localCertificateChain)) {
+        for (const SslUnsafeCertificate &cert : const_cast<const QList<SslUnsafeCertificate>&>(configuration.d->localCertificateChain)) { // qAsConst(configuration.d->localCertificateChain)
             if (first) {
                 first = false;
                 continue;
@@ -277,8 +331,19 @@ init_context:
     if (sslContext->sslConfiguration.peerVerifyMode() == SslUnsafeSocket::VerifyNone) {
         q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_NONE, 0);
     } else {
-        q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_PEER, q_X509Callback);
+        q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_PEER,
+#if QT_CONFIG(dtls)
+                             isDtls ? dtlscallbacks::q_X509DtlsCallback :
+#endif // dtls
+                             q_X509Callback);
     }
+
+#if QT_CONFIG(dtls)
+    if (mode == SslUnsafeSocket::SslServerMode && isDtls && configuration.dtlsCookieVerificationEnabled()) {
+        q_SSL_CTX_set_cookie_generate_cb(sslContext->ctx, dtlscallbacks::q_generate_cookie_callback);
+        q_SSL_CTX_set_cookie_verify_cb(sslContext->ctx, CookieVerifyCallback(dtlscallbacks::q_verify_cookie_callback));
+    }
+#endif // dtls
 
     // Set verification depth.
     if (sslContext->sslConfiguration.peerVerifyDepth() != 0)
@@ -314,7 +379,7 @@ init_context:
         BIGNUM *bn = q_BN_new();
         RSA *rsa = q_RSA_new();
         q_BN_set_word(bn, RSA_F4);
-        q_RSA_generate_key_ex(rsa, 512, bn, NULL);
+        q_RSA_generate_key_ex(rsa, 512, bn, nullptr);
         q_SSL_CTX_set_tmp_rsa(sslContext->ctx, rsa);
         q_RSA_free(rsa);
         q_BN_free(bn);
@@ -353,6 +418,7 @@ init_context:
                                 const_cast<int *>(reinterpret_cast<const int *>(qcurves.data())))) {
                 sslContext->errorStr = msgErrorSettingEllipticCurves(SslUnsafeSocketBackendPrivate::getErrorsFromOpenSsl());
                 sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+                return;
             }
         } else
 #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(OPENSSL_NO_EC)
@@ -360,8 +426,11 @@ init_context:
             // specific curves requested, but not possible to set -> error
             sslContext->errorStr = msgErrorSettingEllipticCurves(SslUnsafeSocket::tr("OpenSSL version too old, need at least v1.0.2"));
             sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+            return;
         }
     }
+
+    applyBackendConfig(sslContext);
 }
 
 QT_END_NAMESPACE
