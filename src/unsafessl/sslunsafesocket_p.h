@@ -95,7 +95,6 @@ QT_BEGIN_NAMESPACE
     typedef BOOL (WINAPI *PtrCertCloseStore)(HCERTSTORE, DWORD);
 #endif // Q_OS_WIN && !Q_OS_WINRT
 
-
 int qt_subtract_from_timeout(int timeout, int elapsed);
 
 class SslUnsafeSocketPrivate : public QObjectData, public QTcpSocket // public QTcpSocketPrivate
@@ -171,7 +170,7 @@ public:
     static void checkSettingSslContext(SslUnsafeSocket*, QSharedPointer<SslUnsafeContext>);
     static QSharedPointer<SslUnsafeContext> sslContext(SslUnsafeSocket *socket);
     bool isPaused() const;
-    bool bind(const QHostAddress &address, quint16, QAbstractSocket::BindMode);// Q_DECL_OVERRIDE;
+    bool bind(const QHostAddress &address, quint16, QAbstractSocket::BindMode);// override;
     void _q_connectedSlot();
     void _q_hostFoundSlot();
     void _q_disconnectedSlot();
@@ -191,9 +190,10 @@ public:
 
     static QList<QByteArray> unixRootCertDirectories(); // used also by SslUnsafeContext
 
-    virtual qint64 peek(char *data, qint64 maxSize);// Q_DECL_OVERRIDE;
-    virtual QByteArray peek(qint64 maxSize);// Q_DECL_OVERRIDE;
-    bool flush();// Q_DECL_OVERRIDE;
+    virtual qint64 peek(char *data, qint64 maxSize);// override;
+    virtual QByteArray peek(qint64 maxSize);// override;
+    qint64 skip(qint64 maxSize);// override;
+    bool flush();// override;
 
     // Platform specific functions
     virtual void startClientEncryption() = 0;
@@ -264,7 +264,7 @@ public:
 private:
     static bool ensureLibraryLoaded();
     static void ensureCiphersAndCertsLoaded();
-#if defined(Q_OS_ANDROID)
+#if defined(Q_OS_ANDROID) && !defined(Q_OS_ANDROID_EMBEDDED)
     static QList<QByteArray> fetchSslCertificateData();
 #endif
 
