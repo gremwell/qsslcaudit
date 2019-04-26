@@ -48,6 +48,7 @@ private:
     SslServer *prepareSslServer(const SslTest *test);
     void proxyConnection(XSslSocket *sslSocket, SslTest *test);
     void handleIncomingConnection(XSslSocket *sslSocket, SslTest *test);
+    static void showCiphersGroup(const QString &groupName, const QString &ciphersStr);
 
     SslUserSettings settings;
     QList<SslTest *> sslTests;

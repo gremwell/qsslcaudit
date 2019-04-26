@@ -2,6 +2,7 @@
 #include "sslcaudit.h"
 #include "sslserver.h"
 #include "debug.h"
+#include "ciphers.h"
 
 #include <QCoreApplication>
 #include <QThread>
@@ -25,18 +26,32 @@ SslCAudit::SslCAudit(const SslUserSettings settings, QObject *parent) :
     VERBOSE("SSL library used: " + XSslSocket::sslLibraryVersionString());
 }
 
+void SslCAudit::showCiphersGroup(const QString &groupName, const QString &ciphersStr)
+{
+    QStringList opensslCiphers = ciphersStr.split(":");
+    QString supportedCiphersStr;
+
+    VERBOSE("  " + groupName + ":");
+
+    for (int i = 0; i < opensslCiphers.size(); i++) {
+        XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+        if (!cipher.isNull())
+            supportedCiphersStr += opensslCiphers.at(i) + ":";
+    }
+
+    supportedCiphersStr.chop(1);
+
+    VERBOSE("    " + supportedCiphersStr);
+}
+
 void SslCAudit::showCiphers()
 {
     VERBOSE("supported ciphers:");
-    QList<XSslCipher> ciphers = XSslConfiguration::supportedCiphers();
-    QString ciphersString = "\t";
-    for (int i = 0; i < ciphers.size(); i++) {
-        ciphersString += ciphers.at(i).name() + " ";
-        if (((i + 1) % 4) == 0) {
-            VERBOSE(ciphersString);
-            ciphersString = "\t";
-        }
-    }
+    showCiphersGroup("EXPORT", ciphers_export_str);
+    showCiphersGroup("LOW", ciphers_low_str);
+    showCiphersGroup("MEDIUM", ciphers_medium_str);
+    showCiphersGroup("HIGH", ciphers_high_str);
 }
 
 void SslCAudit::setSslTests(const QList<SslTest *> &tests)
