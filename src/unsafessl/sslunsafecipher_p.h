@@ -78,4 +78,4 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // SslUnsafeCIPHER_P_H
+#endif // QSSLCIPHER_P_H
