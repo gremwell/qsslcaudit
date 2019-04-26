@@ -13,6 +13,8 @@ list(APPEND unsafessl_SOURCES
     sslunsafecipher.cpp
     sslunsafecontext_openssl.cpp
     sslunsafeconfiguration.cpp
+    sslunsafedtls.cpp
+    sslunsafedtls_openssl.cpp
     sslunsafediffiehellmanparameters.cpp
     sslunsafediffiehellmanparameters_openssl.cpp
     sslunsafeerror.cpp
@@ -21,6 +23,7 @@ list(APPEND unsafessl_SOURCES
     sslunsafekey_openssl.cpp
     sslunsafekey_p.cpp
     sslunsafemutexpool.cpp
+    sslunsafepassworddigestor.cpp
     sslunsafepresharedkeyauthenticator.cpp
     sslunsaferingbuffer.cpp
     sslunsafesocket.cpp
@@ -41,6 +44,9 @@ list(APPEND unsafessl_HEADERS
     sslunsafeconfiguration.h
     sslunsafeconfiguration_p.h
     sslunsafecontext_openssl_p.h
+    sslunsafedtls.h
+    sslunsafedtls_openssl_p.h
+    sslunsafedtls_p.h
     sslunsafediffiehellmanparameters.h
     sslunsafediffiehellmanparameters_p.h
     sslunsafeellipticcurve.h
@@ -49,6 +55,7 @@ list(APPEND unsafessl_HEADERS
     sslunsafekey_p.h
     sslunsafemutexpool_p.h
     sslunsafenetworkglobal.h
+    sslunsafepassworddigestor.h
     sslunsafepresharedkeyauthenticator.h
     sslunsafepresharedkeyauthenticator_p.h
     sslunsaferingbuffer_p.h
