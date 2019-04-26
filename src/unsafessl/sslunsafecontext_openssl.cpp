@@ -49,10 +49,15 @@
 
 QT_BEGIN_NAMESPACE
 
+static inline QString msgErrorSettingBackendConfig(const QString &why)
+{
+    return SslUnsafeSocket::tr("Error when setting the OpenSSL configuration (%1)").arg(why);
+}
+
 SslUnsafeContext::SslUnsafeContext()
-    : ctx(0),
-    pkey(0),
-    session(0),
+    : ctx(nullptr),
+    pkey(nullptr),
+    session(nullptr),
     m_sessionTicketLifeTimeHint(-1)
 {
 }
@@ -132,7 +137,8 @@ SSL* SslUnsafeContext::createSsl()
     if (!session && !sessionASN1().isEmpty()
             && !sslConfiguration.testSslOption(SslUnsafe::SslOptionDisableSessionPersistence)) {
         const unsigned char *data = reinterpret_cast<const unsigned char *>(m_sessionASN1.constData());
-        session = q_d2i_SSL_SESSION(0, &data, m_sessionASN1.size()); // refcount is 1 already, set by function above
+        session = q_d2i_SSL_SESSION(
+            nullptr, &data, m_sessionASN1.size()); // refcount is 1 already, set by function above
     }
 
     if (session) {
@@ -140,7 +146,7 @@ SSL* SslUnsafeContext::createSsl()
         if (!q_SSL_set_session(ssl, session)) {
             qCWarning(lcSsl, "could not set SSL session");
             q_SSL_SESSION_free(session);
-            session = 0;
+            session = nullptr;
         }
     }
 
@@ -199,7 +205,7 @@ bool SslUnsafeContext::cacheSession(SSL* ssl)
     session = q_SSL_get1_session(ssl);
 
     if (session && !sslConfiguration.testSslOption(SslUnsafe::SslOptionDisableSessionPersistence)) {
-        int sessionSize = q_i2d_SSL_SESSION(session, 0);
+        int sessionSize = q_i2d_SSL_SESSION(session, nullptr);
         if (sessionSize > 0) {
             m_sessionASN1.resize(sessionSize);
             unsigned char *data = reinterpret_cast<unsigned char *>(m_sessionASN1.data());
@@ -209,7 +215,7 @@ bool SslUnsafeContext::cacheSession(SSL* ssl)
         }
     }
 
-    return (session != 0);
+    return (session != nullptr);
 }
 
 QByteArray SslUnsafeContext::sessionASN1() const
@@ -235,6 +241,72 @@ SslUnsafeError::SslError SslUnsafeContext::error() const
 QString SslUnsafeContext::errorString() const
 {
     return errorStr;
+}
+
+// static
+void SslUnsafeContext::applyBackendConfig(SslUnsafeContext *sslContext)
+{
+    if (sslContext->sslConfiguration.backendConfiguration().isEmpty())
+        return;
+
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L
+    if (SslUnsafeSocket::sslLibraryVersionNumber() >= 0x10002000L) {
+        QSharedPointer<SSL_CONF_CTX> cctx(q_SSL_CONF_CTX_new(), &q_SSL_CONF_CTX_free);
+        if (cctx) {
+            q_SSL_CONF_CTX_set_ssl_ctx(cctx.data(), sslContext->ctx);
+            q_SSL_CONF_CTX_set_flags(cctx.data(), SSL_CONF_FLAG_FILE);
+
+            const auto &backendConfig = sslContext->sslConfiguration.backendConfiguration();
+            for (auto i = backendConfig.constBegin(); i != backendConfig.constEnd(); ++i) {
+                if (!i.value().canConvert(QMetaType::QByteArray)) {
+                    sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+                    sslContext->errorStr = msgErrorSettingBackendConfig(
+                        SslUnsafeSocket::tr("Expecting QByteArray for %1").arg(
+                            QString::fromUtf8(i.key())));
+                    return;
+                }
+
+                const QByteArray &value = i.value().toByteArray();
+                const int result = q_SSL_CONF_cmd(cctx.data(), i.key().constData(), value.constData());
+                if (result == 2)
+                    continue;
+
+                sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+                switch (result) {
+                case 0:
+                    sslContext->errorStr = msgErrorSettingBackendConfig(
+                        SslUnsafeSocket::tr("An error occurred attempting to set %1 to %2").arg(
+                            QString::fromUtf8(i.key()), QString::fromUtf8(value)));
+                    return;
+                case 1:
+                    sslContext->errorStr = msgErrorSettingBackendConfig(
+                        SslUnsafeSocket::tr("Wrong value for %1 (%2)").arg(
+                            QString::fromUtf8(i.key()), QString::fromUtf8(value)));
+                    return;
+                default:
+                    sslContext->errorStr = msgErrorSettingBackendConfig(
+                        SslUnsafeSocket::tr("Unrecognized command %1 = %2").arg(
+                            QString::fromUtf8(i.key()), QString::fromUtf8(value)));
+                    return;
+                }
+            }
+
+            if (q_SSL_CONF_CTX_finish(cctx.data()) == 0) {
+                sslContext->errorStr = msgErrorSettingBackendConfig(SslUnsafeSocket::tr("SSL_CONF_finish() failed"));
+                sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+            }
+       } else {
+           sslContext->errorStr = msgErrorSettingBackendConfig(SslUnsafeSocket::tr("SSL_CONF_CTX_new() failed"));
+           sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+       }
+    } else
+#endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
+    {
+        // specific algorithms requested, but not possible to set
+        sslContext->errorCode = SslUnsafeError::UnspecifiedError;
+        sslContext->errorStr = msgErrorSettingBackendConfig(
+            SslUnsafeSocket::tr("OpenSSL version too old, need at least v1.0.2"));
+    }
 }
 
 QT_END_NAMESPACE
