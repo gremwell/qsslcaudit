@@ -72,4 +72,4 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // SslUnsafePreSharedKeyAuthenticator_P_H
+#endif // SSLUNSAFEPRESHAREDKEYAUTHENTICATOR_P_H
