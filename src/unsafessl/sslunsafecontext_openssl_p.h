@@ -111,6 +111,7 @@ protected:
 private:
     static void initSslContext(SslUnsafeContext* sslContext, SslUnsafeSocket::SslMode mode, const SslUnsafeConfiguration &configuration,
                                bool allowRootCertOnDemandLoading);
+    static void applyBackendConfig(SslUnsafeContext *sslContext);
 
 private:
     SSL_CTX* ctx;
@@ -131,4 +132,4 @@ private:
 
 QT_END_NAMESPACE
 
-#endif // SslUnsafeCONTEXT_OPENSSL_P_H
+#endif // SSLUNSAFECONTEXT_OPENSSL_P_H
