@@ -57,6 +57,7 @@
 #define SSLUNSAFECONFIGURATION_H
 
 #include "sslunsafenetworkglobal.h"
+#include <QtCore/qmap.h>
 #include <QtCore/qshareddata.h>
 #include "sslunsafesocket.h"
 #include "sslunsafe.h"
@@ -71,6 +72,11 @@ class SslUnsafeCipher;
 class SslUnsafeKey;
 class SslUnsafeEllipticCurve;
 class SslUnsafeDiffieHellmanParameters;
+
+namespace dtlsopenssl
+{
+class SslUnsafeDtlsState;
+}
 
 class SslUnsafeConfigurationPrivate;
 class Q_NETWORK_EXPORT SslUnsafeConfiguration
@@ -149,8 +155,20 @@ public:
     SslUnsafeDiffieHellmanParameters diffieHellmanParameters() const;
     void setDiffieHellmanParameters(const SslUnsafeDiffieHellmanParameters &dhparams);
 
+    QMap<QByteArray, QVariant> backendConfiguration() const;
+    void setBackendConfigurationOption(const QByteArray &name, const QVariant &value);
+    void setBackendConfiguration(const QMap<QByteArray, QVariant> &backendConfiguration = QMap<QByteArray, QVariant>());
+
     static SslUnsafeConfiguration defaultConfiguration();
     static void setDefaultConfiguration(const SslUnsafeConfiguration &configuration);
+
+#if QT_CONFIG(dtls) || defined(Q_CLANG_QDOC)
+    bool dtlsCookieVerificationEnabled() const;
+    void setDtlsCookieVerificationEnabled(bool enable);
+
+    static SslUnsafeConfiguration defaultDtlsConfiguration();
+    static void setDefaultDtlsConfiguration(const SslUnsafeConfiguration &configuration);
+#endif // dtls
 
     enum NextProtocolNegotiationStatus {
         NextProtocolNegotiationNone,
@@ -177,6 +195,8 @@ private:
     friend class SslUnsafeConfigurationPrivate;
     friend class SslUnsafeSocketBackendPrivate;
     friend class SslUnsafeContext;
+    friend class SslUnsafeDtlsBasePrivate;
+    friend class dtlsopenssl::SslUnsafeDtlsState;
     SslUnsafeConfiguration(SslUnsafeConfigurationPrivate *dd);
     QSharedDataPointer<SslUnsafeConfigurationPrivate> d;
 };
