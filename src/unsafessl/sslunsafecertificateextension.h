@@ -48,9 +48,6 @@
 
 QT_BEGIN_NAMESPACE
 
-
-#ifndef QT_NO_SSL
-
 class SslUnsafeCertificateExtensionPrivate;
 
 class Q_NETWORK_EXPORT SslUnsafeCertificateExtension
@@ -80,11 +77,9 @@ private:
 
 Q_DECLARE_SHARED(SslUnsafeCertificateExtension)
 
-#endif // QT_NO_SSL
-
 QT_END_NAMESPACE
 
 
-#endif // SslUnsafeCERTIFICATEEXTENSION_H
+#endif // SSLUNSAFECERTIFICATEEXTENSION_H
 
 
