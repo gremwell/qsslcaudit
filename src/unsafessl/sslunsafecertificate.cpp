@@ -125,7 +125,9 @@
 #include "sslunsafe_p.h"
 #include "sslunsafecertificate.h"
 #include "sslunsafecertificate_p.h"
+#ifndef QT_NO_SSL
 #include "sslunsafekey_p.h"
+#endif
 
 #include <QtCore/qdir.h>
 #include <QtCore/qdiriterator.h>
@@ -142,8 +144,12 @@ QT_BEGIN_NAMESPACE
 SslUnsafeCertificate::SslUnsafeCertificate(QIODevice *device, SslUnsafe::EncodingFormat format)
     : d(new SslUnsafeCertificatePrivate)
 {
+#ifndef QT_NO_OPENSSL
     SslUnsafeSocketPrivate::ensureInitialized();
     if (device && SslUnsafeSocket::supportsSsl())
+#else
+    if (device)
+#endif
         d->init(device->readAll(), format);
 }
 
@@ -156,8 +162,10 @@ SslUnsafeCertificate::SslUnsafeCertificate(QIODevice *device, SslUnsafe::Encodin
 SslUnsafeCertificate::SslUnsafeCertificate(const QByteArray &data, SslUnsafe::EncodingFormat format)
     : d(new SslUnsafeCertificatePrivate)
 {
+#ifndef QT_NO_OPENSSL
     SslUnsafeSocketPrivate::ensureInitialized();
     if (SslUnsafeSocket::supportsSsl())
+#endif
         d->init(data, format);
 }
 
@@ -458,7 +466,7 @@ QByteArray SslUnsafeCertificate::digest(QCryptographicHash::Algorithm algorithm)
 
     Example:
 
-    \snippet code/src_network_ssl_SslUnsafecertificate.cpp 0
+    \snippet code/src_network_ssl_qsslcertificate.cpp 0
 
     \sa fromData()
 */
@@ -557,6 +565,8 @@ QList<SslUnsafeCertificate> SslUnsafeCertificate::fromData(const QByteArray &dat
         : SslUnsafeCertificatePrivate::certificatesFromDer(data);
 }
 
+#ifndef QT_NO_SSL
+
 /*!
     Verifies a certificate chain. The chain to be verified is passed in the
     \a certificateChain parameter. The first certificate in the list should
@@ -599,6 +609,8 @@ bool SslUnsafeCertificate::importPkcs12(QIODevice *device,
 {
     return SslUnsafeSocketBackendPrivate::importPkcs12(device, key, certificate, caCertificates, passPhrase);
 }
+
+#endif
 
 // These certificates are known to be fraudulent and were created during the comodo
 // compromise. See http://www.comodo.com/Comodo-Fraud-Incident-2011-03-23.html
@@ -649,12 +661,12 @@ static const char *const certificate_blacklist[] = {
     "27:92",                                           "NIC CA 2011", // intermediate certificate from NIC India (2011)
     "27:b1",                                           "NIC CA 2014", // intermediate certificate from NIC India (2014)
     #endif
-    0
+    nullptr
 };
 
 bool SslUnsafeCertificatePrivate::isBlacklisted(const SslUnsafeCertificate &certificate)
 {
-    for (int a = 0; certificate_blacklist[a] != 0; a++) {
+    for (int a = 0; certificate_blacklist[a] != nullptr; a++) {
         QString blacklistedCommonName = QString::fromUtf8(certificate_blacklist[(a+1)]);
         if (certificate.serialNumber() == certificate_blacklist[a++] &&
             (certificate.subjectInfo(SslUnsafeCertificate::CommonName).contains(blacklistedCommonName) ||
@@ -682,6 +694,56 @@ QByteArray SslUnsafeCertificatePrivate::subjectInfoToString(SslUnsafeCertificate
 }
 
 /*!
+    \since 5.12
+
+    Returns a name that describes the issuer. It returns the SslUnsafeCertificate::CommonName
+    if available, otherwise falls back to the first SslUnsafeCertificate::Organization or the
+    first SslUnsafeCertificate::OrganizationalUnitName.
+
+    \sa issuerInfo()
+*/
+QString SslUnsafeCertificate::issuerDisplayName() const
+{
+    QStringList names;
+    names = issuerInfo(SslUnsafeCertificate::CommonName);
+    if (!names.isEmpty())
+        return names.first();
+    names = issuerInfo(SslUnsafeCertificate::Organization);
+    if (!names.isEmpty())
+        return names.first();
+    names = issuerInfo(SslUnsafeCertificate::OrganizationalUnitName);
+    if (!names.isEmpty())
+        return names.first();
+
+    return QString();
+}
+
+/*!
+    \since 5.12
+
+    Returns a name that describes the subject. It returns the SslUnsafeCertificate::CommonName
+    if available, otherwise falls back to the first SslUnsafeCertificate::Organization or the
+    first SslUnsafeCertificate::OrganizationalUnitName.
+
+    \sa subjectInfo()
+*/
+QString SslUnsafeCertificate::subjectDisplayName() const
+{
+    QStringList names;
+    names = subjectInfo(SslUnsafeCertificate::CommonName);
+    if (!names.isEmpty())
+        return names.first();
+    names = subjectInfo(SslUnsafeCertificate::Organization);
+    if (!names.isEmpty())
+        return names.first();
+    names = subjectInfo(SslUnsafeCertificate::OrganizationalUnitName);
+    if (!names.isEmpty())
+        return names.first();
+
+    return QString();
+}
+
+/*!
     \fn uint qHash(const SslUnsafeCertificate &key, uint seed)
 
     Returns the hash value for the \a key, using \a seed to seed the calculation.
@@ -698,10 +760,10 @@ QDebug operator<<(QDebug debug, const SslUnsafeCertificate &certificate)
           << certificate.version()
           << ", " << certificate.serialNumber()
           << ", " << certificate.digest().toBase64()
-          << ", " << certificate.issuerInfo(SslUnsafeCertificate::Organization)
-          << ", " << certificate.subjectInfo(SslUnsafeCertificate::Organization)
+          << ", " << certificate.issuerDisplayName()
+          << ", " << certificate.subjectDisplayName()
           << ", " << certificate.subjectAlternativeNames()
-#ifndef QT_NO_DATESTRING
+#if QT_CONFIG(datestring)
           << ", " << certificate.effectiveDate()
           << ", " << certificate.expiryDate()
 #endif
