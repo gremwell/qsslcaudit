@@ -105,4 +105,4 @@ QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(SslUnsafeEllipticCurve)
 
-#endif // SslUnsafeEllipticCurve_H
+#endif // SSLUNSAFEELLIPTICCURVE_H
