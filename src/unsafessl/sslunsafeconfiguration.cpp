@@ -59,7 +59,7 @@ const char SslUnsafeConfiguration::NextProtocolHttp1_1[] = "http/1.1";
 
 /*!
     \class SslUnsafeConfiguration
-    \brief The SslUnsafeConfiguration class holds the configuration and state of an SSL connection
+    \brief The SslUnsafeConfiguration class holds the configuration and state of an SSL connection.
     \since 4.4
 
     \reentrant
@@ -110,7 +110,7 @@ const char SslUnsafeConfiguration::NextProtocolHttp1_1[] = "http/1.1";
     achieve that. The following example illustrates how to change the
     protocol to TLSv1_0 in a SslUnsafeSocket object:
 
-    \snippet code/src_network_ssl_SslUnsafeconfiguration.cpp 0
+    \snippet code/src_network_ssl_qsslconfiguration.cpp 0
 
     \sa SslUnsafe::SslProtocol, SslUnsafeCertificate, SslUnsafeCipher, SslUnsafeKey,
         SslUnsafeSocket, QNetworkAccessManager,
@@ -221,12 +221,14 @@ bool SslUnsafeConfiguration::operator==(const SslUnsafeConfiguration &other) con
         d->peerVerifyMode == other.d->peerVerifyMode &&
         d->peerVerifyDepth == other.d->peerVerifyDepth &&
         d->allowRootCertOnDemandLoading == other.d->allowRootCertOnDemandLoading &&
+        d->backendConfig == other.d->backendConfig &&
         d->sslOptions == other.d->sslOptions &&
         d->sslSession == other.d->sslSession &&
         d->sslSessionTicketLifeTimeHint == other.d->sslSessionTicketLifeTimeHint &&
         d->nextAllowedProtocols == other.d->nextAllowedProtocols &&
         d->nextNegotiatedProtocol == other.d->nextNegotiatedProtocol &&
-        d->nextProtocolNegotiationStatus == other.d->nextProtocolNegotiationStatus;
+        d->nextProtocolNegotiationStatus == other.d->nextProtocolNegotiationStatus &&
+        d->dtlsCookieEnabled == other.d->dtlsCookieEnabled;
 }
 
 /*!
@@ -263,6 +265,7 @@ bool SslUnsafeConfiguration::isNull() const
             d->privateKey.isNull() &&
             d->peerCertificate.isNull() &&
             d->peerCertificateChain.count() == 0 &&
+            d->backendConfig.isEmpty() &&
             d->sslOptions == SslUnsafeConfigurationPrivate::defaultSslOptions &&
             d->sslSession.isNull() &&
             d->sslSessionTicketLifeTimeHint == -1 &&
@@ -639,6 +642,10 @@ QList<SslUnsafeCertificate> SslUnsafeConfiguration::caCertificates() const
   The CA certificate database is used by the socket during the
   handshake phase to validate the peer's certificate.
 
+  \note The default configuration uses the system CA certificate database. If
+  that is not available (as is commonly the case on iOS), the default database
+  is empty.
+
   \sa caCertificates()
 */
 void SslUnsafeConfiguration::setCaCertificates(const QList<SslUnsafeCertificate> &certificates)
@@ -873,6 +880,60 @@ void SslUnsafeConfiguration::setDiffieHellmanParameters(const SslUnsafeDiffieHel
 }
 
 /*!
+    \since 5.11
+
+    Returns the backend-specific configuration.
+
+    Only options set by setBackendConfigurationOption() or setBackendConfiguration() will be
+    returned. The internal standard configuration of the backend is not reported.
+
+    \sa setBackendConfigurationOption(), setBackendConfiguration()
+ */
+QMap<QByteArray, QVariant> SslUnsafeConfiguration::backendConfiguration() const
+{
+    return d->backendConfig;
+}
+
+/*!
+    \since 5.11
+
+    Sets the option \a name in the backend-specific configuration to \a value.
+
+    Options supported by the OpenSSL (>= 1.0.2) backend are available in the \l
+    {https://www.openssl.org/docs/manmaster/man3/SSL_CONF_cmd.html#SUPPORTED-CONFIGURATION-FILE-COMMANDS}
+    {supported configuration file commands} documentation. The expected type for
+    the \a value parameter is a QByteArray for all options. The \l
+    {https://www.openssl.org/docs/manmaster/man3/SSL_CONF_cmd.html#EXAMPLES}{examples}
+    show how to use some of the options.
+
+    \note The backend-specific configuration will be applied after the general
+    configuration. Using the backend-specific configuration to set a general
+    configuration option again will overwrite the general configuration option.
+
+    \sa backendConfiguration(), setBackendConfiguration()
+ */
+void SslUnsafeConfiguration::setBackendConfigurationOption(const QByteArray &name, const QVariant &value)
+{
+    d->backendConfig[name] = value;
+}
+
+/*!
+    \since 5.11
+
+    Sets or clears the backend-specific configuration.
+
+    Without a \a backendConfiguration parameter this function will clear the
+    backend-specific configuration. More information about the supported
+    options is available in the documentation of setBackendConfigurationOption().
+
+    \sa backendConfiguration(), setBackendConfigurationOption()
+ */
+void SslUnsafeConfiguration::setBackendConfiguration(const QMap<QByteArray, QVariant> &backendConfiguration)
+{
+    d->backendConfig = backendConfiguration;
+}
+
+/*!
   \since 5.3
 
   This function returns the protocol negotiated with the server
@@ -952,7 +1013,7 @@ SslUnsafeConfiguration::NextProtocolNegotiationStatus SslUnsafeConfiguration::ne
 
     \list
       \li no local certificate and no private key
-      \li protocol SecureProtocols (meaning either TLS 1.0 or SSL 3 will be used)
+      \li protocol \l{SslUnsafe::SecureProtocols}{SecureProtocols}
       \li the system's default CA certificate list
       \li the cipher list equal to the list of the SSL libraries'
          supported SSL ciphers that are 128 bits or more
@@ -976,6 +1037,65 @@ void SslUnsafeConfiguration::setDefaultConfiguration(const SslUnsafeConfiguratio
 {
     SslUnsafeConfigurationPrivate::setDefaultConfiguration(configuration);
 }
+
+#if QT_CONFIG(dtls) || defined(Q_CLANG_QDOC)
+
+/*!
+  This function returns true if DTLS cookie verification was enabled on a
+  server-side socket.
+
+  \sa setDtlsCookieVerificationEnabled()
+ */
+bool SslUnsafeConfiguration::dtlsCookieVerificationEnabled() const
+{
+    return d->dtlsCookieEnabled;
+}
+
+/*!
+  This function enables DTLS cookie verification when \a enable is true.
+
+  \sa dtlsCookieVerificationEnabled()
+ */
+void SslUnsafeConfiguration::setDtlsCookieVerificationEnabled(bool enable)
+{
+    d->dtlsCookieEnabled = enable;
+}
+
+/*!
+    Returns the default DTLS configuration to be used in new DTLS
+    connections.
+
+    The default DTLS configuration consists of:
+
+    \list
+      \li no local certificate and no private key
+      \li protocol DtlsV1_2OrLater
+      \li the system's default CA certificate list
+      \li the cipher list equal to the list of the SSL libraries'
+         supported TLS 1.2 ciphers that use 128 or more secret bits
+         for the cipher.
+    \endlist
+
+    \sa setDefaultDtlsConfiguration()
+*/
+SslUnsafeConfiguration SslUnsafeConfiguration::defaultDtlsConfiguration()
+{
+    return SslUnsafeConfigurationPrivate::defaultDtlsConfiguration();
+}
+
+/*!
+    Sets the default DTLS configuration to be used in new DTLS
+    connections to be \a configuration. Existing connections are not
+    affected by this call.
+
+    \sa defaultDtlsConfiguration()
+*/
+void SslUnsafeConfiguration::setDefaultDtlsConfiguration(const SslUnsafeConfiguration &configuration)
+{
+    SslUnsafeConfigurationPrivate::setDefaultDtlsConfiguration(configuration);
+}
+
+#endif // dtls
 
 /*! \internal
 */
