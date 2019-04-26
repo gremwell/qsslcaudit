@@ -55,7 +55,9 @@
 // We mean it.
 //
 
+#ifndef QT_NO_SSL
 #include "sslunsafesocket_p.h"
+#endif
 #include "sslunsafecertificateextension.h"
 #include <QtCore/qdatetime.h>
 #include <QtCore/qmap.h>
@@ -87,7 +89,9 @@ public:
     SslUnsafeCertificatePrivate()
         : null(true), x509(0)
     {
+#ifndef QT_NO_SSL
         SslUnsafeSocketPrivate::ensureInitialized();
+#endif
     }
 
     ~SslUnsafeCertificatePrivate()
@@ -147,4 +151,4 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // SslUnsafeCERTIFICATE_OPENSSL_P_H
+#endif // SSLUNSAFECERTIFICATE_OPENSSL_P_H
