@@ -156,23 +156,25 @@ public:
     static int s_indexForSSLExtraData; // index used in SSL_get_ex_data to get the matching SslUnsafeSocketBackendPrivate
 #endif
 
+    bool inSetAndEmitError = false;
+
     // Platform specific functions
-    void startClientEncryption() Q_DECL_OVERRIDE;
-    void startServerEncryption() Q_DECL_OVERRIDE;
-    void transmit() Q_DECL_OVERRIDE;
+    void startClientEncryption() override;
+    void startServerEncryption() override;
+    void transmit() override;
     bool startHandshake();
-    void disconnectFromHost() Q_DECL_OVERRIDE;
-    void disconnected() Q_DECL_OVERRIDE;
-    SslUnsafeCipher sessionCipher() const Q_DECL_OVERRIDE;
-    SslUnsafe::SslProtocol sessionProtocol() const Q_DECL_OVERRIDE;
-    void continueHandshake() Q_DECL_OVERRIDE;
+    void disconnectFromHost() override;
+    void disconnected() override;
+    SslUnsafeCipher sessionCipher() const override;
+    SslUnsafe::SslProtocol sessionProtocol() const override;
+    void continueHandshake() override;
     bool checkSslErrors();
     void storePeerCertificates();
     unsigned int tlsPskClientCallback(const char *hint, char *identity, unsigned int max_identity_len, unsigned char *psk, unsigned int max_psk_len);
     unsigned int tlsPskServerCallback(const char *identity, unsigned char *psk, unsigned int max_psk_len);
 #ifdef Q_OS_WIN
     void fetchCaRootForCert(const SslUnsafeCertificate &cert);
-    void _q_caRootLoaded(SslUnsafeCertificate,SslUnsafeCertificate) Q_DECL_OVERRIDE;
+    void _q_caRootLoaded(SslUnsafeCertificate,SslUnsafeCertificate) override;
 #endif
 
     Q_AUTOTEST_EXPORT static long setupOpenSslOptions(SslUnsafe::SslProtocol protocol, SslUnsafe::SslOptions sslOptions);
@@ -184,24 +186,9 @@ public:
                              SslUnsafeKey *key, SslUnsafeCertificate *cert,
                              QList<SslUnsafeCertificate> *caCertificates,
                              const QByteArray &passPhrase);
-};
 
-#ifdef Q_OS_WIN
-class QWindowsCaRootFetcher : public QObject
-{
-    Q_OBJECT;
-public:
-    QWindowsCaRootFetcher(const SslUnsafeCertificate &certificate, SslUnsafeSocket::SslMode sslMode);
-    ~QWindowsCaRootFetcher();
-public slots:
-    void start();
-signals:
-    void finished(SslUnsafeCertificate brokenChain, SslUnsafeCertificate caroot);
-private:
-    SslUnsafeCertificate cert;
-    SslUnsafeSocket::SslMode mode;
+    static QString msgErrorsDuringHandshake();
 };
-#endif
 
 QT_END_NAMESPACE
 
