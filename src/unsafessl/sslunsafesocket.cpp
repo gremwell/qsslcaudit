@@ -341,7 +341,7 @@ public:
         : config(new SslUnsafeConfigurationPrivate),
           dtlsConfig(new SslUnsafeConfigurationPrivate)
     {
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
         dtlsConfig->protocol = SslUnsafe::DtlsV1_2OrLater;
 #endif // dtls
     }
@@ -2360,7 +2360,7 @@ void SslUnsafeConfigurationPrivate::deepCopyDefaultConfiguration(SslUnsafeConfig
     ptr->sslOptions = global->sslOptions;
     ptr->ellipticCurves = global->ellipticCurves;
     ptr->backendConfig = global->backendConfig;
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
     ptr->dtlsCookieEnabled = global->dtlsCookieEnabled;
 #endif
 }

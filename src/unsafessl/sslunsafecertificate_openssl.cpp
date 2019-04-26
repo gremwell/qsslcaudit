@@ -44,7 +44,7 @@
 #include "sslunsafekey_p.h"
 #include "sslunsafecertificateextension_p.h"
 
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
 #include "sslunsafemutexpool_p.h"
 #endif
 QT_BEGIN_NAMESPACE
@@ -91,7 +91,7 @@ bool SslUnsafeCertificate::isSelfSigned() const
 
 QByteArray SslUnsafeCertificate::version() const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     if (d->versionString.isEmpty() && d->x509)
@@ -102,7 +102,7 @@ QByteArray SslUnsafeCertificate::version() const
 
 QByteArray SslUnsafeCertificate::serialNumber() const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     if (d->serialNumberString.isEmpty() && d->x509) {
@@ -121,7 +121,7 @@ QByteArray SslUnsafeCertificate::serialNumber() const
 
 QStringList SslUnsafeCertificate::issuerInfo(SubjectInfo info) const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     // lazy init
@@ -134,7 +134,7 @@ QStringList SslUnsafeCertificate::issuerInfo(SubjectInfo info) const
 
 QStringList SslUnsafeCertificate::issuerInfo(const QByteArray &attribute) const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     // lazy init
@@ -147,7 +147,7 @@ QStringList SslUnsafeCertificate::issuerInfo(const QByteArray &attribute) const
 
 QStringList SslUnsafeCertificate::subjectInfo(SubjectInfo info) const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     // lazy init
@@ -160,7 +160,7 @@ QStringList SslUnsafeCertificate::subjectInfo(SubjectInfo info) const
 
 QStringList SslUnsafeCertificate::subjectInfo(const QByteArray &attribute) const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     // lazy init
@@ -173,7 +173,7 @@ QStringList SslUnsafeCertificate::subjectInfo(const QByteArray &attribute) const
 
 QList<QByteArray> SslUnsafeCertificate::subjectInfoAttributes() const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     // lazy init
@@ -186,7 +186,7 @@ QList<QByteArray> SslUnsafeCertificate::subjectInfoAttributes() const
 
 QList<QByteArray> SslUnsafeCertificate::issuerInfoAttributes() const
 {
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
     QMutexLocker lock(SslUnsafeMutexPool::globalInstanceGet(d.data()));
 #endif
     // lazy init

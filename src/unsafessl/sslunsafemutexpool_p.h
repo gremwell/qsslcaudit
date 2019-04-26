@@ -56,7 +56,7 @@
 #include "QtCore/qmutex.h"
 #include "QtCore/qvarlengtharray.h"
 
-QT_REQUIRE_CONFIG(thread);
+// QT_REQUIRE_CONFIG(thread);
 
 QT_BEGIN_NAMESPACE
 

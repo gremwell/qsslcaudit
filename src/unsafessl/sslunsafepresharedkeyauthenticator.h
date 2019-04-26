@@ -45,7 +45,7 @@
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QMetaType>
 
-QT_REQUIRE_CONFIG(ssl);
+// QT_REQUIRE_CONFIG(ssl);
 
 QT_BEGIN_NAMESPACE
 

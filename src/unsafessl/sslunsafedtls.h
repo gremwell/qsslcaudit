@@ -48,7 +48,7 @@
 #include <QtCore/qcryptographichash.h>
 #include <QtCore/qobject.h>
 
-QT_REQUIRE_CONFIG(dtls);
+// QT_REQUIRE_CONFIG(dtls);
 
 QT_BEGIN_NAMESPACE
 

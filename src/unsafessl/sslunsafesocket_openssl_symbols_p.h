@@ -538,7 +538,7 @@ void q_SSL_get0_alpn_selected(const SSL *ssl, const unsigned char **data,
 #endif
 #endif // OPENSSL_VERSION_NUMBER >= 0x1000100fL ...
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
 
 extern "C"
 {
@@ -555,7 +555,7 @@ const SSL_METHOD *q_DTLS_client_method();
 void *q_X509_STORE_CTX_get_ex_data(X509_STORE_CTX *ctx, int idx);
 int q_SSL_get_ex_data_X509_STORE_CTX_idx();
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
 #define q_DTLS_set_link_mtu(ssl, mtu) q_SSL_ctrl((ssl), DTLS_CTRL_SET_LINK_MTU, (mtu), nullptr)
 #define q_DTLSv1_get_timeout(ssl, arg) q_SSL_ctrl(ssl, DTLS_CTRL_GET_TIMEOUT, 0, arg)
 #define q_DTLSv1_handle_timeout(ssl) q_SSL_ctrl(ssl, DTLS_CTRL_HANDLE_TIMEOUT, 0, nullptr)

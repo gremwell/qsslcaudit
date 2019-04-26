@@ -56,7 +56,7 @@ QT_BEGIN_NAMESPACE
 extern int q_X509Callback(int ok, X509_STORE_CTX *ctx);
 extern QString getErrorsFromOpenSsl();
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
 // defined in qdtls_openssl.cpp:
 namespace dtlscallbacks
 {
@@ -88,7 +88,7 @@ void SslUnsafeContext::initSslContext(SslUnsafeContext *sslContext, SslUnsafeSoc
     bool isDtls = false;
 init_context:
     switch (sslContext->sslConfiguration.protocol()) {
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
     case SslUnsafe::DtlsV1_0:
         isDtls = true;
         sslContext->ctx = q_SSL_CTX_new(client ? q_DTLSv1_client_method() : q_DTLSv1_server_method());
@@ -332,13 +332,13 @@ init_context:
         q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_NONE, 0);
     } else {
         q_SSL_CTX_set_verify(sslContext->ctx, SSL_VERIFY_PEER,
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
                              isDtls ? dtlscallbacks::q_X509DtlsCallback :
 #endif // dtls
                              q_X509Callback);
     }
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
     if (mode == SslUnsafeSocket::SslServerMode && isDtls && configuration.dtlsCookieVerificationEnabled()) {
         q_SSL_CTX_set_cookie_generate_cb(sslContext->ctx, dtlscallbacks::q_generate_cookie_callback);
         q_SSL_CTX_set_cookie_verify_cb(sslContext->ctx, CookieVerifyCallback(dtlscallbacks::q_verify_cookie_callback));

@@ -763,7 +763,7 @@ QDebug operator<<(QDebug debug, const SslUnsafeCertificate &certificate)
           << ", " << certificate.issuerDisplayName()
           << ", " << certificate.subjectDisplayName()
           << ", " << certificate.subjectAlternativeNames()
-#if QT_CONFIG(datestring)
+#if 1 // #if QT_CONFIG(datestring)
           << ", " << certificate.effectiveDate()
           << ", " << certificate.expiryDate()
 #endif

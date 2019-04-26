@@ -134,7 +134,7 @@ unsigned long q_SSL_set_options(SSL *s, unsigned long op);
 int q_SSL_CTX_set_ciphersuites(SSL_CTX *ctx, const char *str);
 #endif
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
 // Functions and types required for DTLS support:
 extern "C"
 {

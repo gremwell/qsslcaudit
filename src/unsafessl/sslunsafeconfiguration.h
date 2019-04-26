@@ -162,7 +162,7 @@ public:
     static SslUnsafeConfiguration defaultConfiguration();
     static void setDefaultConfiguration(const SslUnsafeConfiguration &configuration);
 
-#if QT_CONFIG(dtls) || defined(Q_CLANG_QDOC)
+#if 1 // QT_CONFIG(dtls) || defined(Q_CLANG_QDOC)
     bool dtlsCookieVerificationEnabled() const;
     void setDtlsCookieVerificationEnabled(bool enable);
 

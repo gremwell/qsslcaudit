@@ -521,7 +521,7 @@ void SslUnsafeSocketPrivate::resetDefaultCiphers()
     setDefaultSupportedCiphers(ciphers);
     setDefaultCiphers(defaultCiphers);
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
     ciphers.clear();
     defaultCiphers.clear();
     myCtx = q_SSL_CTX_new(q_DTLS_client_method());

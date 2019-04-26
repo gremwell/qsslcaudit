@@ -63,7 +63,7 @@
 # include <QtCore/qlibrary.h>
 #endif
 #include <QtCore/qmutex.h>
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
 #include "sslunsafemutexpool_p.h"
 #endif
 #include <QtCore/qdatetime.h>
@@ -185,7 +185,7 @@ DEFINEFUNC(unsigned long, SSL_SESSION_get_ticket_lifetime_hint, const SSL_SESSIO
 DEFINEFUNC4(void, DH_get0_pqg, const DH *dh, dh, const BIGNUM **p, p, const BIGNUM **q, q, const BIGNUM **g, g, return, DUMMYARG)
 DEFINEFUNC(int, DH_bits, DH *dh, dh, return 0, return)
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
 DEFINEFUNC2(int, DTLSv1_listen, SSL *s, s, BIO_ADDR *c, c, return -1, return)
 DEFINEFUNC(BIO_ADDR *, BIO_ADDR_new, DUMMYARG, DUMMYARG, return nullptr, return)
 DEFINEFUNC(void, BIO_ADDR_free, BIO_ADDR *ap, ap, return, DUMMYARG)
@@ -313,7 +313,7 @@ DEFINEFUNC3(EC_KEY *, d2i_ECPrivateKey, EC_KEY **a, a, unsigned char **b, b, lon
 #endif
 #endif
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
 DEFINEFUNC(const SSL_METHOD *, DTLSv1_server_method, void, DUMMYARG, return nullptr, return)
 DEFINEFUNC(const SSL_METHOD *, DTLSv1_client_method, void, DUMMYARG, return nullptr, return)
 DEFINEFUNC(const SSL_METHOD *, DTLSv1_2_server_method, void, DUMMYARG, return nullptr, return)
@@ -570,7 +570,7 @@ DEFINEFUNC3(void, SSL_get0_alpn_selected, const SSL *s, s, const unsigned char *
 #endif // OPENSSL_VERSION_NUMBER >= 0x1000100fL ...
 
 // DTLS:
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
 DEFINEFUNC2(void, SSL_CTX_set_cookie_generate_cb, SSL_CTX *ctx, ctx, CookieGenerateCallback cb, cb, return, DUMMYARG)
 DEFINEFUNC2(void, SSL_CTX_set_cookie_verify_cb, SSL_CTX *ctx, ctx, CookieVerifyCallback cb, cb, return, DUMMYARG)
 DEFINEFUNC(const SSL_METHOD *, DTLS_server_method, DUMMYARG, DUMMYARG, return nullptr, return)
@@ -967,7 +967,7 @@ bool q_resolveOpenSslSymbols()
 {
     static bool symbolsResolved = false;
     static bool triedToResolveSymbols = false;
-#if QT_CONFIG(thread)
+#if 1 // QT_CONFIG(thread)
 #if QT_FEATURE_opensslv11 && OPENSSLV11 // QT_CONFIG(opensslv11)
     QMutexLocker locker(SslUnsafeMutexPool::globalInstanceGet((void *)&q_OPENSSL_init_ssl));
 #else
@@ -1039,7 +1039,7 @@ bool q_resolveOpenSslSymbols()
     RESOLVEFUNC(DH_bits)
     RESOLVEFUNC(DSA_bits)
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
     RESOLVEFUNC(DTLSv1_listen)
     RESOLVEFUNC(BIO_ADDR_new)
     RESOLVEFUNC(BIO_ADDR_free)
@@ -1123,7 +1123,7 @@ bool q_resolveOpenSslSymbols()
     RESOLVEFUNC(d2i_RSAPrivateKey)
 #endif
 
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
     RESOLVEFUNC(DTLSv1_server_method)
     RESOLVEFUNC(DTLSv1_client_method)
     RESOLVEFUNC(DTLSv1_2_server_method)
@@ -1375,7 +1375,7 @@ bool q_resolveOpenSslSymbols()
     RESOLVEFUNC(SSL_CTX_set_alpn_select_cb)
     RESOLVEFUNC(SSL_get0_alpn_selected)
 #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L ...
-#if QT_CONFIG(dtls)
+#if 1 // QT_CONFIG(dtls)
     RESOLVEFUNC(SSL_CTX_set_cookie_generate_cb)
     RESOLVEFUNC(SSL_CTX_set_cookie_verify_cb)
     RESOLVEFUNC(DTLS_server_method)
