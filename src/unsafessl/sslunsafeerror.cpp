@@ -52,7 +52,7 @@
     SslUnsafeError provides a simple API for managing errors during SslUnsafeSocket's
     SSL handshake.
 
-    \sa SslUnsafeSocket, SslUnsafeCertificate, QSslCipher
+    \sa SslUnsafeSocket, SslUnsafeCertificate, SslUnsafeCipher
 */
 
 /*!
