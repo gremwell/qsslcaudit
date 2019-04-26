@@ -67,6 +67,7 @@
 // We mean it.
 //
 
+#include <QtCore/qmap.h>
 //#include <QtNetwork/private/qtnetworkglobal_p.h>
 #include "sslunsafeconfiguration.h"
 #include "qlist.h"
@@ -123,6 +124,8 @@ public:
 
     SslUnsafeDiffieHellmanParameters dhParams;
 
+    QMap<QByteArray, QVariant> backendConfig;
+
     QByteArray sslSession;
     int sslSessionTicketLifeTimeHint;
 
@@ -134,10 +137,19 @@ public:
     QByteArray nextNegotiatedProtocol;
     SslUnsafeConfiguration::NextProtocolNegotiationStatus nextProtocolNegotiationStatus;
 
-    // in SslUnsafesocket.cpp:
+#if QT_CONFIG(dtls)
+    bool dtlsCookieEnabled = true;
+#else
+    const bool dtlsCookieEnabled = false;
+#endif // dtls
+
+    // in qsslsocket.cpp:
     static SslUnsafeConfiguration defaultConfiguration();
     static void setDefaultConfiguration(const SslUnsafeConfiguration &configuration);
     static void deepCopyDefaultConfiguration(SslUnsafeConfigurationPrivate *config);
+
+    static SslUnsafeConfiguration defaultDtlsConfiguration();
+    static void setDefaultDtlsConfiguration(const SslUnsafeConfiguration &configuration);
 };
 
 // implemented here for inlining purposes
