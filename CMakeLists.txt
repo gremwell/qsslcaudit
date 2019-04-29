@@ -71,7 +71,7 @@ message(STATUS "Setting up build for qsslcaudit v${QSSLC_VERSION}\n")
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
-if (Qt5Core_VERSION VERSION_LESS 5.9.1)
+if (Qt5Core_VERSION VERSION_LESS 5.11)
   add_definitions(-DOLDQT)
 endif()
 
