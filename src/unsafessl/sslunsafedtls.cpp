@@ -497,6 +497,22 @@ SslUnsafeDtlsClientVerifier::GeneratorParameters SslUnsafeDtlsClientVerifier::co
     return {d->hashAlgorithm, d->secret};
 }
 
+#ifdef OLDQT
+static bool isMulticast(const QHostAddress &address)
+{
+    if (address.protocol() == QAbstractSocket::IPv4Protocol) {
+        quint32 a = address.toIPv4Address();
+        if ((a & 0xf0000000U) == 0xe0000000U)
+            return true;
+    } else {
+        Q_IPV6ADDR a6_64 = address.toIPv6Address();
+        if (a6_64.c[0] == 0xff)
+            return true;
+    }
+    return false;
+}
+#endif
+
 /*!
     \a socket must be a valid pointer, \a dgram must be a non-empty
     datagram, \a address cannot be null, broadcast, or multicast.
@@ -523,7 +539,13 @@ bool SslUnsafeDtlsClientVerifier::verifyClient(QUdpSocket *socket, const QByteAr
         return false;
     }
 
-    if (address.isBroadcast() || address.isMulticast()) {
+    if ((address == QHostAddress("255.255.255.255")) ||
+        #ifndef OLDQT
+            address.isMulticast()
+        #else
+            isMulticast(address)
+        #endif
+            ) {
         d->setDtlsError(SslUnsafeDtlsError::InvalidInputParameters,
                         msgUnsupportedMulticastAddress());
         return false;
@@ -617,7 +639,14 @@ bool SslUnsafeDtls::setPeer(const QHostAddress &address, quint16 port,
         return false;
     }
 
-    if (address.isBroadcast() || address.isMulticast()) {
+
+    if ((address == QHostAddress("255.255.255.255")) ||
+        #ifndef OLDQT
+            address.isMulticast()
+        #else
+            isMulticast(address)
+        #endif
+            ) {
         d->setDtlsError(SslUnsafeDtlsError::InvalidInputParameters,
                         msgUnsupportedMulticastAddress());
         return false;

@@ -79,6 +79,15 @@ namespace SslUnsafePasswordDigestor {
 
     \sa deriveKeyPbkdf2, QCryptographicHash, QCryptographicHash::hashLength
 */
+#ifdef OLDQT
+static int hashLength(QCryptographicHash::Algorithm method)
+{
+    if (method == QCryptographicHash::Sha1)
+        return 20;
+    return 0;
+}
+#endif
+
 QByteArray deriveKeyPbkdf1(QCryptographicHash::Algorithm algorithm,
                            const QByteArray &data, const QByteArray &salt,
                            int iterations, quint64 dkLen)
@@ -101,10 +110,21 @@ QByteArray deriveKeyPbkdf1(QCryptographicHash::Algorithm algorithm,
     if (iterations < 1 || dkLen < 1)
         return QByteArray();
 
-    if (dkLen > quint64(QCryptographicHash::hashLength(algorithm))) {
+    if (dkLen >
+        #ifndef OLDQT
+            quint64(QCryptographicHash::hashLength(algorithm)
+        #else
+            quint64(hashLength(algorithm)
+        #endif
+                    )) {
         qWarning() << "Derived key too long:\n"
                    << algorithm << "was chosen which produces output of length"
-                   << QCryptographicHash::hashLength(algorithm) << "but" << dkLen
+              #ifndef OLDQT
+                   << QCryptographicHash::hashLength(algorithm)
+              #else
+                   << hashLength(algorithm)
+              #endif
+                   << "but" << dkLen
                    << "was requested.";
         return QByteArray();
     }
@@ -146,7 +166,12 @@ QByteArray deriveKeyPbkdf2(QCryptographicHash::Algorithm algorithm,
     // https://tools.ietf.org/html/rfc8018#section-5.2
 
     // The RFC recommends checking that 'dkLen' is not greater than '(2^32 - 1) * hLen'
+#ifndef OLDQT
     int hashLen = QCryptographicHash::hashLength(algorithm);
+#else
+    int hashLen = hashLength(algorithm);
+#endif
+
     const quint64 maxLen = quint64(std::numeric_limits<quint32>::max() - 1) * hashLen;
     if (dkLen > maxLen) {
         qWarning().nospace() << "Derived key too long:\n"
@@ -165,7 +190,7 @@ QByteArray deriveKeyPbkdf2(QCryptographicHash::Algorithm algorithm,
     while (quint64(key.length()) < dkLen) {
         hmac.addData(salt);
 
-        qToBigEndian(currentIteration, index.data());
+        qToBigEndian(currentIteration, (uchar *)index.data());
         hmac.addData(index);
 
         QByteArray u = hmac.result();

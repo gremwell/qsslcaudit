@@ -836,9 +836,11 @@ void SslUnsafeDtlsState::setLinkMtu(SslUnsafeDtlsBasePrivate *dtlsBase)
         // IP_MTU/IP6_MTU can give us some hint:
         bool optionFound = false;
         if (udpSocket->state() == QAbstractSocket::ConnectedState) {
+#ifndef OLDQT
             const QVariant val(udpSocket->socketOption(QAbstractSocket::PathMtuSocketOption));
             if (val.isValid() && val.canConvert<int>())
                 mtu = val.toInt(&optionFound);
+#endif
         }
 
         if (!optionFound || mtu <= 0) {

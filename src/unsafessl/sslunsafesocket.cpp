@@ -2795,6 +2795,7 @@ QByteArray SslUnsafeSocketPrivate::peek(qint64 maxSize)
     }
 }
 
+#ifndef OLDQT
 /*!
     \internal
 */
@@ -2808,6 +2809,7 @@ qint64 SslUnsafeSocketPrivate::skip(qint64 maxSize)
     // we need to wait for more incoming data.
     return (state() == QAbstractSocket::ConnectedState) ? Q_INT64_C(0) : Q_INT64_C(-1);
 }
+#endif
 
 /*!
     \internal
