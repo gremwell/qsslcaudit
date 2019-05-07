@@ -59,119 +59,12 @@ void SslCAudit::setSslTests(const QList<SslTest *> &tests)
     sslTests = tests;
 }
 
-SslServer *SslCAudit::prepareSslServer(const SslTest *test)
-{
-    QHostAddress listenAddress = settings.getListenAddress();
-    quint16 listenPort = settings.getListenPort();
-    SslServer *sslServer = new SslServer;
-
-    sslServer->setSslLocalCertificateChain(test->localCert());
-
-    sslServer->setSslPrivateKey(test->privateKey());
-
-    sslServer->setSslProtocol(test->sslProtocol());
-
-    sslServer->setSslCiphers(test->sslCiphers());
-
-    sslServer->setStartTlsProto(settings.getStartTlsProtocol());
-
-    if (!sslServer->listen(listenAddress, listenPort)) {
-        RED(QString("can not bind to %1:%2").arg(listenAddress.toString()).arg(listenPort));
-        sslServer->deleteLater();
-        return nullptr;
-    }
-
-    VERBOSE(QString("listening on %1:%2").arg(listenAddress.toString()).arg(listenPort));
-    return sslServer;
-}
-
-void SslCAudit::proxyConnection(XSslSocket *sslSocket, SslTest *test)
-{
-    // in case 'forward' option was set, we do the following:
-    // - connect to the proxy;
-    // - synchronously read data from ssl socket
-    // - synchronously send this data to proxy
-    QTcpSocket proxy;
-
-    proxy.connectToHost(settings.getForwardHostAddr(), settings.getForwardHostPort());
-
-    if (!proxy.waitForConnected(2000)) {
-        RED("can't connect to the forward proxy");
-    } else {
-        WHITE("forwarding incoming data to the provided proxy");
-        WHITE("to get test results, relauch this app without 'forward' option");
-
-        while (1) {
-            if (sslSocket->state() == QAbstractSocket::UnconnectedState)
-                break;
-            if (proxy.state() == QAbstractSocket::UnconnectedState)
-                break;
-
-            if (sslSocket->waitForReadyRead(100)) {
-                QByteArray data = sslSocket->readAll();
-
-                test->addInterceptedData(data);
-
-                proxy.write(data);
-            }
-
-            if (proxy.waitForReadyRead(100)) {
-                sslSocket->write(proxy.readAll());
-            }
-        }
-    }
-}
-
-void SslCAudit::handleIncomingConnection(XSslSocket *sslSocket, SslTest *test)
-{
-    VERBOSE(QString("connection from: %1:%2").arg(sslSocket->peerAddress().toString()).arg(sslSocket->peerPort()));
-
-    test->setClientSourceHost(sslSocket->peerAddress().toString());
-
-    if (!settings.getForwardHostAddr().isNull()) {
-        // this will loop until connection is interrupted
-        proxyConnection(sslSocket, test);
-    } else {
-        // handling socket errors makes sence only in non-interception mode
-
-        connect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
-                this, &SslCAudit::handleSocketError);
-        connect(sslSocket, &XSslSocket::encrypted, this, &SslCAudit::sslHandshakeFinished);
-        connect(sslSocket, static_cast<void(XSslSocket::*)(const QList<XSslError> &)>(&XSslSocket::sslErrors),
-                this, &SslCAudit::handleSslErrors);
-        connect(sslSocket, &XSslSocket::peerVerifyError, this, &SslCAudit::handlePeerVerifyError);
-
-        // no 'forward' option -- just read the first packet of unencrypted data and close the connection
-        if (sslSocket->waitForReadyRead(settings.getWaitDataTimeout())) {
-            QByteArray message = sslSocket->readAll();
-
-            VERBOSE("received data: " + QString(message));
-
-            test->addInterceptedData(message);
-        } else {
-            VERBOSE("no unencrypted data received (" + sslSocket->errorString() + ")");
-        }
-
-#ifdef UNSAFE_QSSL
-        test->addRawDataRecv(sslSocket->getRawReadData());
-        test->addRawDataSent(sslSocket->getRawWrittenData());
-#endif
-
-        sslSocket->disconnectFromHost();
-        if (sslSocket->state() != QAbstractSocket::UnconnectedState)
-            sslSocket->waitForDisconnected();
-        VERBOSE("disconnected");
-    }
-}
-
 void SslCAudit::runTest(SslTest *test)
 {
-    SslServer *sslServer;
-
     WHITE(QString("running test #%1: %2").arg(test->id()).arg(test->description()));
 
-    sslServer = prepareSslServer(test);
-    if (!sslServer) {
+    SslServer *sslServer = new SslServer(settings, test, this);
+    if (!sslServer->listen()) {
         // this place is in the middle of code path and others could expect
         // some return values, signals, etc.
         // however, if we can not setup listener (mostly due to permission/busy errors)
@@ -182,40 +75,77 @@ void SslCAudit::runTest(SslTest *test)
         exit(-1);
     }
 
+    m_sslErrorsStr.clear();
+    m_sslErrors.clear();
+
+    connect(sslServer, &SslServer::sslSocketErrors, this, &SslCAudit::handleSslSocketErrors);
+
+    connect(sslServer, &SslServer::sslErrors, [=](const QList<XSslError> &errors) {
+        VERBOSE("SSL errors detected:");
+        XSslError error;
+        foreach (error, errors) {
+            VERBOSE("\t" + error.errorString());
+            currentTest->addSslErrorString(error.errorString());
+        }
+        currentTest->addSslErrors(errors);
+    });
+
+    connect(sslServer, &SslServer::dataIntercepted, [=](const QByteArray &data) {
+        currentTest->addInterceptedData(data);
+    });
+
+    connect(sslServer, &SslServer::rawDataCollected, [=](const QByteArray &rdData, const QByteArray &wrData) {
+        currentTest->addRawDataRecv(rdData);
+        currentTest->addRawDataSent(wrData);
+    });
+
+    connect(sslServer, &SslServer::sslHandshakeFinished, [=](const QList<XSslCertificate> &clientCerts) {
+        VERBOSE("SSL connection established");
+        if (clientCerts.size() > 0) {
+            VERBOSE(QString("\tclient supplied chain of %1 certificates").arg(clientCerts.size()));
+            for (int i = 0; i < clientCerts.size(); i++) {
+                VERBOSE(clientCerts.at(i).toPem());
+            }
+        }
+
+        currentTest->setSslConnectionStatus(true);
+    });
+
+    connect(sslServer, &SslServer::peerVerifyError, [=](const XSslError &error) {
+        VERBOSE("peer verify error:");
+        VERBOSE("\t" + error.errorString());
+    });
+
+    connect(sslServer, &SslServer::newPeer, [=](const QHostAddress &peerAddress) {
+        currentTest->setClientSourceHost(peerAddress.toString());
+    });
+
     emit sslTestReady();
 
-    if (sslServer->waitForNewConnection(-1)) {
+    if (sslServer->waitForClient()) {
         // check if *server* was not able to setup SSL connection
-        QStringList sslInitErrors = sslServer->getSslInitErrorsStr();
-
-        if (sslInitErrors.size() > 0) {
+        // to check this we need to see if we already received some SSL errors
+        // if this is the case -- then those errors are about SSL initialization
+        if ((m_sslErrorsStr.size() > 0) || (m_sslErrors.size() > 0)) {
             RED("failure during SSL initialization, test will not continue");
 
-            for (int i = 0; i < sslInitErrors.size(); i++) {
-                VERBOSE("\t" + sslInitErrors.at(i));
+            for (int i = 0; i < m_sslErrorsStr.size(); i++) {
+                VERBOSE("\t" + m_sslErrorsStr.at(i));
             }
 
-            test->addSocketErrors(sslServer->getSslInitErrors());
             test->calcResults();
-
-            sslServer->close();
-            sslServer->deleteLater();
+            delete sslServer;
             return;
         }
 
-        // now we can hanle client side
-        XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sslServer->nextPendingConnection());
+        // now we can handle client side
         // this call will loop until connection close if 'forward' option is set
-        handleIncomingConnection(sslSocket, test);
-        // be sure that socket is disconnected
-        sslSocket->close();
-        sslSocket->deleteLater();
+        sslServer->handleIncomingConnection();
     } else {
-        VERBOSE("could not establish encrypted connection (" + sslServer->errorString() + ")");
+        VERBOSE("could not establish encrypted connection (" + m_sslErrorsStr.join(", ") + ")");
     }
 
-    sslServer->close();
-    sslServer->deleteLater();
+    delete sslServer;
 
     test->calcResults();
 
@@ -226,6 +156,40 @@ void SslCAudit::runTest(SslTest *test)
     WHITE("test finished");
 
     emit sslTestFinished();
+}
+
+void SslCAudit::handleSslSocketErrors(const QList<XSslError> &sslErrors,
+                                      const QString &errorStr, QAbstractSocket::SocketError socketError)
+{
+    m_sslErrorsStr << errorStr;
+    m_sslErrors << socketError;
+
+    VERBOSE(QString("socket error: %1 (#%2)").arg(errorStr).arg(socketError));
+
+    currentTest->addSslErrors(sslErrors);
+    currentTest->addSslErrorString(errorStr);
+    currentTest->addSocketErrors(QList<QAbstractSocket::SocketError>() << socketError);
+
+    switch (socketError) {
+    case QAbstractSocket::SslInvalidUserDataError:
+        VERBOSE("\tInvalid data (certificate, key, cypher, etc.) was provided and its use resulted in an error in the SSL library.");
+        break;
+    case QAbstractSocket::SslInternalError:
+        VERBOSE("\tThe SSL library being used reported an internal error. This is probably the result of a bad installation or misconfiguration of the library.");
+        break;
+    case QAbstractSocket::SslHandshakeFailedError:
+        if (errorStr.contains(QString("ssl3_get_client_hello:no shared cipher"))) {
+            VERBOSE("\tThe SSL/TLS handshake failed (client did not provide expected ciphers), so the connection was closed.");
+        } else if (errorStr.contains(QString("ssl3_read_bytes:tlsv1 alert protocol version"))) {
+            VERBOSE("\tThe SSL/TLS handshake failed (client refused the proposed protocol), so the connection was closed.");
+        } else {
+            VERBOSE("\tThe SSL/TLS handshake failed, so the connection was closed.");
+        }
+        break;
+    default:
+        // just ignore all other errors
+        break;
+    }
 }
 
 void SslCAudit::run()
@@ -286,77 +250,6 @@ bool SslCAudit::isSameClient(bool doPrint)
     return ret;
 }
 
-void SslCAudit::handleSocketError(QAbstractSocket::SocketError socketError)
-{
-    XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sender());
-    QString errorStr = sslSocket->errorString();
-    int errorCode = sslSocket->error();
-
-    VERBOSE(QString("ssl error: %1 (%2)").arg(errorStr).arg(errorCode));
-
-    currentTest->addSslErrors(sslSocket->sslErrors());
-    currentTest->addSslErrorString(errorStr);
-    currentTest->addSocketErrors(QList<QAbstractSocket::SocketError>() << socketError);
-
-    switch (socketError) {
-    case QAbstractSocket::SslInvalidUserDataError:
-        VERBOSE("\tInvalid data (certificate, key, cypher, etc.) was provided and its use resulted in an error in the SSL library.");
-        break;
-    case QAbstractSocket::SslInternalError:
-        VERBOSE("\tThe SSL library being used reported an internal error. This is probably the result of a bad installation or misconfiguration of the library.");
-        break;
-    case QAbstractSocket::SslHandshakeFailedError:
-        if (errorStr.contains(QString("ssl3_get_client_hello:no shared cipher"))) {
-            VERBOSE("\tThe SSL/TLS handshake failed (client did not provide expected ciphers), so the connection was closed.");
-        } else if (errorStr.contains(QString("ssl3_read_bytes:tlsv1 alert protocol version"))) {
-            VERBOSE("\tThe SSL/TLS handshake failed (client refused the proposed protocol), so the connection was closed.");
-        } else {
-            VERBOSE("\tThe SSL/TLS handshake failed, so the connection was closed.");
-        }
-        break;
-    default:
-        // just ignore all other errors
-        break;
-    }
-}
-
-void SslCAudit::handleSslErrors(const QList<XSslError> &errors)
-{
-    XSslError error;
-
-    VERBOSE("SSL errors detected:");
-
-    foreach (error, errors) {
-        VERBOSE("\t" + error.errorString());
-        currentTest->addSslErrorString(error.errorString());
-    }
-
-    currentTest->addSslErrors(errors);
-}
-
-void SslCAudit::sslHandshakeFinished()
-{
-    XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(sender());
-
-    VERBOSE("SSL connection established");
-
-    QList<XSslCertificate> clientCerts = sslSocket->peerCertificateChain();
-
-    if (clientCerts.size() > 0) {
-        VERBOSE(QString("\tclient supplied chain of %1 certificates").arg(clientCerts.size()));
-        for (int i = 0; i < clientCerts.size(); i++) {
-            VERBOSE(clientCerts.at(i).toPem());
-        }
-    }
-
-    currentTest->setSslConnectionStatus(true);
-}
-
-void SslCAudit::handlePeerVerifyError(const XSslError &error)
-{
-    VERBOSE("peer verify error:");
-    VERBOSE("\t" + error.errorString());
-}
 
 static const int testIdWidth = 3;
 static const int testColumnWidth = 34;

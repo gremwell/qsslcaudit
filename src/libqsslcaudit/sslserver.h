@@ -1,27 +1,8 @@
-/**
- * Qt-SslServer, a Tcp Server class with SSL support using QTcpServer and QSslSocket.
- * Copyright (C) 2014  TRUCHOT Guillaume
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
 #ifndef SSLSERVER_H
 #define SSLSERVER_H
 
-#include <QTcpServer>
-#include <QString>
+#include <QAbstractSocket>
+#include <QHostAddress>
 
 #ifdef UNSAFE_QSSL
 #include "sslunsafecertificate.h"
@@ -37,33 +18,16 @@
 
 
 class XSslSocket;
+class SslUserSettings;
+class SslTest;
 
-class SslServer : public QTcpServer
+class TcpsServer;
+
+class SslServer : public QObject
 {
     Q_OBJECT
 
 public:
-    SslServer(QObject *parent = 0);
-
-    const XSslCertificate &getSslLocalCertificate() const;
-    const XSslKey &getSslPrivateKey() const;
-    XSsl::SslProtocol getSslProtocol() const;
-
-    void setSslLocalCertificate(const XSslCertificate &certificate);
-    bool setSslLocalCertificate(const QString &path, XSsl::EncodingFormat format = XSsl::Pem);
-
-    void setSslLocalCertificateChain(const QList<XSslCertificate> &chain);
-    bool setSslLocalCertificateChain(const QString &path, XSsl::EncodingFormat format = XSsl::Pem);
-
-    void setSslPrivateKey(const XSslKey &key);
-    bool setSslPrivateKey(const QString &fileName, XSsl::KeyAlgorithm algorithm = XSsl::Rsa,
-                          XSsl::EncodingFormat format = XSsl::Pem, const QByteArray &passPhrase = QByteArray());
-
-    void setSslProtocol(const XSsl::SslProtocol protocol);
-
-    void setSslCiphers(const QList<XSslCipher> &ciphers);
-    void setSslEllipticCurves(const QVector<XSslEllipticCurve> &ecurves);
-
     enum StartTlsProtocol {
         StartTlsFtp,
         StartTlsSmtp,
@@ -71,28 +35,29 @@ public:
         StartTlsUnknownProtocol = -1
     };
 
-    void setStartTlsProto(const SslServer::StartTlsProtocol protocol);
+    SslServer(const SslUserSettings &settings, const SslTest *test, QObject *parent = nullptr);
+    ~SslServer();
 
-    const QStringList &getSslInitErrorsStr() const;
-    const QList<QAbstractSocket::SocketError> &getSslInitErrors() const;
+    bool listen();
+    bool waitForClient();
+    void handleIncomingConnection();
 
-protected:
-    void incomingConnection(qintptr socketDescriptor) override final;
+signals:
+    void sslSocketErrors(const QList<XSslError> &sslErrors,
+                         const QString &errorStr, QAbstractSocket::SocketError socketError);
+    void sslErrors(const QList<XSslError> &errors);
+    void dataIntercepted(const QByteArray &data);
+    void rawDataCollected(const QByteArray &rdData, const QByteArray &wrData);
+    void sslHandshakeFinished(const QList<XSslCertificate> &clientCerts);
+    void peerVerifyError(const XSslError &error);
+    void newPeer(const QHostAddress &peerAddress);
 
 private:
-    void handleStartTls(XSslSocket *const socket);
-    void handleSocketError(QAbstractSocket::SocketError socketError);
+    QHostAddress m_listenAddress;
+    quint16 m_listenPort;
+    bool m_dtlsMode;
 
-    XSslCertificate m_sslLocalCertificate;
-    QList<XSslCertificate> m_sslCertsChain;
-    XSslKey m_sslPrivateKey;
-    XSsl::SslProtocol m_sslProtocol;
-    QList<XSslCipher> m_sslCiphers;
-    QVector<XSslEllipticCurve> m_sslEllipticCurves;
-    SslServer::StartTlsProtocol m_startTlsProtocol;
-    QStringList m_sslInitErrorsStr;
-    QList<QAbstractSocket::SocketError> m_sslInitErrors;
-
+    TcpsServer *tcpsServer;
 };
 
 #endif // SSLSERVER_H

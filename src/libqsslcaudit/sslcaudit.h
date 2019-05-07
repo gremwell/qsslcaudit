@@ -2,9 +2,6 @@
 #ifndef SSLCAUDIT_H
 #define SSLCAUDIT_H
 
-#include <QObject>
-#include <QAbstractSocket>
-
 #ifdef UNSAFE_QSSL
 #include "sslunsafeerror.h"
 #else
@@ -14,13 +11,12 @@
 #include "sslusersettings.h"
 #include "ssltest.h"
 
-
 class SslCAudit : public QObject
 {
     Q_OBJECT
 
 public:
-    SslCAudit(const SslUserSettings settings, QObject *parent = 0);
+    SslCAudit(const SslUserSettings settings, QObject *parent = nullptr);
 
     void setSslTests(const QList<SslTest *> &tests);
 
@@ -37,23 +33,19 @@ signals:
     void sslTestFinished();
     void sslTestsFinished();
 
-private slots:
-    void handleSocketError(QAbstractSocket::SocketError socketError);
-    void handleSslErrors(const QList<XSslError> &errors);
-    void handlePeerVerifyError(const XSslError &error);
-    void sslHandshakeFinished();
-
 private:
     void runTest(SslTest *test);
-    SslServer *prepareSslServer(const SslTest *test);
-    void proxyConnection(XSslSocket *sslSocket, SslTest *test);
-    void handleIncomingConnection(XSslSocket *sslSocket, SslTest *test);
+    void handleSslSocketErrors(const QList<XSslError> &sslErrors,
+                               const QString &errorStr, QAbstractSocket::SocketError socketError);
     static void showCiphersGroup(const QString &groupName, const QString &ciphersStr);
 
     SslUserSettings settings;
     QList<SslTest *> sslTests;
     SslTest *currentTest;
     QVector<TlsClientInfo> clientsInfo;
+
+    QStringList m_sslErrorsStr;
+    QList<QAbstractSocket::SocketError> m_sslErrors;
 
 };
 
