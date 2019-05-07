@@ -5,11 +5,16 @@
 
 #include <QUrl>
 #include <QFileInfo>
+#include <QUdpSocket>
 
 #ifdef UNSAFE_QSSL
 #include "sslunsafesocket.h"
+#include "sslunsafedtls.h"
+#include "sslunsafeconfiguration.h"
 #else
 #include <QSslSocket>
+#include <QDtls>
+#include <QSslConfiguration>
 #endif
 
 
@@ -29,6 +34,7 @@ SslUserSettings::SslUserSettings()
     waitDataTimeout = 5000;
     outputXmlFilename = "";
     pidFile = "";
+    useDtls = false;
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -67,21 +73,59 @@ QString SslUserSettings::getUserCN() const
 
 bool SslUserSettings::setServerAddr(const QString &addr)
 {
-    XSslSocket socket;
     QUrl url = QUrl::fromUserInput(addr);
     QString host = url.host();
     quint16 port = url.port(443);
 
-    socket.connectToHostEncrypted(host, port);
-    if (!socket.waitForEncrypted()) {
-        RED("failed to connect to " + addr);
-        return false;
+    if (!useDtls) {
+        XSslSocket socket;
+        socket.connectToHostEncrypted(host, port);
+        if (!socket.waitForEncrypted()) {
+            RED("failed to connect to " + addr);
+            return false;
+        }
+
+        // obtain connection parameters
+        peerCerts = socket.peerCertificateChain();
+
+        socket.disconnectFromHost();
+    } else {
+        QUdpSocket socket;
+        XDtls crypto(XSslSocket::SslClientMode);
+        auto configuration = XSslConfiguration::defaultDtlsConfiguration();
+        configuration.setPeerVerifyMode(XSslSocket::VerifyNone);
+        crypto.setPeer(QHostAddress(host), port);
+        crypto.setDtlsConfiguration(configuration);
+
+        socket.connectToHost(host, port);
+        while (socket.waitForReadyRead()) {
+            QByteArray dgram(socket.pendingDatagramSize(), Qt::Uninitialized);
+            const qint64 bytesRead = socket.readDatagram(dgram.data(), dgram.size());
+            if (bytesRead <= 0) {
+                return false;
+            }
+
+            dgram.resize(bytesRead);
+            if (crypto.isConnectionEncrypted()) {
+                // obtain connection parameters
+                // not supported yet
+                return true;
+            } else {
+                if (!crypto.doHandshake(&socket, dgram)) {
+                    return false;
+                }
+
+                if (crypto.isConnectionEncrypted()) {
+                    // obtain connection parameters
+                    // not supported yet
+                    return true;
+                }
+            }
+        }
+
+        if (crypto.isConnectionEncrypted())
+            crypto.shutdown(&socket);
     }
-
-    // obtain connection parameters
-    peerCerts = socket.peerCertificateChain();
-
-    socket.disconnectFromHost();
 
     serverAddr = addr;
 
@@ -317,4 +361,14 @@ bool SslUserSettings::setPidFile(const QString &fileName)
 QString SslUserSettings::getPidFile() const
 {
     return pidFile;
+}
+
+void SslUserSettings::setUseDtls(bool dtls)
+{
+    useDtls = dtls;
+}
+
+bool SslUserSettings::getUseDtls() const
+{
+    return useDtls;
 }

@@ -66,6 +66,9 @@ public:
     bool setPidFile(const QString &fileName);
     QString getPidFile() const;
 
+    void setUseDtls(bool dtls);
+    bool getUseDtls() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -82,6 +85,7 @@ private:
     quint32 waitDataTimeout;
     QString outputXmlFilename;
     QString pidFile;
+    bool useDtls;
 };
 
 #endif // SSLUSERSETTINGS_H

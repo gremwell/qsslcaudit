@@ -609,6 +609,11 @@ void SslProtocolsCiphersTest::calcResults()
 
 bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
 {
+    // omit protocols test for DTLS
+    // TODO: support ciphers test
+    if (settings.getUseDtls())
+        return false;
+
     XSslKey key;
     QList<XSslCertificate> chain = settings.getUserCert();
     if (chain.size() != 0) {

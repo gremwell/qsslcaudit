@@ -81,9 +81,14 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     QCommandLineOption pidFileOption(QStringList() << "pid-file",
                                      "create a pidfile once initialized", "/tmp/qs.pid");
     parser.addOption(pidFileOption);
+    QCommandLineOption useDtlsOption(QStringList() << "dtls", "use DTLS protocol over UDP");
+    parser.addOption(useDtlsOption);
 
     parser.process(a);
 
+    if (parser.isSet(useDtlsOption)) {
+        settings->setUseDtls(true);
+    }
     if (parser.isSet(showciphersOption)) {
         SslCAudit::showCiphers();
         exit(0);
@@ -215,6 +220,10 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         settings->setForwardAddr(parser.value(forwardOption));
     }
     if (parser.isSet(starttlsOption)) {
+        if (settings->getUseDtls()) {
+            RED("STARTTLS option conflicts with DTLS protocol");
+            exit(-1);
+        }
         if (!settings->setStartTlsProtocol(parser.value(starttlsOption))) {
             RED("unsupported STARTTLS protocol");
             exit(-1);
