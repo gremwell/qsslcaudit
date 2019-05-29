@@ -67,7 +67,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
                                     "show ciphers provided by loaded openssl library");
     parser.addOption(showciphersOption);
     QCommandLineOption starttlsOption(QStringList() << "starttls",
-                                    "exchange specific STARTTLS messages before starting secure connection", "ftp|smtp");
+                                    "exchange specific STARTTLS messages before starting secure connection", "ftp|smtp|xmpp");
     parser.addOption(starttlsOption);
     QCommandLineOption loopTestsOption(QStringList() << "loop-tests",
                                        "infinitely repeat selected tests (use Ctrl-C to kill the tool)");

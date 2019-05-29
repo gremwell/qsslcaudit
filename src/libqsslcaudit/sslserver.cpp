@@ -205,6 +205,9 @@ void SslServer::handleStartTls(XSslSocket *const socket)
     case SslServer::StartTlsSmtp:
         handleStartTlsSmtp(socket);
         break;
+    case SslServer::StartTlsXmpp:
+        handleStartTlsXmpp(socket);
+        break;
     default:
         break;
     }

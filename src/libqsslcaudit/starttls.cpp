@@ -70,3 +70,34 @@ void handleStartTlsSmtp(XSslSocket *const socket)
         WHITE("SMTP STARTTLS sequence completed");
     }
 }
+
+void handleStartTlsXmpp(XSslSocket *const socket)
+{
+    QByteArray readData;
+
+    WHITE("initiating XMPP STARTTLS sequence");
+
+    socket->waitForReadyRead(5000);
+    readData = socket->readAll();
+
+    if (!readData.startsWith(QByteArray("<stream:stream xmlns='jabber:client'"))) {
+        RED("unexpected STARTTLS sequence");
+        return;
+    }
+
+    socket->write("<stream:stream xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'><stream:features><starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'><required/></starttls></stream:features>");
+    socket->flush();
+
+    socket->waitForReadyRead(5000);
+    readData = socket->readAll();
+
+    if (!readData.startsWith(QByteArray("<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>"))) {
+        RED("unexpected STARTTLS sequence");
+        return;
+    }
+
+    socket->write("<proceed xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>");
+    socket->flush();
+
+    WHITE("FTP STARTTLS sequence completed");
+}

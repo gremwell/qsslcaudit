@@ -234,6 +234,9 @@ bool SslUserSettings::setStartTlsProtocol(const QString &proto)
     } else if (proto == QString("smtp")) {
         startTlsProtocol = SslServer::StartTlsSmtp;
         return true;
+    } else if (proto == QString("xmpp")) {
+        startTlsProtocol = SslServer::StartTlsXmpp;
+        return true;
     } else {
         startTlsProtocol = SslServer::StartTlsUnknownProtocol;
         return false;

@@ -67,6 +67,7 @@ public:
     enum StartTlsProtocol {
         StartTlsFtp,
         StartTlsSmtp,
+        StartTlsXmpp,
         StartTlsUnknownProtocol = -1
     };
 
