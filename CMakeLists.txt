@@ -3,7 +3,7 @@ project(qsslcaudit)
 cmake_minimum_required(VERSION 2.8.11)
 
 set(QSSLC_VERSION_MAJOR 0)
-set(QSSLC_VERSION_MINOR 4)
+set(QSSLC_VERSION_MINOR 5)
 set(QSSLC_VERSION_PATCH 0)
 set(QSSLC_VERSION "${QSSLC_VERSION_MAJOR}.${QSSLC_VERSION_MINOR}.${QSSLC_VERSION_PATCH}")
 # version formatting stolen from KeepAssXC's CMakeLists.txt :-)
