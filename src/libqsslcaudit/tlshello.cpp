@@ -428,6 +428,99 @@ QString cipherStringFromId(unsigned int id)
     return QString("");
 }
 
+bool isUnknownCipher(unsigned int id)
+{
+    for (unsigned int i = 0; i < sizeof(ssl_20_cipher_suites)/sizeof(ssl_20_cipher_suites[0]); i++) {
+        if (ssl_20_cipher_suites[i].value == id)
+            return false;
+    }
+    return true;
+}
+
+/*
+ * Supported Groups (formerly named "EC Named Curve").
+ * https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8
+ */
+static const value_string ssl_extension_curves[] = {
+    {  1, "sect163k1" },
+    {  2, "sect163r1" },
+    {  3, "sect163r2" },
+    {  4, "sect193r1" },
+    {  5, "sect193r2" },
+    {  6, "sect233k1" },
+    {  7, "sect233r1" },
+    {  8, "sect239k1" },
+    {  9, "sect283k1" },
+    { 10, "sect283r1" },
+    { 11, "sect409k1" },
+    { 12, "sect409r1" },
+    { 13, "sect571k1" },
+    { 14, "sect571r1" },
+    { 15, "secp160k1" },
+    { 16, "secp160r1" },
+    { 17, "secp160r2" },
+    { 18, "secp192k1" },
+    { 19, "secp192r1" },
+    { 20, "secp224k1" },
+    { 21, "secp224r1" },
+    { 22, "secp256k1" },
+    { 23, "secp256r1" },
+    { 24, "secp384r1" },
+    { 25, "secp521r1" },
+    { 26, "brainpoolP256r1" }, /* RFC 7027 */
+    { 27, "brainpoolP384r1" }, /* RFC 7027 */
+    { 28, "brainpoolP512r1" }, /* RFC 7027 */
+    { 29, "x25519" }, /* RFC 8446 / RFC 8422 */
+    { 30, "x448" }, /* RFC 8446 / RFC 8422 */
+    { 256, "ffdhe2048" }, /* RFC 7919 */
+    { 257, "ffdhe3072" }, /* RFC 7919 */
+    { 258, "ffdhe4096" }, /* RFC 7919 */
+    { 259, "ffdhe6144" }, /* RFC 7919 */
+    { 260, "ffdhe8192" }, /* RFC 7919 */
+    { 2570, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 6682, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 10794, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 14906, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 19018, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 23130, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 27242, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 31354, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 35466, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 39578, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 43690, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 47802, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 51914, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 56026, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 60138, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 64250, "Reserved (GREASE)" }, /* draft-ietf-tls-grease */
+    { 0xFF01, "arbitrary_explicit_prime_curves" },
+    { 0xFF02, "arbitrary_explicit_char2_curves" },
+    { 0x00, nullptr }
+};
+
+QString extensionCurveStringFromId(unsigned int id)
+{
+    for (unsigned int i = 0; i < sizeof(ssl_extension_curves)/sizeof(ssl_extension_curves[0]); i++) {
+        if (ssl_extension_curves[i].value == id)
+            return QString(ssl_extension_curves[i].strptr);
+    }
+    return QString("");
+}
+
+bool isUnknownExtensionCurve(unsigned int id)
+{
+    for (unsigned int i = 0; i < sizeof(ssl_extension_curves)/sizeof(ssl_extension_curves[0]); i++) {
+        if (ssl_extension_curves[i].value == id) {
+            if (QString(ssl_extension_curves[i].strptr).contains("GREASE", Qt::CaseInsensitive)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 static quint8 getUint8(const QByteArray &packet, int offset)
 {
     if (offset < packet.size())
