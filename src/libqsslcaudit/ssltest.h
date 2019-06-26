@@ -28,6 +28,7 @@ static const QString SSLTESTS_GROUP_CERTS_STR = QString("certs");
 static const QString SSLTESTS_GROUP_PROTOS_STR = QString("protos");
 static const QString SSLTESTS_GROUP_CIPHERS_STR = QString("ciphers");
 
+extern bool isUnknownExtensionCurve(unsigned int id);
 class TlsClientHelloExt
 {
 public:
@@ -56,13 +57,29 @@ public:
     QString printable() const;
 
     bool operator==(const TlsClientHelloExt &other) const {
+        // cleanup "supported_versions" and "supported_groups" from unknown values to fight from GREASE extension
+        // see https://tools.ietf.org/html/draft-davidben-tls-grease-01
+        if (supported_versions.size() != other.supported_versions.size())
+            return false;
+        for (int i = 1; i < supported_versions.size(); i++) {
+            if (supported_versions.at(i) < 0x0A00)
+                if (supported_versions.at(i) != other.supported_versions.at(i))
+                    return false;
+        }
+
+        if (supported_groups.size() != other.supported_groups.size())
+            return false;
+        for (int i = 0; i < supported_groups.size(); i++) {
+            if (!isUnknownExtensionCurve(supported_groups.at(i)))
+                if (supported_groups.at(i) != other.supported_groups.at(i))
+                    return false;
+        }
+
         if ((server_name != other.server_name)
                 || (heartbeat_mode != other.heartbeat_mode)
                 || (supported_version != other.supported_version)
                 || (encrypt_then_mac != other.encrypt_then_mac)
-                || (supported_versions != other.supported_versions)
                 || (ec_point_formats != other.ec_point_formats)
-                || (supported_groups != other.supported_groups)
                 || (sig_hash_algs != other.sig_hash_algs)
                 || (npn != other.npn)
                 || (alpn != other.alpn))
@@ -104,6 +121,7 @@ public:
     }
 };
 
+extern bool isUnknownCipher(unsigned int id);
 class TlsClientHelloInfo
 {
 public:
@@ -124,8 +142,17 @@ public:
     QString printable() const;
 
     bool operator==(const TlsClientHelloInfo &other) const {
+        // cleanup "ciphers" from unknown values to fight from GREASE extension
+        // see https://tools.ietf.org/html/draft-davidben-tls-grease-01
+        if (ciphers.size() != other.ciphers.size())
+            return false;
+        for (int i = 0; i < ciphers.size(); i++) {
+            if (!isUnknownCipher(ciphers.at(i)))
+                if (ciphers.at(i) != other.ciphers.at(i))
+                    return false;
+        }
+
         if ((version != other.version)
-                || (ciphers != other.ciphers)
                 || (comp_methods != other.comp_methods)
                 || (hnd_hello != other.hnd_hello))
             return false;
