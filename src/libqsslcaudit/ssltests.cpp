@@ -35,7 +35,12 @@ bool SslTest01::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::AnyProtocol);
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        setSslProtocol(XSsl::DtlsV1_0OrLater);
+    } else {
+        setSslProtocol(XSsl::AnyProtocol);
+    }
 
     return true;
 }
@@ -65,7 +70,12 @@ bool SslTest02::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::AnyProtocol);
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        setSslProtocol(XSsl::DtlsV1_0OrLater);
+    } else {
+        setSslProtocol(XSsl::AnyProtocol);
+    }
 
     return true;
 }
@@ -83,7 +93,12 @@ bool SslTest03::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::AnyProtocol);
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        setSslProtocol(XSsl::DtlsV1_0OrLater);
+    } else {
+        setSslProtocol(XSsl::AnyProtocol);
+    }
 
     return true;
 }
@@ -120,7 +135,12 @@ bool SslTest04::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::AnyProtocol);
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        setSslProtocol(XSsl::DtlsV1_0OrLater);
+    } else {
+        setSslProtocol(XSsl::AnyProtocol);
+    }
 
     return true;
 }
@@ -145,7 +165,12 @@ bool SslTest05::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::AnyProtocol);
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        setSslProtocol(XSsl::DtlsV1_0OrLater);
+    } else {
+        setSslProtocol(XSsl::AnyProtocol);
+    }
 
     return true;
 }
@@ -181,7 +206,12 @@ bool SslTest06::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::AnyProtocol);
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        setSslProtocol(XSsl::DtlsV1_0OrLater);
+    } else {
+        setSslProtocol(XSsl::AnyProtocol);
+    }
 
     return true;
 }
@@ -206,7 +236,12 @@ bool SslTest07::prepare(const SslUserSettings &settings)
 
     // the rest of parameters are insignificant
     setSslCiphers(XSslConfiguration::supportedCiphers());
-    setSslProtocol(XSsl::AnyProtocol);
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        setSslProtocol(XSsl::DtlsV1_0OrLater);
+    } else {
+        setSslProtocol(XSsl::AnyProtocol);
+    }
 
     return true;
 }
