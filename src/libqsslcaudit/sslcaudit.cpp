@@ -78,8 +78,10 @@ void SslCAudit::runTest(SslTest *test)
     m_sslErrorsStr.clear();
     m_sslErrors.clear();
 
+    // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::sslSocketErrors, this, &SslCAudit::handleSslSocketErrors);
 
+    // can be emitted by TCP server only
     connect(sslServer, &SslServer::sslErrors, [=](const QList<XSslError> &errors) {
         VERBOSE("SSL errors detected:");
         XSslError error;
@@ -90,15 +92,27 @@ void SslCAudit::runTest(SslTest *test)
         currentTest->addSslErrors(errors);
     });
 
+    // can be emitted by UDP server only
+    connect(sslServer, &SslServer::dtlsHandshakeError, [=](const XDtlsError error, const QString &errorStr) {
+        VERBOSE("DTLS error detected:");
+        VERBOSE(QString("\t%1(%2)").arg(errorStr).arg(SslServer::dtlsErrorToString(error)));
+        currentTest->addSslErrorString(errorStr);
+        currentTest->addDtlsError(error);
+    });
+
+    // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::dataIntercepted, [=](const QByteArray &data) {
         currentTest->addInterceptedData(data);
     });
 
+    // can be emitted by both TCP and UDP servers
+    // TODO for UDP
     connect(sslServer, &SslServer::rawDataCollected, [=](const QByteArray &rdData, const QByteArray &wrData) {
         currentTest->addRawDataRecv(rdData);
         currentTest->addRawDataSent(wrData);
     });
 
+    // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::sslHandshakeFinished, [=](const QList<XSslCertificate> &clientCerts) {
         VERBOSE("SSL connection established");
         if (clientCerts.size() > 0) {
@@ -111,11 +125,14 @@ void SslCAudit::runTest(SslTest *test)
         currentTest->setSslConnectionStatus(true);
     });
 
+    // can be emitted by TCP server only
+    // for UDP see QDtls::peerVerificationErrors(), however, it does not make sense anyway
     connect(sslServer, &SslServer::peerVerifyError, [=](const XSslError &error) {
         VERBOSE("peer verify error:");
         VERBOSE("\t" + error.errorString());
     });
 
+    // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::newPeer, [=](const QHostAddress &peerAddress) {
         currentTest->setClientSourceHost(peerAddress.toString());
     });
