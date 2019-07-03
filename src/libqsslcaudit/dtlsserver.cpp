@@ -37,6 +37,8 @@ public slots:
         if (!currentConnection.isNull()) {
             // this sends a valid DTLS alert to close the connection
             currentConnection->shutdown(serverSocket);
+            // it is fail-safe moment to emit collected writted data
+            emit rawDataCollected(QByteArray(), currentConnection->getRawWrittenData());
         }
         serverSocket->close();
         serverSocket->deleteLater();
@@ -129,6 +131,8 @@ void DtlsServerWorker::readyRead()
 
     dgram.resize(bytesRead);
 
+    emit rawDataCollected(dgram, QByteArray());
+
     // explicitly disable client cookie-based verification as it does not work for now
     clientVerified = true;
 
@@ -205,6 +209,8 @@ void DtlsServerWorker::doHandshake(const QByteArray &clientHello)
 
 void DtlsServerWorker::decryptDatagram(DtlsConnection connection, const QByteArray &clientMessage)
 {
+    // data will be intercepted here until data timeout fires killing the socket
+    // this differs from TCP TLS server, but it is fine I think
     const QByteArray dgram = connection->decryptDatagram(serverSocket, clientMessage);
     if (dgram.size()) {
         VERBOSE("received data: " + QString(dgram));
@@ -271,8 +277,9 @@ DtlsServer::DtlsServer(const SslUserSettings &settings, const SslTest *test, QOb
     connect(dtlsWorker, &DtlsServerWorker::newPeer, [=](const QHostAddress &peer) {
         emit newPeer(peer);
     });
-
-    connect(dtlsWorker, &DtlsServerWorker::rawDataCollected, this, &DtlsServer::rawDataCollected);
+    connect(dtlsWorker, &DtlsServerWorker::rawDataCollected, [=](const QByteArray &rdData, const QByteArray &wrData) {
+        emit rawDataCollected(rdData, wrData);
+    });
 
     dtlsThread.start();
 

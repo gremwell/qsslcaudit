@@ -106,7 +106,6 @@ void SslCAudit::runTest(SslTest *test)
     });
 
     // can be emitted by both TCP and UDP servers
-    // TODO for UDP
     connect(sslServer, &SslServer::rawDataCollected, [=](const QByteArray &rdData, const QByteArray &wrData) {
         currentTest->addRawDataRecv(rdData);
         currentTest->addRawDataSent(wrData);
