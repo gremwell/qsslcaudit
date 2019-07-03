@@ -300,6 +300,8 @@ public:
 
     void setClientSourceHost(const QString &host) { m_clientInfo.sourceHost = host; }
 
+    void setDtlsProto(bool usingDtls) { m_dtlsProto = usingDtls; }
+
 private:
     bool checkProtoSupport(XSsl::SslProtocol proto);
     bool checkForNonSslClient();
@@ -319,6 +321,7 @@ private:
     XSslKey m_privateKey;
     XSsl::SslProtocol m_sslProtocol;
     QList<XSslCipher> m_sslCiphers;
+    bool m_dtlsProto = false;
 
     QList<XSslError> m_sslErrors;
     QList<XDtlsError> m_dtlsErrors;
