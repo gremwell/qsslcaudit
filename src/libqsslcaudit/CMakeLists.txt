@@ -3,6 +3,7 @@ project(libqsslcaudit)
 set(qsslcauditSources
     sslcaudit.cpp
     sslserver.cpp
+    tcpsserver.cpp
     sslcertgen.cpp
     ssltest.cpp
     ssltests.cpp
@@ -18,6 +19,7 @@ set(qsslcauditHeaders
     sslcaudit.h
     sslcertgen.h
     sslserver.h
+    tcpsserver.h
     ssltest.h
     ssltests.h
     sslusersettings.h
