@@ -56,6 +56,7 @@ public slots:
                 this, &DtlsServerWorker::handleSocketError);
 
         bindResult = serverSocket->bind(m_listenAddress, m_listenPort);
+
         isReadyToAccept = true;
     }
 
@@ -105,9 +106,11 @@ private:
     QList<XSslCipher> m_sslCiphers;
 
     SslServer::StartTlsProtocol m_startTlsProtocol;
+    quint32 m_waitDataTimeout;
+
+    QUdpSocket *proxySocket = nullptr;
     QHostAddress m_forwardHost;
     quint16 m_forwardPort;
-    quint32 m_waitDataTimeout;
 
     friend class DtlsServer;
 };
@@ -215,6 +218,22 @@ void DtlsServerWorker::decryptDatagram(DtlsConnection connection, const QByteArr
     if (dgram.size()) {
         VERBOSE("received data: " + QString(dgram));
         emit dataIntercepted(dgram);
+
+        // send data to proxy, if requested
+        // vary naive implementation
+        if (!m_forwardHost.isNull()) {
+            VERBOSE("proxying the received data...");
+            if (!proxySocket) {
+                proxySocket = new QUdpSocket(this);
+                proxySocket->connectToHost(m_forwardHost, m_forwardPort);
+            }
+            proxySocket->write(dgram);
+            if (proxySocket->waitForReadyRead(100)) {
+                QByteArray received = proxySocket->readAll();
+                VERBOSE("proxy replied with: " + received);
+                serverSocket->write(received);
+            }
+        }
     } else if (connection->dtlsError() == XDtlsError::NoError) {
         VERBOSE("received empty data");
         emit dataIntercepted(dgram);
