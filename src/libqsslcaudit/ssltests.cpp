@@ -335,3 +335,37 @@ bool SslTest22::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::TlsV1_2);
 }
+
+bool SslTest23::setProtoAndCiphers()
+{
+    return setProtoAndExportCiphers(XSsl::DtlsV1_0);
+}
+
+
+bool SslTest24::setProtoAndCiphers()
+{
+    return setProtoAndLowCiphers(XSsl::DtlsV1_0);
+}
+
+
+bool SslTest25::setProtoAndCiphers()
+{
+    return setProtoAndMediumCiphers(XSsl::DtlsV1_0);
+}
+
+bool SslTest26::setProtoAndCiphers()
+{
+    return setProtoAndExportCiphers(XSsl::DtlsV1_2);
+}
+
+
+bool SslTest27::setProtoAndCiphers()
+{
+    return setProtoAndLowCiphers(XSsl::DtlsV1_2);
+}
+
+
+bool SslTest28::setProtoAndCiphers()
+{
+    return setProtoAndMediumCiphers(XSsl::DtlsV1_2);
+}

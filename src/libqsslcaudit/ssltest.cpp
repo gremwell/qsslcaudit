@@ -67,8 +67,20 @@ SslTest *SslTest::createTest(int id)
         return new SslTest21();
     case 21:
         return new SslTest22();
+    case 22:
+        return new SslTest23();
+    case 23:
+        return new SslTest24();
+    case 24:
+        return new SslTest25();
+    case 25:
+        return new SslTest26();
+    case 26:
+        return new SslTest27();
+    case 27:
+        return new SslTest28();
     }
-    return NULL;
+    return nullptr;
 }
 
 const QString SslTest::resultToStatus(enum SslTest::SslTestResult result)
@@ -592,7 +604,7 @@ void SslProtocolsCiphersTest::calcResults()
     }
 
     if (!m_sslConnectionEstablished
-            && m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
+            && (m_dtlsProto || (!m_dtlsProto && m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)))
             && ((m_sslErrorsStr.filter(QString("certificate unknown")).size() > 0)
                 || (m_sslErrorsStr.filter(QString("unknown ca")).size() > 0)
                 || (m_sslErrorsStr.filter(QString("bad certificate")).size() > 0))) {
@@ -614,11 +626,12 @@ void SslProtocolsCiphersTest::calcResults()
 
 bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
 {
-    // omit protocols test for DTLS
-    // TODO: support ciphers test
+    // in case of DTLS omit protocols test for normal TLS
+    // kind of weird piece of code, but should be okay for now and easily traceable in future
     if (settings.getUseDtls()) {
         setDtlsProto(true);
-        return false;
+        if (id() <= 22)
+            return false;
     }
 
     XSslKey key;
@@ -661,6 +674,12 @@ bool SslProtocolsCiphersTest::setProtoOnly(XSsl::SslProtocol proto)
             protoStr = "TLSv1.0";
         } else if (proto == SslUnsafe::TlsV1_1) {
             protoStr = "TLSv1.1";
+        } else if (proto == SslUnsafe::TlsV1_2) {
+            protoStr = "TLSv1.2";
+        } else if (proto == SslUnsafe::DtlsV1_0) {
+            protoStr = "DTLSv1.0";
+        } else if (proto == SslUnsafe::DtlsV1_2) {
+            protoStr = "DTLSv1.2";
         }
         VERBOSE(QString("the requested protocol (%1) is not supported").arg(protoStr));
         return false;

@@ -3,7 +3,7 @@
 
 #include "ssltest.h"
 
-#define SSLTESTS_COUNT 22
+#define SSLTESTS_COUNT 28
 
 class SslTest01 : public SslCertificatesTest
 {
@@ -264,6 +264,78 @@ public:
         setId(22);
         setName("TLS 1.2 protocol and MEDIUM grade ciphers support");
         setDescription("test for TLS 1.2 protocol and MEDIUM grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest23 : public SslCiphersTest
+{
+public:
+    SslTest23() {
+        setId(23);
+        setName("DTLS 1.0 protocol and EXPORT grade ciphers support");
+        setDescription("test for DTLS 1.0 protocol and EXPORT grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest24 : public SslCiphersTest
+{
+public:
+    SslTest24() {
+        setId(24);
+        setName("DTLS 1.0 protocol and LOW grade ciphers support");
+        setDescription("test for DTLS 1.0 protocol and LOW grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest25 : public SslCiphersTest
+{
+public:
+    SslTest25() {
+        setId(25);
+        setName("DTLS 1.0 protocol and MEDIUM grade ciphers support");
+        setDescription("test for DTLS 1.0 protocol and MEDIUM grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest26 : public SslCiphersTest
+{
+public:
+    SslTest26() {
+        setId(26);
+        setName("DTLS 1.2 protocol and EXPORT grade ciphers support");
+        setDescription("test for DTLS 1.2 protocol and EXPORT grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest27 : public SslCiphersTest
+{
+public:
+    SslTest27() {
+        setId(27);
+        setName("DTLS 1.2 protocol and LOW grade ciphers support");
+        setDescription("test for DTLS 1.2 protocol and LOW grade ciphers support");
+    }
+    bool setProtoAndCiphers();
+
+};
+
+class SslTest28 : public SslCiphersTest
+{
+public:
+    SslTest28() {
+        setId(28);
+        setName("DTLS 1.2 protocol and MEDIUM grade ciphers support");
+        setDescription("test for DTLS 1.2 protocol and MEDIUM grade ciphers support");
     }
     bool setProtoAndCiphers();
 
