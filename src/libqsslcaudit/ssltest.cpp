@@ -353,8 +353,8 @@ bool SslTest::checkForNonSslClient()
     int helloPos = -1;
     bool isSsl2 = false;
 
-    // test for HELLO message in advance
-    if ((m_rawDataRecv.size() > 0) && ((helloPos = helloPosInBuffer(m_rawDataRecv, &isSsl2)) >= 0)) {
+    // test for HELLO message in advance (only for TCP TLS for now)
+    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0) && ((helloPos = helloPosInBuffer(m_rawDataRecv, &isSsl2)) >= 0)) {
         m_clientInfo.hasHelloMessage = true;
 
         if (isSsl2) {
@@ -387,7 +387,8 @@ bool SslTest::checkForNonSslClient()
         return true;
     }
 
-    if ((m_rawDataRecv.size() > 0)
+    // excluding DTLS from this check
+    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
@@ -419,7 +420,8 @@ bool SslTest::checkForNonSslClient()
     }
 #endif
 
-    if ((m_rawDataRecv.size() > 0)
+    // excluding DTLS from this check
+    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
@@ -432,7 +434,8 @@ bool SslTest::checkForNonSslClient()
         return true;
     }
 
-    if ((m_rawDataRecv.size() > 0)
+    // excluding DTLS from this check
+    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
@@ -466,7 +469,8 @@ bool SslTest::checkForNonSslClient()
     }
 
     // failsafe check. this can't be SSL client without HELLO message intercepted
-    if ((m_rawDataRecv.size() > 0)
+    // excluding DTLS from this check
+    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
             && !m_clientInfo.hasHelloMessage) {
         m_report = QString("secure connection was not established, %1 bytes were received before the connection was closed")
                 .arg(m_rawDataRecv.size());
@@ -612,8 +616,10 @@ bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
 {
     // omit protocols test for DTLS
     // TODO: support ciphers test
-    if (settings.getUseDtls())
+    if (settings.getUseDtls()) {
+        setDtlsProto(true);
         return false;
+    }
 
     XSslKey key;
     QList<XSslCertificate> chain = settings.getUserCert();
