@@ -4,6 +4,7 @@ set(qsslcauditSources
     sslcaudit.cpp
     sslserver.cpp
     tcpsserver.cpp
+    dtlsserver.cpp
     sslcertgen.cpp
     ssltest.cpp
     ssltests.cpp
@@ -20,6 +21,7 @@ set(qsslcauditHeaders
     sslcertgen.h
     sslserver.h
     tcpsserver.h
+    dtlsserver.h
     ssltest.h
     ssltests.h
     sslusersettings.h

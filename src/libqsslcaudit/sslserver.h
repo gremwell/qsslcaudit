@@ -9,11 +9,13 @@
 #include "sslunsafekey.h"
 #include "sslunsafeellipticcurve.h"
 #include "sslunsafecipher.h"
+#include "sslunsafedtls.h"
 #else
 #include <QSslCertificate>
 #include <QSslKey>
 #include <QSslEllipticCurve>
 #include <QSslCipher>
+#include <QDtls>
 #endif
 
 
@@ -22,6 +24,7 @@ class SslUserSettings;
 class SslTest;
 
 class TcpsServer;
+class DtlsServer;
 
 class SslServer : public QObject
 {
@@ -42,6 +45,8 @@ public:
     bool waitForClient();
     void handleIncomingConnection();
 
+    static QString dtlsErrorToString(XDtlsError error);
+
 signals:
     void sslSocketErrors(const QList<XSslError> &sslErrors,
                          const QString &errorStr, QAbstractSocket::SocketError socketError);
@@ -52,12 +57,15 @@ signals:
     void peerVerifyError(const XSslError &error);
     void newPeer(const QHostAddress &peerAddress);
 
+    void dtlsHandshakeError(const XDtlsError, const QString &);
+
 private:
     QHostAddress m_listenAddress;
     quint16 m_listenPort;
     bool m_dtlsMode;
 
     TcpsServer *tcpsServer;
+    DtlsServer *dtlsServer;
 };
 
 #endif // SSLSERVER_H

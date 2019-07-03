@@ -3,6 +3,7 @@
 #include "starttls.h"
 #include "ssltest.h"
 #include "tcpsserver.h"
+#include "dtlsserver.h"
 
 
 SslServer::SslServer(const SslUserSettings &settings, const SslTest *test, QObject *parent) : QObject(parent)
@@ -12,6 +13,7 @@ SslServer::SslServer(const SslUserSettings &settings, const SslTest *test, QObje
     m_dtlsMode = settings.getUseDtls();
 
     tcpsServer = nullptr;
+    dtlsServer = nullptr;
 
     if (!m_dtlsMode) {
         tcpsServer = new TcpsServer(settings, test, this);
@@ -23,6 +25,15 @@ SslServer::SslServer(const SslUserSettings &settings, const SslTest *test, QObje
         connect(tcpsServer, &TcpsServer::sslHandshakeFinished, this, &SslServer::sslHandshakeFinished);
         connect(tcpsServer, &TcpsServer::peerVerifyError, this, &SslServer::peerVerifyError);
         connect(tcpsServer, &TcpsServer::newPeer, this, &SslServer::newPeer);
+    } else {
+        dtlsServer = new DtlsServer(settings, test, this);
+
+        connect(dtlsServer, &DtlsServer::udpSocketErrors, this, &SslServer::sslSocketErrors, Qt::DirectConnection);
+        connect(dtlsServer, &DtlsServer::dtlsHandshakeError, this, &SslServer::dtlsHandshakeError, Qt::DirectConnection);
+        connect(dtlsServer, &DtlsServer::dataIntercepted, this, &SslServer::dataIntercepted, Qt::DirectConnection);
+        connect(dtlsServer, &DtlsServer::sslHandshakeFinished, this, &SslServer::sslHandshakeFinished, Qt::DirectConnection);
+        connect(dtlsServer, &DtlsServer::newPeer, this, &SslServer::newPeer, Qt::DirectConnection);
+        connect(dtlsServer, &DtlsServer::rawDataCollected, this, &SslServer::rawDataCollected, Qt::DirectConnection);
     }
 }
 
@@ -31,6 +42,10 @@ SslServer::~SslServer()
     if (tcpsServer) {
         tcpsServer->close();
         delete tcpsServer;
+    }
+    if (dtlsServer) {
+        dtlsServer->close();
+        delete dtlsServer;
     }
 }
 
@@ -42,7 +57,10 @@ bool SslServer::listen()
             return false;
         }
     } else {
-        return false;
+        if (!dtlsServer->listen(m_listenAddress, m_listenPort)) {
+            RED(QString("can not bind to %1:%2").arg(m_listenAddress.toString()).arg(m_listenPort));
+            return false;
+        }
     }
 
     VERBOSE(QString("listening on %1:%2").arg(m_listenAddress.toString()).arg(m_listenPort));
@@ -54,7 +72,7 @@ bool SslServer::waitForClient()
     if (!m_dtlsMode) {
         return tcpsServer->waitForNewConnection(-1);
     } else {
-        return false;
+        return dtlsServer->waitForNewClient();
     }
 }
 
@@ -63,6 +81,32 @@ void SslServer::handleIncomingConnection()
     if (!m_dtlsMode) {
         XSslSocket *sslSocket = dynamic_cast<XSslSocket*>(tcpsServer->nextPendingConnection());
         tcpsServer->handleIncomingConnection(sslSocket);
+    } else {
+        dtlsServer->handleClient();
     }
 }
 
+QString SslServer::dtlsErrorToString(XDtlsError error)
+{
+    switch (error) {
+    case SslUnsafeDtlsError::NoError:
+        return QString("NoError");
+    case SslUnsafeDtlsError::InvalidInputParameters:
+        return QString("InvalidInputParameters");
+    case SslUnsafeDtlsError::InvalidOperation:
+        return QString("InvalidOperation");
+    case SslUnsafeDtlsError::UnderlyingSocketError:
+        return QString("UnderlyingSocketError");
+    case SslUnsafeDtlsError::RemoteClosedConnectionError:
+        return QString("RemoteClosedConnectionError");
+    case SslUnsafeDtlsError::PeerVerificationError:
+        return QString("PeerVerificationError");
+    case SslUnsafeDtlsError::TlsInitializationError:
+        return QString("TlsInitializationError");
+    case SslUnsafeDtlsError::TlsFatalError:
+        return QString("TlsFatalError");
+    case SslUnsafeDtlsError::TlsNonFatalError:
+        return QString("TlsNonFatalError");
+    }
+    return QString("");
+}
