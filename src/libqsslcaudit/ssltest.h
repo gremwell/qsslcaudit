@@ -281,6 +281,7 @@ public:
     QList<XSslCipher> sslCiphers() const { return m_sslCiphers; }
 
     void addSslErrors(const QList<XSslError> errors) { m_sslErrors << errors; }
+    void addDtlsError(XDtlsError error) { m_dtlsErrors << error; }
     void addSslErrorString(const QString error) { m_sslErrorsStr << error; }
     void addSocketErrors(const QList<QAbstractSocket::SocketError> errors) { m_socketErrors << errors; }
     void setSslConnectionStatus(bool isEstablished) { m_sslConnectionEstablished = isEstablished; }
@@ -320,6 +321,7 @@ private:
     QList<XSslCipher> m_sslCiphers;
 
     QList<XSslError> m_sslErrors;
+    QList<XDtlsError> m_dtlsErrors;
     QStringList m_sslErrorsStr;
     QList<QAbstractSocket::SocketError> m_socketErrors;
     bool m_sslConnectionEstablished;

@@ -107,6 +107,7 @@ void SslTest::printReport()
 void SslTest::clear()
 {
     m_sslErrors = QList<XSslError>();
+    m_dtlsErrors = QList<XDtlsError>();
     m_sslErrorsStr = QStringList();
     m_socketErrors = QList<QAbstractSocket::SocketError>();
     m_sslConnectionEstablished = false;
