@@ -1192,4 +1192,11 @@ void SslUnsafeDtls::ignoreVerificationErrors(const QVector<SslUnsafeError> &erro
     d->tlsErrorsToIgnore = errorsToIgnore;
 }
 
+QByteArray SslUnsafeDtls::getRawWrittenData() const
+{
+    Q_D(const SslUnsafeDtls);
+
+    return d->rawWrittenData;
+}
+
 QT_END_NAMESPACE

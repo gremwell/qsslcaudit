@@ -112,6 +112,8 @@ public:
     QString peerVerificationName;
     QByteArray secret;
 
+    QByteArray rawWrittenData;
+
 #ifdef QT_CRYPTOGRAPHICHASH_ONLY_SHA1
     QCryptographicHash::Algorithm hashAlgorithm = QCryptographicHash::Sha1;
 #else

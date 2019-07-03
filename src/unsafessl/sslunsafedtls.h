@@ -168,6 +168,8 @@ public:
     QVector<SslUnsafeError> peerVerificationErrors() const;
     void ignoreVerificationErrors(const QVector<SslUnsafeError> &errorsToIgnore);
 
+    QByteArray getRawWrittenData() const;
+
 Q_SIGNALS:
 
     void pskRequired(SslUnsafePreSharedKeyAuthenticator *authenticator);

@@ -378,6 +378,9 @@ extern "C" int q_dgram_write(BIO *bio, const char *src, int bytesToWrite)
                                                 dtls->remotePort);
     }
 
+    // store sent data for debugging
+    dtls->dtlsPrivate->rawWrittenData.append(dgram.left(bytesWritten));
+
     if (bytesWritten <= 0)
         q_BIO_set_retry_write(bio);
 
