@@ -206,6 +206,13 @@ bool SslTest::checkForSocketErrors()
 
 bool SslTest::isHelloMessage(const QByteArray &packet, bool *isSsl2)
 {
+    if (m_dtlsProto) {
+        if (is_dtls(packet)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     if (is_sslv3_or_tls(packet)) {
         if (is_sslv3_or_tls_hello(packet)) {
             *isSsl2 = false;
@@ -284,6 +291,15 @@ QString TlsClientHelloInfo::printable() const
     case 0x304:
         out << "TLSv1.3";
         break;
+    case 0xfeff:
+        out << "DTLSv1.0";
+        break;
+    case 0x100:
+        out << "DTLSv1.0";
+        break;
+    case 0xfefd:
+        out << "DTLSv1.2";
+        break;
     default:
         out << "SSLv2/unknown";
     }
@@ -339,6 +355,7 @@ QDebug operator<<(QDebug dbg, const TlsClientInfo &clientInfo)
     dbg << "tls comp_methods(" << clientInfo.tlsHelloInfo.comp_methods << ")" << endl;
     dbg << "tls random_time(" << clientInfo.tlsHelloInfo.random_time << ")" << endl;
     dbg << "tls random(" << clientInfo.tlsHelloInfo.random << ")" << endl;
+    dbg << "tls cookie(" << clientInfo.tlsHelloInfo.cookie << ")" << endl;
     dbg << "tls hnd_hello_ext_heartbeat_mode(" << clientInfo.tlsHelloInfo.hnd_hello.heartbeat_mode << ")" << endl;
     dbg << "tls hnd_hello_ext_padding(" << clientInfo.tlsHelloInfo.hnd_hello.padding << ")" << endl;
     dbg << "tls hnd_hello_ext_record_size_limit(" << clientInfo.tlsHelloInfo.hnd_hello.record_size_limit << ")" << endl;
@@ -365,14 +382,14 @@ bool SslTest::checkForNonSslClient()
     int helloPos = -1;
     bool isSsl2 = false;
 
-    // test for HELLO message in advance (only for TCP TLS for now)
-    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0) && ((helloPos = helloPosInBuffer(m_rawDataRecv, &isSsl2)) >= 0)) {
+    // test for HELLO message in advance
+    if ((m_rawDataRecv.size() > 0) && ((helloPos = helloPosInBuffer(m_rawDataRecv, &isSsl2)) >= 0)) {
         m_clientInfo.hasHelloMessage = true;
 
         if (isSsl2) {
             dissect_ssl2_hnd_client_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo);
         } else {
-            ssl_dissect_hnd_cli_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo);
+            ssl_dissect_hnd_cli_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo, m_dtlsProto);
         }
     }
 
@@ -399,8 +416,7 @@ bool SslTest::checkForNonSslClient()
         return true;
     }
 
-    // excluding DTLS from this check
-    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
+    if ((m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
@@ -432,8 +448,7 @@ bool SslTest::checkForNonSslClient()
     }
 #endif
 
-    // excluding DTLS from this check
-    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
+    if ((m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
@@ -446,8 +461,7 @@ bool SslTest::checkForNonSslClient()
         return true;
     }
 
-    // excluding DTLS from this check
-    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
+    if ((m_rawDataRecv.size() > 0)
             && !m_sslConnectionEstablished
             && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
             && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
@@ -481,8 +495,7 @@ bool SslTest::checkForNonSslClient()
     }
 
     // failsafe check. this can't be SSL client without HELLO message intercepted
-    // excluding DTLS from this check
-    if ((!m_dtlsProto) && (m_rawDataRecv.size() > 0)
+    if ((m_rawDataRecv.size() > 0)
             && !m_clientInfo.hasHelloMessage) {
         m_report = QString("secure connection was not established, %1 bytes were received before the connection was closed")
                 .arg(m_rawDataRecv.size());

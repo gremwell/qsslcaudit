@@ -136,6 +136,7 @@ public:
     QVector<quint8> comp_methods;
     quint32 random_time;
     QByteArray random;
+    QByteArray cookie;
 
     TlsClientHelloExt hnd_hello;
 
@@ -176,6 +177,8 @@ public:
         random_time = 0;
         random.clear();
         random.squeeze();
+        cookie.clear();
+        cookie.squeeze();
         hnd_hello.clear();
     }
 };

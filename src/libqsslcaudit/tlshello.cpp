@@ -1,4 +1,3 @@
-
 #include "tlshello.h"
 
 #include <QtEndian>
@@ -7,16 +6,22 @@
 // this we need only for TlsClientHello type
 #include "ssltest.h"
 
-// taken from packet-tls.c, wireshark source code
+// taken from packet-{d,t}ls.c, wireshark source code
 
-#define SSL_ID_HANDSHAKE               0x16
-#define SSL_ID_APP_DATA                0x17
+#define SSL_ID_CHG_CIPHER_SPEC  0x14
+#define SSL_ID_ALERT            0x15
+#define SSL_ID_HANDSHAKE        0x16
+#define SSL_ID_APP_DATA         0x17
+#define SSL_ID_HEARTBEAT        0x18
 
 #define SSLV3_VERSION          0x300
 #define TLSV1_VERSION          0x301
 #define TLSV1DOT1_VERSION      0x302
 #define TLSV1DOT2_VERSION      0x303
 #define TLSV1DOT3_VERSION      0x304
+#define DTLSV1DOT0_VERSION     0xfeff
+#define DTLSV1DOT0_OPENSSL_VERSION 0x100
+#define DTLSV1DOT2_VERSION     0xfefd
 
 #define SSL2_HND_CLIENT_HELLO          0x01
 
@@ -1247,7 +1252,7 @@ static int ssl_dissect_hnd_extension(const QByteArray &packet, int offset, int h
     return offset;
 }
 
-void ssl_dissect_hnd_cli_hello(const QByteArray &packet, TlsClientHelloInfo *tlsHelloInfo)
+void ssl_dissect_hnd_cli_hello(const QByteArray &packet, TlsClientHelloInfo *tlsHelloInfo, bool isDtls)
 {
     /* struct {
      *     ProtocolVersion client_version;
@@ -1263,8 +1268,7 @@ void ssl_dissect_hnd_cli_hello(const QByteArray &packet, TlsClientHelloInfo *tls
     quint32 compression_methods_length;
     quint8 compression_method;
     int next_offset;
-
-    int offset = 9;
+    int offset = isDtls ? 25 : 9;
 
     /* show the client version */
     tlsHelloInfo->version = getUint16(packet, offset);
@@ -1275,22 +1279,17 @@ void ssl_dissect_hnd_cli_hello(const QByteArray &packet, TlsClientHelloInfo *tls
     offset = ssl_dissect_hnd_hello_common(packet, offset, tlsHelloInfo);
 
     /* fields specific for DTLS (cookie_len, cookie) */
-#if 0
-    if (dtls_hfs != NULL) {
-        guint32 cookie_length;
+    if (isDtls) {
+        quint32 cookie_length;
+
         /* opaque cookie<0..32> (for DTLS only) */
-        if (!ssl_add_vector(hf, tvb, pinfo, tree, offset, offset_end, &cookie_length,
-                            dtls_hfs->hf_dtls_handshake_cookie_len, 0, 32)) {
-            return;
-        }
+        cookie_length = getUint8(packet, offset);
         offset++;
         if (cookie_length > 0) {
-            proto_tree_add_item(tree, dtls_hfs->hf_dtls_handshake_cookie,
-                                tvb, offset, cookie_length, ENC_NA);
+            tlsHelloInfo->cookie = packet.mid(offset, cookie_length);
             offset += cookie_length;
         }
     }
-#endif
 
     /* CipherSuite cipher_suites<2..2^16-1> */
     cipher_suite_length = getUint16(packet, offset);
@@ -1323,4 +1322,46 @@ void ssl_dissect_hnd_cli_hello(const QByteArray &packet, TlsClientHelloInfo *tls
     if (tlsHelloInfo->version > SSLV3_VERSION) {
         ssl_dissect_hnd_extension(packet, offset, SSL_HND_CLIENT_HELLO, tlsHelloInfo);
     }
+}
+
+static bool ssl_is_valid_content_type(quint8 type)
+{
+    switch (type) {
+    case SSL_ID_CHG_CIPHER_SPEC:
+    case SSL_ID_ALERT:
+    case SSL_ID_HANDSHAKE:
+    case SSL_ID_APP_DATA:
+    case SSL_ID_HEARTBEAT:
+        return true;
+    }
+    return false;
+}
+
+static bool looks_like_dtls(const QByteArray &packet, int offset)
+{
+    /* have to have a valid content type followed by a valid
+     * protocol version
+     */
+    quint8 byte;
+    quint16 version;
+
+    /* see if the first byte is a valid content type */
+    byte = getUint8(packet, offset);
+    if (!ssl_is_valid_content_type(byte)) {
+        return false;
+    }
+
+    /* now check to see if the version byte appears valid */
+    version = getUint16(packet, offset + 1);
+    if (version != DTLSV1DOT0_VERSION && version != DTLSV1DOT2_VERSION &&
+            version != DTLSV1DOT0_OPENSSL_VERSION) {
+        return false;
+    }
+
+    return true;
+}
+
+bool is_dtls(const QByteArray &packet)
+{
+    return looks_like_dtls(packet, 0);
 }
