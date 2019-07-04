@@ -1147,7 +1147,7 @@ void SslUnsafeDtlsPrivateOpenSSL::sendShutdownAlert(QUdpSocket *socket)
 
     clearDtlsError();
 
-    if (connectionEncrypted && !connectionWasShutdown) {
+    if (/*connectionEncrypted && */!connectionWasShutdown) {
         dtls.udpSocket = socket;
         Q_ASSERT(dtls.tlsConnection.data());
         q_SSL_shutdown(dtls.tlsConnection.data());
