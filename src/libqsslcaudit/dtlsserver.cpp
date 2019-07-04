@@ -186,8 +186,12 @@ void DtlsServerWorker::handleClient() {
 void DtlsServerWorker::doHandshake(const QByteArray &clientHello)
 {
     const bool result = currentConnection->doHandshake(serverSocket, clientHello);
-    if (!result) {
+    // we should always emit current DTLS error even if doHandshake() returned 'true'
+    // there could be useful errors for further assessment
+    if (currentConnection->dtlsError() != XDtlsError::NoError)
         emit dtlsHandshakeError(currentConnection->dtlsError(), currentConnection->dtlsErrorString());
+
+    if (!result) {
         clientFinished = true;
         return;
     }
@@ -210,6 +214,11 @@ void DtlsServerWorker::decryptDatagram(DtlsConnection connection, const QByteArr
     // data will be intercepted here until data timeout fires killing the socket
     // this differs from TCP TLS server, but it is fine I think
     const QByteArray dgram = connection->decryptDatagram(serverSocket, clientMessage);
+
+    // report DTLS errors here too, just in case we missed something earlier
+    if (connection->dtlsError() != XDtlsError::NoError)
+        emit dtlsHandshakeError(connection->dtlsError(), connection->dtlsErrorString());
+
     if (dgram.size()) {
         VERBOSE("received data: " + QString(dgram));
         emit dataIntercepted(dgram);
@@ -233,11 +242,9 @@ void DtlsServerWorker::decryptDatagram(DtlsConnection connection, const QByteArr
         VERBOSE("received empty data");
         emit dataIntercepted(dgram);
     } else if (connection->dtlsError() == XDtlsError::RemoteClosedConnectionError) {
-        emit dtlsHandshakeError(connection->dtlsError(), connection->dtlsErrorString());
         clientFinished = true;
     } else {
         VERBOSE("data decryption error");
-        emit dtlsHandshakeError(connection->dtlsError(), connection->dtlsErrorString());
     }
 }
 
