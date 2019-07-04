@@ -1,0 +1,16 @@
+object 254a6e28ab6e6a8e13132f10f95e7f37a612c28c
+type commit
+tag v0.6.0
+tagger Pavel Nakonechnyi <pavel@gremwell.com> 1562242405 +0200
+
+v0.6.0
+-----BEGIN PGP SIGNATURE-----
+
+iQEcBAABAgAGBQJdHe1lAAoJEKDQnNNrQX5bn/kH+QEPc0NoNvASTYNfiTqzGtIG
+G6af0XBhyVHthyXIrwEovzCu+rM6y1n/BCcPwY3XcMNd+vrI/7YKk6Fm677hIqLI
+Gjdp1KRE6eMxAE4IG4t3tLf8rnAqSJmT0ACpp9hmldjHqmm5Rne1fVAxV7P3BRj5
+t4AsyIeLabRo9sE5k/97OTxPD24yYic1Ahs8VtUhDoqctBd1bkPXFW7v3GudFGBD
+y0VuI7l2bXcIiWhxWnC5bPXagZMmoIe/8uv+zJdMWYF7fTrvzoh23Q9tgN8cn7+3
+Mu1+SR63tKuUHJlR++Jg8XycjT4wgnEefDX5KxKUUwGbQ0vaC0KtQkiWZdmD5aA=
+=pWuM
+-----END PGP SIGNATURE-----
