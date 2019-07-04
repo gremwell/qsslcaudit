@@ -20,7 +20,7 @@ class DtlsServerWorker : public QObject
         while (!isReadyToAccept) {
             QThread::msleep(5);
         }
-        return bindResult;
+        return (serverSocket->state() == QAbstractSocket::BoundState);
     }
 
     bool waitForNewClient() {
@@ -45,17 +45,13 @@ public slots:
     }
 
     void initUdpSocket() {
-        isReadyToAccept = false;
-        bindResult = false;
-        clientFinished = false;
-
         serverSocket = new QUdpSocket(this);
 
         connect(serverSocket, &QAbstractSocket::readyRead, this, &DtlsServerWorker::readyRead);
         connect(serverSocket, static_cast<void(QUdpSocket::*)(QAbstractSocket::SocketError)>(&QUdpSocket::error),
                 this, &DtlsServerWorker::handleSocketError);
 
-        bindResult = serverSocket->bind(m_listenAddress, m_listenPort);
+        serverSocket->bind(m_listenAddress, m_listenPort);
 
         isReadyToAccept = true;
     }
@@ -84,9 +80,10 @@ private:
 
     QUdpSocket *serverSocket;
     // handling only one client
-    bool clientConnected;
-    bool clientVerified;
-    bool clientFinished;
+    bool isReadyToAccept = false;
+    bool clientConnected = false;
+    bool clientVerified = false;
+    bool clientFinished = false;
     QByteArray collectedDgram;
     DtlsConnection currentConnection;
 
@@ -94,8 +91,6 @@ private:
 
     QHostAddress m_listenAddress;
     quint16 m_listenPort;
-    bool isReadyToAccept;
-    bool bindResult;
 
     QHostAddress peerAddress;
     quint16 peerPort;
