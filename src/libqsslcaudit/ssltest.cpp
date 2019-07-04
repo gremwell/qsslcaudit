@@ -635,6 +635,9 @@ bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
         setDtlsProto(true);
         if (id() <= 22)
             return false;
+    } else {
+        if (id() >= 23)
+            return false;
     }
 
     XSslKey key;
