@@ -23,7 +23,7 @@ bool SslTest01::prepare(const SslUserSettings &settings)
         return false;
     }
 
-    setLocalCert(chain);
+    m_localCertsChain = chain;
 
     XSslKey key = settings.getUserKey();
     if (key.isNull()) {
@@ -31,15 +31,14 @@ bool SslTest01::prepare(const SslUserSettings &settings)
         return false;
     }
 
-    setPrivateKey(key);
+    m_privateKey = key;
 
-    setSslCiphers(XSslConfiguration::supportedCiphers());
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
-        setSslProtocol(XSsl::DtlsV1_0OrLater);
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
-        setSslProtocol(XSsl::AnyProtocol);
+        m_sslProtocol = XSsl::AnyProtocol;
     }
 
     return true;
@@ -65,16 +64,15 @@ bool SslTest02::prepare(const SslUserSettings &settings)
     QList<XSslCertificate> chain;
     chain << cert.first;
 
-    setLocalCert(chain);
-    setPrivateKey(cert.second);
+    m_localCertsChain = chain;
+    m_privateKey = cert.second;
 
-    setSslCiphers(XSslConfiguration::supportedCiphers());
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
-        setSslProtocol(XSsl::DtlsV1_0OrLater);
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
-        setSslProtocol(XSsl::AnyProtocol);
+        m_sslProtocol = XSsl::AnyProtocol;
     }
 
     return true;
@@ -88,16 +86,15 @@ bool SslTest03::prepare(const SslUserSettings &settings)
     QList<XSslCertificate> chain;
     chain << cert.first;
 
-    setLocalCert(chain);
-    setPrivateKey(cert.second);
+    m_localCertsChain = chain;
+    m_privateKey = cert.second;
 
-    setSslCiphers(XSslConfiguration::supportedCiphers());
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
-        setSslProtocol(XSsl::DtlsV1_0OrLater);
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
-        setSslProtocol(XSsl::AnyProtocol);
+        m_sslProtocol = XSsl::AnyProtocol;
     }
 
     return true;
@@ -130,16 +127,15 @@ bool SslTest04::prepare(const SslUserSettings &settings)
 
     generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
 
-    setLocalCert(generatedCert.first);
-    setPrivateKey(generatedCert.second);
+    m_localCertsChain = generatedCert.first;
+    m_privateKey = generatedCert.second;
 
-    setSslCiphers(XSslConfiguration::supportedCiphers());
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
-        setSslProtocol(XSsl::DtlsV1_0OrLater);
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
-        setSslProtocol(XSsl::AnyProtocol);
+        m_sslProtocol = XSsl::AnyProtocol;
     }
 
     return true;
@@ -160,16 +156,15 @@ bool SslTest05::prepare(const SslUserSettings &settings)
 
     generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
 
-    setLocalCert(generatedCert.first);
-    setPrivateKey(generatedCert.second);
+    m_localCertsChain = generatedCert.first;
+    m_privateKey = generatedCert.second;
 
-    setSslCiphers(XSslConfiguration::supportedCiphers());
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
-        setSslProtocol(XSsl::DtlsV1_0OrLater);
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
-        setSslProtocol(XSsl::AnyProtocol);
+        m_sslProtocol = XSsl::AnyProtocol;
     }
 
     return true;
@@ -201,16 +196,15 @@ bool SslTest06::prepare(const SslUserSettings &settings)
 
     generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
 
-    setLocalCert(generatedCert.first);
-    setPrivateKey(generatedCert.second);
+    m_localCertsChain = generatedCert.first;
+    m_privateKey = generatedCert.second;
 
-    setSslCiphers(XSslConfiguration::supportedCiphers());
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
-        setSslProtocol(XSsl::DtlsV1_0OrLater);
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
-        setSslProtocol(XSsl::AnyProtocol);
+        m_sslProtocol = XSsl::AnyProtocol;
     }
 
     return true;
@@ -231,16 +225,15 @@ bool SslTest07::prepare(const SslUserSettings &settings)
 
     generatedCert.first << chain.mid(1); // create full chain of certificates (if user provided)
 
-    setLocalCert(generatedCert.first);
-    setPrivateKey(generatedCert.second);
+    m_localCertsChain = generatedCert.first;
+    m_privateKey = generatedCert.second;
 
-    setSslCiphers(XSslConfiguration::supportedCiphers());
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
-        setSslProtocol(XSsl::DtlsV1_0OrLater);
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
-        setSslProtocol(XSsl::AnyProtocol);
+        m_sslProtocol = XSsl::AnyProtocol;
     }
 
     return true;

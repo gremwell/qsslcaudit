@@ -3,7 +3,7 @@
 #include "sslcertgen.h"
 #include "ssltests.h"
 #include "ciphers.h"
-#include "tlshello.h"
+#include "sslcheck.h"
 
 #ifdef UNSAFE
 #include <openssl-unsafe/ssl.h>
@@ -83,53 +83,11 @@ SslTest *SslTest::createTest(int id)
     return nullptr;
 }
 
-const QString SslTest::resultToStatus(enum SslTest::SslTestResult result)
-{
-    QString ret;
-
-    switch (result) {
-    case SslTest::SSLTEST_RESULT_SUCCESS:
-        ret = "PASSED";
-        break;
-    case SslTest::SSLTEST_RESULT_NOT_READY:
-    case SslTest::SSLTEST_RESULT_UNDEFINED:
-    case SslTest::SSLTEST_RESULT_INIT_FAILED:
-        ret = "UNDEFINED";
-        break;
-    case SslTest::SSLTEST_RESULT_DATA_INTERCEPTED:
-    case SslTest::SSLTEST_RESULT_CERT_ACCEPTED:
-    case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED:
-    case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR:
-        ret = "FAILED";
-        break;
-    }
-
-    return ret;
-}
-
-void SslTest::printReport()
-{
-    if (m_result < 0) {
-        RED(m_report);
-    } else {
-        GREEN(m_report);
-    }
-}
-
 void SslTest::clear()
 {
-    m_sslErrors = QList<XSslError>();
-    m_dtlsErrors = QList<XDtlsError>();
-    m_sslErrorsStr = QStringList();
-    m_socketErrors = QList<QAbstractSocket::SocketError>();
-    m_sslConnectionEstablished = false;
-    m_interceptedData = QByteArray();
-    m_result = SSLTEST_RESULT_NOT_READY;
+    m_result = SslTestResult::NotReady;
     m_resultComment = QString();
-    m_rawDataRecv = QByteArray();
-    m_rawDataSent = QByteArray();
     m_report = QString("test results undefined");
-    m_clientInfo.clear();
 }
 
 bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)
@@ -173,471 +131,94 @@ bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)
     return true;
 }
 
-bool SslTest::checkForSocketErrors()
+void SslCertificatesTest::calcResults(const ClientInfo client)
 {
-    // all errors should be here except those which we handle below in a particular test
-    if (m_socketErrors.contains(QAbstractSocket::ConnectionRefusedError)
-            || m_socketErrors.contains(QAbstractSocket::HostNotFoundError)
-            || m_socketErrors.contains(QAbstractSocket::SocketAccessError)
-            || m_socketErrors.contains(QAbstractSocket::SocketResourceError)
-            || m_socketErrors.contains(QAbstractSocket::DatagramTooLargeError)
-            || m_socketErrors.contains(QAbstractSocket::NetworkError)
-            || m_socketErrors.contains(QAbstractSocket::AddressInUseError)
-            || m_socketErrors.contains(QAbstractSocket::SocketAddressNotAvailableError)
-            || m_socketErrors.contains(QAbstractSocket::UnsupportedSocketOperationError)
-            || m_socketErrors.contains(QAbstractSocket::UnfinishedSocketOperationError)
-            || m_socketErrors.contains(QAbstractSocket::OperationError)
-            || m_socketErrors.contains(QAbstractSocket::TemporaryError)) {
-        m_report = QString("socket/network error occuried");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_resultComment = QString("socket error");
-        return true;
-    }
+    SslCheckReport rep;
 
-    if (m_socketErrors.contains(QAbstractSocket::UnknownSocketError)) {
-        m_report = QString("unknown socket error occuried");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_resultComment = QString("socket error");
-        return true;
-    }
+    SslCheckSocketErrors check1 = SslCheckSocketErrors();
+    rep = check1.doCheck(client);
 
-    return false;
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
+
+    if (m_result != SslTestResult::Success)
+        return;
+
+    SslCheckNonSslClient check2 = SslCheckNonSslClient();
+    rep = check2.doCheck(client);
+
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
+
+    if (m_result != SslTestResult::Success)
+        return;
+
+    SslCheckForGenericSslErrors check3 = SslCheckForGenericSslErrors();
+    rep = check3.doCheck(client);
+
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
+
+    if (m_result != SslTestResult::Success)
+        return;
+
+    SslCheckCertificatesValidation check4 = SslCheckCertificatesValidation();
+    rep = check4.doCheck(client);
+
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
+
+    if (m_result != SslTestResult::Success)
+        return;
 }
 
-bool SslTest::isHelloMessage(const QByteArray &packet, bool *isSsl2)
+void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
 {
-    if (m_dtlsProto) {
-        if (is_dtls(packet)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    if (is_sslv3_or_tls(packet)) {
-        if (is_sslv3_or_tls_hello(packet)) {
-            *isSsl2 = false;
-            return true;
-        }
-    } else if (is_sslv2_clienthello(packet)) {
-        *isSsl2 = true;
-        return true;
-    }
+    SslCheckReport rep;
 
-    return false;
-}
+    SslCheckSocketErrors check1 = SslCheckSocketErrors();
+    rep = check1.doCheck(client);
 
-int SslTest::helloPosInBuffer(const QByteArray &buf, bool *isSsl2)
-{
-    int size = buf.size();
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
 
-    for (int i = 0; i < size; i++) {
-        if (isHelloMessage(buf.right(size - i), isSsl2))
-            return i;
-    }
-
-    return -1;
-}
-
-QString TlsClientHelloExt::printable() const
-{
-    QString ret;
-    QTextStream out(&ret);
-
-    if (heartbeat_mode)
-        out << "heartbeat mode" << endl;
-
-    if (server_name.size() > 0) {
-        out << "SNI: ";
-        for (int i = 0; i < server_name.size(); i++) {
-            out << server_name.at(i).second;
-            if (i != server_name.size() - 1)
-                out << ", ";
-        }
-        out << endl;
-    }
-
-    if (alpn.size() > 0) {
-        out << "ALPN: ";
-        for (int i = 0; i < alpn.size(); i++) {
-            out << QString::fromStdString(alpn.at(i).toStdString());
-            if (i != alpn.size() - 1)
-                out << ", ";
-        }
-        out << endl;
-    }
-
-    return ret;
-}
-
-QString TlsClientHelloInfo::printable() const
-{
-    QString ret;
-    QTextStream out(&ret);
-
-    out << "protocol: ";
-    switch (version) {
-    case 0x300:
-        out << "SSLv3";
-        break;
-    case 0x301:
-        out << "TLSv1.0";
-        break;
-    case 0x302:
-        out << "TLSv1.1";
-        break;
-    case 0x303:
-        out << "TLSv1.2";
-        break;
-    case 0x304:
-        out << "TLSv1.3";
-        break;
-    case 0xfeff:
-        out << "DTLSv1.0";
-        break;
-    case 0x100:
-        out << "DTLSv1.0";
-        break;
-    case 0xfefd:
-        out << "DTLSv1.2";
-        break;
-    default:
-        out << "SSLv2/unknown";
-    }
-    out << endl;
-
-    out << "accepted ciphers: ";
-    for (int i = 0; i < ciphers.size(); i++) {
-        QString cipher = cipherStringFromId(ciphers.at(i));
-        if (cipher.size() > 0) {
-            out << cipher;
-            if (i != ciphers.size() - 1)
-                out << ":";
-        }
-    }
-    out << endl;
-
-    out << hnd_hello.printable();
-
-    return ret;
-}
-
-QString TlsClientInfo::printable() const
-{
-    QString ret;
-    QTextStream out(&ret);
-
-    out << "source host: " << sourceHost << endl;
-
-    if (isBrokenSslClient) {
-        out << "not a valid TLS/SSL client, "
-            << rawDataRecv.size() << " byte(s) of raw data received, i.e.: "
-            << rawDataRecv.left(32).simplified() << endl;
-    }
-
-    if (hasHelloMessage)
-        out << tlsHelloInfo.printable();
-
-    return ret;
-}
-
-QDebug operator<<(QDebug dbg, const TlsClientInfo &clientInfo)
-{
-    QDebugStateSaver saver(dbg);
-    dbg.nospace();
-
-    dbg << "source host(" << clientInfo.sourceHost << ")" << endl;
-    dbg << "has hello message(" << clientInfo.hasHelloMessage << ")" << endl;
-    dbg << "is broken SSL client(" << clientInfo.isBrokenSslClient << ")" << endl;
-    dbg << "tls version(" << clientInfo.tlsHelloInfo.version << ")" << endl;
-    dbg << "tls ciphers(" << clientInfo.tlsHelloInfo.ciphers << ")" << endl;
-    dbg << "tls session_id(" << clientInfo.tlsHelloInfo.session_id << ")" << endl;
-    dbg << "tls challenge(" << clientInfo.tlsHelloInfo.challenge << ")" << endl;
-    dbg << "tls comp_methods(" << clientInfo.tlsHelloInfo.comp_methods << ")" << endl;
-    dbg << "tls random_time(" << clientInfo.tlsHelloInfo.random_time << ")" << endl;
-    dbg << "tls random(" << clientInfo.tlsHelloInfo.random << ")" << endl;
-    dbg << "tls cookie(" << clientInfo.tlsHelloInfo.cookie << ")" << endl;
-    dbg << "tls hnd_hello_ext_heartbeat_mode(" << clientInfo.tlsHelloInfo.hnd_hello.heartbeat_mode << ")" << endl;
-    dbg << "tls hnd_hello_ext_padding(" << clientInfo.tlsHelloInfo.hnd_hello.padding << ")" << endl;
-    dbg << "tls hnd_hello_ext_record_size_limit(" << clientInfo.tlsHelloInfo.hnd_hello.record_size_limit << ")" << endl;
-    dbg << "tls hnd_hello_ext_supported_version(" << clientInfo.tlsHelloInfo.hnd_hello.supported_version << ")" << endl;
-    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_responder_id_list(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_responder_id_list << ")" << endl;
-    dbg << "tls hnd_hello_ext_cert_status_type_ocsp_request_extensions(" << clientInfo.tlsHelloInfo.hnd_hello.cert_status_type_ocsp_request_extensions << ")" << endl;
-    dbg << "tls hnd_hello_ext_supported_versions(" << clientInfo.tlsHelloInfo.hnd_hello.supported_versions << ")" << endl;
-    dbg << "tls hnd_hello_ext_ec_point_formats(" << clientInfo.tlsHelloInfo.hnd_hello.ec_point_formats << ")" << endl;
-    dbg << "tls hnd_hello_ext_supported_groups(" << clientInfo.tlsHelloInfo.hnd_hello.supported_groups << ")" << endl;
-    dbg << "tls hnd_hello_ext_session_ticket_data(" << clientInfo.tlsHelloInfo.hnd_hello.session_ticket_data << ")" << endl;
-    dbg << "tls hnd_hello_ext_sig_hash_algs(" << clientInfo.tlsHelloInfo.hnd_hello.sig_hash_algs << ")" << endl;
-    dbg << "tls hnd_hello_ext_npn(" << clientInfo.tlsHelloInfo.hnd_hello.npn << ")" << endl;
-    dbg << "tls hnd_hello_ext_alpn(" << clientInfo.tlsHelloInfo.hnd_hello.alpn << ")" << endl;
-    dbg << "tls hnd_hello_ext_ext_encrypt_then_mac(" << clientInfo.tlsHelloInfo.hnd_hello.encrypt_then_mac << ")" << endl;
-    dbg << "tls hnd_hello_ext_extended_master_secret(" << clientInfo.tlsHelloInfo.hnd_hello.extended_master_secret << ")" << endl;
-    dbg << "tls hnd_hello_ext_server_name(" << clientInfo.tlsHelloInfo.hnd_hello.server_name << ")" << endl;
-
-    return dbg;
-}
-
-bool SslTest::checkForNonSslClient()
-{
-#ifdef UNSAFE_QSSL
-    int helloPos = -1;
-    bool isSsl2 = false;
-
-    // test for HELLO message in advance
-    if ((m_rawDataRecv.size() > 0) && ((helloPos = helloPosInBuffer(m_rawDataRecv, &isSsl2)) >= 0)) {
-        m_clientInfo.hasHelloMessage = true;
-
-        if (isSsl2) {
-            dissect_ssl2_hnd_client_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo);
-        } else {
-            ssl_dissect_hnd_cli_hello(m_rawDataRecv.right(m_rawDataRecv.size() - helloPos), &m_clientInfo.tlsHelloInfo, m_dtlsProto);
-        }
-    }
-
-    // some conditions below are excessive, this is for purpose to make our decisions clear
-    if ((m_rawDataRecv.size() == 0)
-            && !m_sslConnectionEstablished
-            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
-        m_report = QString("no data was transmitted before timeout expired");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        m_resultComment = QString("broken client");
-        return true;
-    }
-
-    if ((m_rawDataRecv.size() == 0)
-            && !m_sslConnectionEstablished
-            && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)) {
-        m_report = QString("client closed the connection without transmitting any data");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        m_resultComment = QString("broken client");
-        return true;
-    }
-
-    if ((m_rawDataRecv.size() > 0)
-            && !m_sslConnectionEstablished
-            && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && !m_clientInfo.hasHelloMessage) {
-        m_report = QString("secure connection was not established, %1 bytes were received before client closed the connection")
-                .arg(m_rawDataRecv.size());
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        m_resultComment = QString("broken client");
-        return true;
-    }
-
-    // this case is the same for broken SSL clients and perfectly valid ones
-#if 0
-    if ((m_rawDataRecv.size() > 0)
-            && !m_sslConnectionEstablished
-            && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && hasHelloMessage
-            && (m_sslErrorsStr.size() == 1)
-            && m_sslErrorsStr.contains("The remote host closed the connection")) {
-        // client sent HELLO, but as SSL errors list is empty and encrypted connection
-        // was not established, something went wrong in the middle of handshake
-        // thus, consider client as non-SSL
-        m_report = QString("secure connection was not properly established (however, the attempt was made), client closed the connection");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        return true;
-    }
-#endif
-
-    if ((m_rawDataRecv.size() > 0)
-            && !m_sslConnectionEstablished
-            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && !m_clientInfo.hasHelloMessage) {
-        m_report = QString("secure connection was not established, %1 bytes were received before client was disconnected")
-                .arg(m_rawDataRecv.size());
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        m_resultComment = QString("broken client");
-        return true;
-    }
-
-    if ((m_rawDataRecv.size() > 0)
-            && !m_sslConnectionEstablished
-            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && m_clientInfo.hasHelloMessage
-            && (m_sslErrorsStr.size() == 1)
-            && m_sslErrorsStr.contains("Network operation timed out")) {
-        // client sent HELLO, but as SSL errors list is empty and encrypted connection
-        // was not established, something went wrong in the middle of handshake
-        // thus, consider client as non-SSL
-        m_report = QString("secure connection was not properly established (however, the attempt was made), client was disconnected");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        m_resultComment = QString("broken client");
-        return true;
-    }
-
-    if ((m_rawDataRecv.size() > 0)
-            && !m_sslConnectionEstablished
-            && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)
-            && !m_socketErrors.contains(QAbstractSocket::SocketTimeoutError)
-            && !m_clientInfo.hasHelloMessage
-            && (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
-                && ((m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:http request")).size() > 0)
-                    || (m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)))) {
-        m_report = QString("secure connection was not established, %1 bytes of unexpected protocol were received before the connection was closed")
-                .arg(m_rawDataRecv.size());
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        m_resultComment = QString("broken client");
-        return true;
-    }
-
-    // failsafe check. this can't be SSL client without HELLO message intercepted
-    if ((m_rawDataRecv.size() > 0)
-            && !m_clientInfo.hasHelloMessage) {
-        m_report = QString("secure connection was not established, %1 bytes were received before the connection was closed")
-                .arg(m_rawDataRecv.size());
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_clientInfo.isBrokenSslClient = true;
-        m_resultComment = QString("broken client");
-        return true;
-    }
-#endif
-
-    return false;
-}
-
-bool SslTest::checkForGenericSslErrors()
-{
-    if (m_socketErrors.contains(QAbstractSocket::SslInternalError)
-            || m_socketErrors.contains(QAbstractSocket::SslInvalidUserDataError)) {
-        m_report = QString("failure during SSL initialization");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_resultComment = QString("can't init SSL");
-        return true;
-    }
-
-    return false;
-}
-
-void SslCertificatesTest::calcResults()
-{
-    if (checkForSocketErrors())
+    if (m_result != SslTestResult::Success)
         return;
 
-    if (checkForNonSslClient())
+    SslCheckNonSslClient check2 = SslCheckNonSslClient();
+    rep = check2.doCheck(client);
+
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
+
+    if (m_result != SslTestResult::Success)
         return;
 
-    if (checkForGenericSslErrors())
+    SslCheckForGenericSslErrors check3 = SslCheckForGenericSslErrors();
+    rep = check3.doCheck(client);
+
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
+
+    if (m_result != SslTestResult::Success)
         return;
 
-    if (m_interceptedData.size() > 0) {
-        m_report = QString("test failed, client accepted fake certificate, data was intercepted");
-        setResult(SSLTEST_RESULT_DATA_INTERCEPTED);
-        m_resultComment = QString("mitm possible");
-        return;
-    }
+    SslCheckProtocolsCiphersSupport check4 = SslCheckProtocolsCiphersSupport();
+    rep = check4.doCheck(client);
 
-    if (m_sslConnectionEstablished
-            && (m_interceptedData.size() == 0)
-            && ((m_dtlsProto && !m_dtlsErrors.contains(XDtlsError::RemoteClosedConnectionError))
-                || (!m_dtlsProto && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)))) {
-        m_report = QString("test failed, client accepted fake certificate, but no data transmitted");
-        setResult(SSLTEST_RESULT_CERT_ACCEPTED);
-        m_resultComment = QString("mitm possible");
-        return;
-    }
+    m_result = rep.result;
+    m_resultComment = rep.comment;
+    m_report = rep.report;
 
-    if (!m_sslConnectionEstablished
-            && (m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)
-                && ((m_sslErrorsStr.filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)
-                    || (m_sslErrorsStr.filter(QString("ssl3_get_client_hello:wrong version number")).size() > 0)))) {
-        m_report = QString("secure connection was not established, %1 bytes of unsupported TLS/SSL protocol were received before the connection was closed")
-                .arg(m_rawDataRecv.size());
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_resultComment = QString("client proposed unsupported TLS/SSL protocol");
+    if (m_result != SslTestResult::Success)
         return;
-    }
-
-    if (!m_sslConnectionEstablished) {
-        m_report = QString("test passed, client refused fake certificate");
-        setResult(SSLTEST_RESULT_SUCCESS);
-        m_resultComment = QString("");
-        return;
-    }
-
-    // this is a controversion situation
-    if (m_sslConnectionEstablished
-            && (m_interceptedData.size() == 0)
-            && ((m_dtlsProto && m_dtlsErrors.contains(XDtlsError::RemoteClosedConnectionError))
-                || (!m_dtlsProto && m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)))) {
-        m_report = QString("test result not clear, client established TLS session but disconnected without data transmission and explicit error message");
-        setResult(SSLTEST_RESULT_UNDEFINED);
-        m_resultComment = QString("Invalid clients refuse cert in this way. Clients without data transmitted accept fake cert with the same diagnostics. Setup MitM proxy to be sure.");
-        return;
-    }
-
-    m_report = QString("unhandled case! please report it to developers!");
-    setResult(SSLTEST_RESULT_UNDEFINED);
-    m_resultComment = QString("report this to developers");
-}
-
-void SslProtocolsCiphersTest::calcResults()
-{
-    if (checkForSocketErrors())
-        return;
-
-    if (checkForNonSslClient())
-        return;
-
-    if (checkForGenericSslErrors())
-        return;
-
-    if (m_interceptedData.size() > 0) {
-        m_report = QString("test failed, client accepted fake certificate and weak protocol, data was intercepted");
-        setResult(SSLTEST_RESULT_DATA_INTERCEPTED);
-        m_resultComment = QString("mitm possible");
-        return;
-    }
-
-    if (m_sslConnectionEstablished
-            && (m_interceptedData.size() == 0)
-            && ((m_dtlsProto && !m_dtlsErrors.contains(XDtlsError::RemoteClosedConnectionError))
-                || (!m_dtlsProto && !m_socketErrors.contains(QAbstractSocket::RemoteHostClosedError)))) {
-        m_report = QString("test failed, client accepted fake certificate and weak protocol, but no data transmitted");
-        setResult(SSLTEST_RESULT_CERT_ACCEPTED);
-        m_resultComment = QString("mitm possible");
-        return;
-    }
-
-    if (m_sslConnectionEstablished) {
-        m_report = QString("test failed, client accepted weak protocol");
-        setResult(SSLTEST_RESULT_PROTO_ACCEPTED);
-        m_resultComment = QString("");
-        return;
-    }
-
-    if (!m_sslConnectionEstablished
-            && (m_dtlsProto || (!m_dtlsProto && m_socketErrors.contains(QAbstractSocket::SslHandshakeFailedError)))
-            && ((m_sslErrorsStr.filter(QString("certificate unknown")).size() > 0)
-                || (m_sslErrorsStr.filter(QString("unknown ca")).size() > 0)
-                || (m_sslErrorsStr.filter(QString("bad certificate")).size() > 0))) {
-        m_report = QString("test failed, client accepted weak protocol");
-        setResult(SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR);
-        m_resultComment = QString("");
-        return;
-    } else if (!m_sslConnectionEstablished) {
-        m_report = QString("test passed, client does not accept weak protocol");
-        setResult(SSLTEST_RESULT_SUCCESS);
-        m_resultComment = QString("");
-        return;
-    }
-
-    m_report = QString("unhandled case! please report it to developers!");
-    setResult(SSLTEST_RESULT_UNDEFINED);
-    m_resultComment = QString("report to developers");
 }
 
 bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
@@ -645,7 +226,6 @@ bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
     // in case of DTLS omit protocols test for normal TLS
     // kind of weird piece of code, but should be okay for now and easily traceable in future
     if (settings.getUseDtls()) {
-        setDtlsProto(true);
         if (id() <= 22)
             return false;
     } else {
@@ -675,8 +255,8 @@ bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
     }
 
     // these parameters should be insignificant, but we tried to make them as much "trustful" as possible
-    setLocalCert(chain);
-    setPrivateKey(key);
+    m_localCertsChain = chain;
+    m_privateKey = key;
 
     return setProtoAndCiphers();
 }
@@ -704,7 +284,7 @@ bool SslProtocolsCiphersTest::setProtoOnly(XSsl::SslProtocol proto)
         return false;
     }
 
-    setSslProtocol(proto);
+    m_sslProtocol = proto;
 
     return true;
 }
@@ -716,7 +296,7 @@ bool SslProtocolsCiphersTest::setProtoAndSupportedCiphers(XSsl::SslProtocol prot
     if (!setProtoOnly(proto))
         return false;
 
-    setSslCiphers(ciphers);
+    m_sslCiphers = ciphers;
 
     return true;
 }
@@ -740,7 +320,7 @@ bool SslProtocolsCiphersTest::setProtoAndSpecifiedCiphers(XSsl::SslProtocol prot
         return false;
     }
 
-    setSslCiphers(ciphers);
+    m_sslCiphers = ciphers;
 
     return true;
 }

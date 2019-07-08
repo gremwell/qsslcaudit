@@ -24,6 +24,11 @@ public:
     void printSummary();
     void writeXmlSummary(const QString &filename);
     bool isSameClient(bool doPrint);
+    ClientInfo getClientInfo(int num) {
+        if (num < clientsInfo.size())
+            return *clientsInfo.at(num);
+        return ClientInfo();
+    }
 
 public slots:
     void run();
@@ -34,15 +39,18 @@ signals:
     void sslTestsFinished();
 
 private:
-    void runTest(SslTest *test);
+    void runTest();
     void handleSslSocketErrors(const QList<XSslError> &sslErrors,
                                const QString &errorStr, QAbstractSocket::SocketError socketError);
     static void showCiphersGroup(const QString &groupName, const QString &ciphersStr);
 
     SslUserSettings settings;
+
     QList<SslTest *> sslTests;
     SslTest *currentTest;
-    QVector<TlsClientInfo> clientsInfo;
+
+    QVector<ClientInfo *> clientsInfo;
+    ClientInfo *currentClientInfo;
 
     QStringList m_sslErrorsStr;
     QList<QAbstractSocket::SocketError> m_sslErrors;

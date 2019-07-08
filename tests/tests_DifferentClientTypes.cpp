@@ -81,12 +81,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(static_cast<int>(currentSslTest()->result())));
         }
     }
 
@@ -132,12 +133,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -189,12 +191,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -245,12 +248,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -303,12 +307,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -359,12 +364,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -417,12 +423,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -473,12 +480,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -529,12 +537,13 @@ public:
     void verifySslTestResult()
     {
         // this is due to SSLv3 and current Qt's behaviour not to send proper TLS alert
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -583,12 +592,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::CertAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -637,12 +647,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -695,12 +706,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::DataIntercepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -756,12 +768,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::DataIntercepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -812,12 +825,13 @@ public:
     void verifySslTestResult()
     {
         // this is due to current Qt's behaviour not to send proper TLS alert
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -866,12 +880,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::CertAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -920,12 +935,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -978,12 +994,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::DataIntercepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1039,12 +1056,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::DataIntercepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1118,12 +1136,13 @@ public:
     void verifySslTestResult()
     {
         // this is due to current Qt's behaviour not to send proper TLS alert
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1197,12 +1216,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_CERT_ACCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::CertAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1277,12 +1297,13 @@ public:
     void verifySslTestResult()
     {
         // we can't handle this case for now as we would like to
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1359,12 +1380,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::DataIntercepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1443,12 +1465,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::DataIntercepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1507,12 +1530,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1574,17 +1598,18 @@ public:
         if (currentSslTest()->result() ==
         #ifdef UNSAFE
                 // we can't handle this case for now as we would like to, test result will be success instead of undefined
-                SslTest::SSLTEST_RESULT_SUCCESS
+                SslTestResult::Success
         #else
                 // in safe mode OpenSSL does not know about SSLv3 and will return another error which makes test result undefined
-                SslTest::SSLTEST_RESULT_UNDEFINED
+                SslTestResult::SSLTEST_RESULT_UNDEFINED
         #endif
                 ) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1643,12 +1668,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_UNDEFINED) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -1708,12 +1734,13 @@ public:
     void verifySslTestResult()
     {
         // we can't handle this case for now as we would like to, test result will be success instead of undefined
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+        if (currentSslTest()->result() == SslTestResult::Success) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 

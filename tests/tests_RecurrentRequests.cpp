@@ -78,14 +78,14 @@ public:
     void verifySslTestResult()
     {
         // we can't use currentSslTest as it becomes broken due to manual relaunch of SslCAudit
-        if ((allSslTests().first()->result() == SslTest::SSLTEST_RESULT_DATA_INTERCEPTED)
-                && (allSslTests().first()->interceptedData() == data)) {
+        if ((allSslTests().first()->result() == SslTestResult::DataIntercepted)
+                && (getClient(0).interceptedData() == data)) {
             ;
         } else {
             socket->close();
             setResult(-1);
             printTestFailed(QString("unexpected test result (%1), attempt %2")
-                            .arg(allSslTests().first()->result())
+                            .arg(sslTestResultToString(allSslTests().first()->result()))
                             .arg(currentAttempt));
             isRunning = false;
         }
@@ -174,7 +174,7 @@ public:
     void verifySslTestResult()
     {
         // we can't use currentSslTest as it becomes broken due to manual relaunch of SslCAudit
-        if ((allSslTests().first()->result() == SslTest::SSLTEST_RESULT_UNDEFINED)
+        if ((allSslTests().first()->result() == SslTestResult::Undefined)
                 && (QString::compare(socket->errorString(),
                                      "The host name did not match any of the valid hosts for this certificate") == 0)) {
             ;
@@ -182,7 +182,7 @@ public:
             socket->close();
             setResult(-1);
             printTestFailed(QString("unexpected test result (%1), attempt %2")
-                            .arg(allSslTests().first()->result())
+                            .arg(sslTestResultToString(allSslTests().first()->result()))
                             .arg(currentAttempt));
             isRunning = false;
         }

@@ -59,11 +59,11 @@ void SslCAudit::setSslTests(const QList<SslTest *> &tests)
     sslTests = tests;
 }
 
-void SslCAudit::runTest(SslTest *test)
+void SslCAudit::runTest()
 {
-    WHITE(QString("running test #%1: %2").arg(test->id()).arg(test->description()));
+    WHITE(QString("running test #%1: %2").arg(currentTest->id()).arg(currentTest->description()));
 
-    SslServer *sslServer = new SslServer(settings, test, this);
+    SslServer *sslServer = new SslServer(settings, currentTest, this);
     if (!sslServer->listen()) {
         // this place is in the middle of code path and others could expect
         // some return values, signals, etc.
@@ -87,28 +87,28 @@ void SslCAudit::runTest(SslTest *test)
         XSslError error;
         foreach (error, errors) {
             VERBOSE("\t" + error.errorString());
-            currentTest->addSslErrorString(error.errorString());
+            currentClientInfo->addSslErrorString(error.errorString());
         }
-        currentTest->addSslErrors(errors);
+        currentClientInfo->addSslErrors(errors);
     });
 
     // can be emitted by UDP server only
     connect(sslServer, &SslServer::dtlsHandshakeError, [=](const XDtlsError error, const QString &errorStr) {
         VERBOSE("DTLS error detected:");
         VERBOSE(QString("\t%1(%2)").arg(errorStr).arg(SslServer::dtlsErrorToString(error)));
-        currentTest->addSslErrorString(errorStr);
-        currentTest->addDtlsError(error);
+        currentClientInfo->addSslErrorString(errorStr);
+        currentClientInfo->addDtlsError(error);
     });
 
     // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::dataIntercepted, [=](const QByteArray &data) {
-        currentTest->addInterceptedData(data);
+        currentClientInfo->addInterceptedData(data);
     });
 
     // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::rawDataCollected, [=](const QByteArray &rdData, const QByteArray &wrData) {
-        currentTest->addRawDataRecv(rdData);
-        currentTest->addRawDataSent(wrData);
+        currentClientInfo->addRawDataRecv(rdData);
+        currentClientInfo->addRawDataSent(wrData);
     });
 
     // can be emitted by both TCP and UDP servers
@@ -121,7 +121,7 @@ void SslCAudit::runTest(SslTest *test)
             }
         }
 
-        currentTest->setSslConnectionStatus(true);
+        currentClientInfo->setSslConnectionStatus(true);
     });
 
     // can be emitted by TCP server only
@@ -133,7 +133,7 @@ void SslCAudit::runTest(SslTest *test)
 
     // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::newPeer, [=](const QHostAddress &peerAddress) {
-        currentTest->setClientSourceHost(peerAddress.toString());
+        currentClientInfo->setSourceHost(peerAddress.toString());
     });
 
     emit sslTestReady();
@@ -149,7 +149,7 @@ void SslCAudit::runTest(SslTest *test)
                 VERBOSE("\t" + m_sslErrorsStr.at(i));
             }
 
-            test->calcResults();
+            currentTest->calcResults(*currentClientInfo);
             delete sslServer;
             return;
         }
@@ -163,11 +163,15 @@ void SslCAudit::runTest(SslTest *test)
 
     delete sslServer;
 
-    test->calcResults();
+    currentTest->calcResults(*currentClientInfo);
 
     WHITE("report:");
 
-    test->printReport();
+    if (currentTest->result() != SslTestResult::Success) {
+        RED(currentTest->report());
+    } else {
+        GREEN(currentTest->report());
+    }
 
     WHITE("test finished");
 
@@ -182,9 +186,9 @@ void SslCAudit::handleSslSocketErrors(const QList<XSslError> &sslErrors,
 
     VERBOSE(QString("socket error: %1 (#%2)").arg(errorStr).arg(socketError));
 
-    currentTest->addSslErrors(sslErrors);
-    currentTest->addSslErrorString(errorStr);
-    currentTest->addSocketErrors(QList<QAbstractSocket::SocketError>() << socketError);
+    currentClientInfo->addSslErrors(sslErrors);
+    currentClientInfo->addSslErrorString(errorStr);
+    currentClientInfo->addSocketErrors(QList<QAbstractSocket::SocketError>() << socketError);
 
     switch (socketError) {
     case QAbstractSocket::SslInvalidUserDataError:
@@ -210,6 +214,8 @@ void SslCAudit::handleSslSocketErrors(const QList<XSslError> &sslErrors,
 
 void SslCAudit::run()
 {
+    // in case we were re-launched, clear containers
+    qDeleteAll(clientsInfo.begin(), clientsInfo.end());
     clientsInfo.clear();
 
     do {
@@ -217,8 +223,12 @@ void SslCAudit::run()
             VERBOSE("");
             currentTest = sslTests.at(i);
             currentTest->clear();
-            runTest(currentTest);
-            clientsInfo << currentTest->clientInfo();
+
+            currentClientInfo = new ClientInfo();
+            currentClientInfo->setDtlsMode(settings.getUseDtls());
+            clientsInfo << currentClientInfo;
+
+            runTest();
             VERBOSE("");
         }
     } while (settings.getLoopTests());
@@ -228,7 +238,7 @@ void SslCAudit::run()
 
 bool SslCAudit::isSameClient(bool doPrint)
 {
-    TlsClientInfo client0;
+    ClientInfo *client0;
     bool ret = true;
 
     if (!clientsInfo.size())
@@ -237,7 +247,7 @@ bool SslCAudit::isSameClient(bool doPrint)
     client0 = clientsInfo.at(0);
 
     for (int i = 1; i < clientsInfo.size(); i++) {
-        if (client0 != clientsInfo.at(i)) {
+        if (!client0->isEqualTo(clientsInfo.at(i))) {
             ret = false;
 
             if (doPrint) {
@@ -246,12 +256,12 @@ bool SslCAudit::isSameClient(bool doPrint)
                 if (!headerPrinted) {
                     RED("not all connections were established by the same client, compare the following:");
                     VERBOSE("client #0");
-                    VERBOSE(client0.printable());
+                    VERBOSE(client0->printable());
                     headerPrinted = true;
                 }
 
                 VERBOSE(QString("client #%1").arg(i));
-                VERBOSE(clientsInfo.at(i).printable());
+                VERBOSE(clientsInfo.at(i)->printable());
             } else {
                 break;
             }
@@ -260,7 +270,7 @@ bool SslCAudit::isSameClient(bool doPrint)
 
     if (ret && doPrint) {
         GREEN("most likely all connections were established by the same client, some collected details:");
-        VERBOSE(client0.printable());
+        VERBOSE(client0->printable());
     }
 
     return ret;
@@ -384,18 +394,18 @@ void SslCAudit::printSummary()
         QString testName = test->name();
 
         switch (test->result()) {
-        case SslTest::SSLTEST_RESULT_SUCCESS:
+        case SslTestResult::Success:
             printTableLinePassed(test->id(), testName, test->resultComment());
             break;
-        case SslTest::SSLTEST_RESULT_UNDEFINED:
-        case SslTest::SSLTEST_RESULT_INIT_FAILED:
-        case SslTest::SSLTEST_RESULT_NOT_READY:
+        case SslTestResult::Undefined:
+        case SslTestResult::InitFailed:
+        case SslTestResult::NotReady:
             printTableLineUndefined(test->id(), testName, test->resultComment());
             break;
-        case SslTest::SSLTEST_RESULT_DATA_INTERCEPTED:
-        case SslTest::SSLTEST_RESULT_CERT_ACCEPTED:
-        case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED:
-        case SslTest::SSLTEST_RESULT_PROTO_ACCEPTED_WITH_ERR:
+        case SslTestResult::DataIntercepted:
+        case SslTestResult::CertAccepted:
+        case SslTestResult::ProtoAccepted:
+        case SslTestResult::ProtoAcceptedWithErr:
             printTableLineFailed(test->id(), testName, test->resultComment());
             break;
         }
@@ -418,7 +428,7 @@ void SslCAudit::writeXmlSummary(const QString &filename)
         SslTest *test = sslTests.at(i);
         QString testId = QString::number(test->id());
         QString testName = test->name();
-        QString testResult = SslTest::resultToStatus(test->result());
+        QString testResult = sslTestResultToStatus(test->result());
 
         xmlWriter.writeStartElement("test");
         xmlWriter.writeTextElement("id", testId);

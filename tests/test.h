@@ -3,6 +3,7 @@
 
 #include "debug.h"
 #include "sslcaudit.h"
+#include "ssltestresult.h"
 
 #include <QThread>
 
@@ -44,6 +45,15 @@ public:
 
     SslTest * currentSslTest() {
         return sslTests.at(currentTestNum);
+    }
+
+    ClientInfo currentClient() {
+        return caudit->getClientInfo(currentTestNum);
+    }
+
+    // required for "recurrentRequests" test
+    ClientInfo getClient(int testNum) {
+        return caudit->getClientInfo(testNum);
     }
 
     int currentSslTestNum() {

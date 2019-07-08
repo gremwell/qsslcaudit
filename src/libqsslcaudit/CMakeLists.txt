@@ -11,6 +11,9 @@ set(qsslcauditSources
     sslusersettings.cpp
     starttls.cpp
     tlshello.cpp
+    sslcheck.cpp
+    ssltestresult.cpp
+    clientinfo.cpp
     )
 
 set(qsslcauditHeaders
@@ -27,6 +30,9 @@ set(qsslcauditHeaders
     sslusersettings.h
     starttls.h
     tlshello.h
+    sslcheck.h
+    ssltestresult.h
+    clientinfo.h
     )
 
 include_directories(

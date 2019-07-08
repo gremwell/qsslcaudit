@@ -54,12 +54,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+        if (currentSslTest()->result() == SslTestResult::Success) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -107,12 +108,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -161,12 +163,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_SUCCESS) {
+        if (currentSslTest()->result() == SslTestResult::Success) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
@@ -216,12 +219,13 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTest::SSLTEST_RESULT_PROTO_ACCEPTED) {
+        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
             setResult(-1);
-            printTestFailed(QString("unexpected test result (%1)").arg(currentSslTest()->result()));
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
         }
     }
 
