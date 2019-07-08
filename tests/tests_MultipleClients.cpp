@@ -21,7 +21,7 @@
 // 7. the same SSL clients, no certificate validation, data transmission (different)
 // 8. different SSL clients, no certificate validation, data transmission (the same)
 //
-// As a reference SslTest02 is used:
+// As a reference SslTestCertSS1 is used:
 // "certificate trust test with self-signed certificate for user-supplied common name"
 
 // the same non-SSL clients, no data transmission, disconnect after short timeout
@@ -579,14 +579,14 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test02(2, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test03(3, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test04(4, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test05(5, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test06(6, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test07(7, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
-            << new Test08(8, "MultipleClients", QList<SslTest *>() << new SslTest02 << new SslTest02)
+            << new Test01(1, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
+            << new Test02(2, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
+            << new Test03(3, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
+            << new Test04(4, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
+            << new Test05(5, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
+            << new Test06(6, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
+            << new Test07(7, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
+            << new Test08(8, "MultipleClients", QList<SslTest *>() << new SslTestCertSS1 << new SslTestCertSS1)
                ;
 }
 

@@ -212,8 +212,8 @@ private:
 QList<Test *> createAutotests(int times)
 {
     return QList<Test *>()
-            << new Test01(times, 1, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
-            << new Test02(times, 2, "RecurrentRequests", QList<SslTest *>() << new SslTest02)
+            << new Test01(times, 1, "RecurrentRequests", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test02(times, 2, "RecurrentRequests", QList<SslTest *>() << new SslTestCertSS1)
                ;
 }
 

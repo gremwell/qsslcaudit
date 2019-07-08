@@ -3,13 +3,43 @@
 
 #include "ssltest.h"
 
-#define SSLTESTS_COUNT 28
 
-class SslTest01 : public SslCertificatesTest
+template <typename T>
+class SslTestsFactory
 {
 public:
-    SslTest01() : SslCertificatesTest() {
-        m_id = 1;
+    template <typename TDerived>
+    void registerType(SslTestId name) {
+        static_assert(std::is_base_of<T, TDerived>::value, "Factory::registerType doesn't accept this type because doesn't derive from base class");
+        _createFuncs[name] = &createFunc<TDerived>;
+    }
+
+    T* create(SslTestId name) {
+        typename QMap<SslTestId, PCreateFunc>::const_iterator it = _createFuncs.find(name);
+        if (it != _createFuncs.end()) {
+            return it.value()();
+        }
+        return nullptr;
+    }
+
+private:
+    template <typename TDerived>
+    static T* createFunc() {
+        return new TDerived();
+    }
+
+    typedef T* (*PCreateFunc)();
+    QMap<SslTestId, PCreateFunc> _createFuncs;
+};
+
+extern SslTestsFactory<SslTest> sslTestsFactory;
+extern void fillSslTestsFactory();
+
+class SslTestCertCustom1 : public SslCertificatesTest
+{
+public:
+    SslTestCertCustom1() : SslCertificatesTest() {
+        m_id = SslTestId::SslTestCertCustom1;
         m_name = "custom certificate trust";
         m_description = "certificate trust test with user-supplied certificate";
     }
@@ -17,11 +47,11 @@ public:
 
 };
 
-class SslTest02 : public SslCertificatesTest
+class SslTestCertSS1 : public SslCertificatesTest
 {
 public:
-    SslTest02() {
-        m_id = 2;
+    SslTestCertSS1() {
+        m_id = SslTestId::SslTestCertSS1;
         m_name = "self-signed certificate for target domain trust";
         m_description = "certificate trust test with self-signed certificate for user-supplied common name";
     }
@@ -29,11 +59,11 @@ public:
 
 };
 
-class SslTest03 : public SslCertificatesTest
+class SslTestCertSS2 : public SslCertificatesTest
 {
 public:
-    SslTest03() {
-        m_id = 3;
+    SslTestCertSS2() {
+        m_id = SslTestId::SslTestCertSS2;
         m_name = "self-signed certificate for invalid domain trust";
         m_description = "certificate trust test with self-signed certificate for www.example.com";
     }
@@ -41,11 +71,11 @@ public:
 
 };
 
-class SslTest04 : public SslCertificatesTest
+class SslTestCertCustom2 : public SslCertificatesTest
 {
 public:
-    SslTest04() {
-        m_id = 4;
+    SslTestCertCustom2() {
+        m_id = SslTestId::SslTestCertCustom2;
         m_name = "custom certificate for target domain trust";
         m_description = "certificate trust test with user-supplied common name signed by user-supplied certificate";
     }
@@ -53,11 +83,11 @@ public:
 
 };
 
-class SslTest05 : public SslCertificatesTest
+class SslTestCertCustom3 : public SslCertificatesTest
 {
 public:
-    SslTest05() {
-        m_id = 5;
+    SslTestCertCustom3() {
+        m_id = SslTestId::SslTestCertCustom3;
         m_name = "custom certificate for invalid domain trust";
         m_description = "certificate trust test with www.example.com common name signed by user-supplied certificate";
     }
@@ -65,11 +95,11 @@ public:
 
 };
 
-class SslTest06 : public SslCertificatesTest
+class SslTestCertCA1 : public SslCertificatesTest
 {
 public:
-    SslTest06() {
-        m_id = 6;
+    SslTestCertCA1() {
+        m_id = SslTestId::SslTestCertCA1;
         m_name = "certificate for target domain signed by custom CA trust";
         m_description = "certificate trust test with user-supplied common name signed by user-supplied CA certificate";
     }
@@ -77,11 +107,11 @@ public:
 
 };
 
-class SslTest07 : public SslCertificatesTest
+class SslTestCertCA2 : public SslCertificatesTest
 {
 public:
-    SslTest07() {
-        m_id = 7;
+    SslTestCertCA2() {
+        m_id = SslTestId::SslTestCertCA2;
         m_name = "certificate for invalid domain signed by custom CA trust";
         m_description = "certificate trust test with www.example.com common name signed by user-supplied CA certificate";
     }
@@ -89,11 +119,11 @@ public:
 
 };
 
-class SslTest08 : public SslProtocolsTest
+class SslTestProtoSsl2 : public SslProtocolsTest
 {
 public:
-    SslTest08() {
-        m_id = 8;
+    SslTestProtoSsl2() {
+        m_id = SslTestId::SslTestProtoSsl2;
         m_name = "SSLv2 protocol support";
         m_description = "test for SSLv2 protocol support";
     }
@@ -101,11 +131,11 @@ public:
 
 };
 
-class SslTest09 : public SslProtocolsTest
+class SslTestProtoSsl3 : public SslProtocolsTest
 {
 public:
-    SslTest09() {
-        m_id = 9;
+    SslTestProtoSsl3() {
+        m_id = SslTestId::SslTestProtoSsl3;
         m_name = "SSLv3 protocol support";
         m_description = "test for SSLv3 protocol support";
     }
@@ -113,11 +143,11 @@ public:
 
 };
 
-class SslTest10 : public SslCiphersTest
+class SslTestCiphersSsl3Exp : public SslCiphersTest
 {
 public:
-    SslTest10() {
-        m_id = 10;
+    SslTestCiphersSsl3Exp() {
+        m_id = SslTestId::SslTestCiphersSsl3Exp;
         m_name = "SSLv3 protocol and EXPORT grade ciphers support";
         m_description = "test for SSLv3 protocol and EXPORT grade ciphers support";
     }
@@ -125,11 +155,11 @@ public:
 
 };
 
-class SslTest11 : public SslCiphersTest
+class SslTestCiphersSsl3Low : public SslCiphersTest
 {
 public:
-    SslTest11() {
-        m_id = 11;
+    SslTestCiphersSsl3Low() {
+        m_id = SslTestId::SslTestCiphersSsl3Low;
         m_name = "SSLv3 protocol and LOW grade ciphers support";
         m_description = "test for SSLv3 protocol and LOW grade ciphers support";
     }
@@ -137,11 +167,11 @@ public:
 
 };
 
-class SslTest12 : public SslCiphersTest
+class SslTestCiphersSsl3Med : public SslCiphersTest
 {
 public:
-    SslTest12() {
-        m_id = 12;
+    SslTestCiphersSsl3Med() {
+        m_id = SslTestId::SslTestCiphersSsl3Med;
         m_name = "SSLv3 protocol and MEDIUM grade ciphers support";
         m_description = "test for SSLv3 protocol and MEDIUM grade ciphers support";
     }
@@ -149,11 +179,11 @@ public:
 
 };
 
-class SslTest13 : public SslProtocolsTest
+class SslTestProtoTls10 : public SslProtocolsTest
 {
 public:
-    SslTest13() {
-        m_id = 13;
+    SslTestProtoTls10() {
+        m_id = SslTestId::SslTestProtoTls10;
         m_name = "TLS 1.0 protocol support";
         m_description = "test for TLS 1.0 protocol support";
     }
@@ -161,11 +191,11 @@ public:
 
 };
 
-class SslTest14 : public SslCiphersTest
+class SslTestCiphersTls10Exp : public SslCiphersTest
 {
 public:
-    SslTest14() {
-        m_id = 14;
+    SslTestCiphersTls10Exp() {
+        m_id = SslTestId::SslTestCiphersTls10Exp;
         m_name = "TLS 1.0 protocol and EXPORT grade ciphers support";
         m_description = "test for TLS 1.0 protocol and EXPORT grade ciphers support";
     }
@@ -173,11 +203,11 @@ public:
 
 };
 
-class SslTest15 : public SslCiphersTest
+class SslTestCiphersTls10Low : public SslCiphersTest
 {
 public:
-    SslTest15() {
-        m_id = 15;
+    SslTestCiphersTls10Low() {
+        m_id = SslTestId::SslTestCiphersTls10Low;
         m_name = "TLS 1.0 protocol and LOW grade ciphers support";
         m_description = "test for TLS 1.0 protocol and LOW grade ciphers support";
     }
@@ -185,11 +215,11 @@ public:
 
 };
 
-class SslTest16 : public SslCiphersTest
+class SslTestCiphersTls10Med : public SslCiphersTest
 {
 public:
-    SslTest16() {
-        m_id = 16;
+    SslTestCiphersTls10Med() {
+        m_id = SslTestId::SslTestCiphersTls10Med;
         m_name = "TLS 1.0 protocol and MEDIUM grade ciphers support";
         m_description = "test for TLS 1.0 protocol and MEDIUM grade ciphers support";
     }
@@ -197,11 +227,11 @@ public:
 
 };
 
-class SslTest17 : public SslCiphersTest
+class SslTestCiphersTls11Exp : public SslCiphersTest
 {
 public:
-    SslTest17() {
-        m_id = 17;
+    SslTestCiphersTls11Exp() {
+        m_id = SslTestId::SslTestCiphersTls11Exp;
         m_name = "TLS 1.1 protocol and EXPORT grade ciphers support";
         m_description = "test for TLS 1.1 protocol and EXPORT grade ciphers support";
     }
@@ -209,11 +239,11 @@ public:
 
 };
 
-class SslTest18 : public SslCiphersTest
+class SslTestCiphersTls11Low : public SslCiphersTest
 {
 public:
-    SslTest18() {
-        m_id = 18;
+    SslTestCiphersTls11Low() {
+        m_id = SslTestId::SslTestCiphersTls11Low;
         m_name = "TLS 1.1 protocol and LOW grade ciphers support";
         m_description = "test for TLS 1.1 protocol and LOW grade ciphers support";
     }
@@ -221,11 +251,11 @@ public:
 
 };
 
-class SslTest19 : public SslCiphersTest
+class SslTestCiphersTls11Med : public SslCiphersTest
 {
 public:
-    SslTest19() {
-        m_id = 19;
+    SslTestCiphersTls11Med() {
+        m_id = SslTestId::SslTestCiphersTls11Med;
         m_name = "TLS 1.1 protocol and MEDIUM grade ciphers support";
         m_description = "test for TLS 1.1 protocol and MEDIUM grade ciphers support";
     }
@@ -233,11 +263,11 @@ public:
 
 };
 
-class SslTest20 : public SslCiphersTest
+class SslTestCiphersTls12Exp : public SslCiphersTest
 {
 public:
-    SslTest20() {
-        m_id = 20;
+    SslTestCiphersTls12Exp() {
+        m_id = SslTestId::SslTestCiphersTls12Exp;
         m_name = "TLS 1.2 protocol and EXPORT grade ciphers support";
         m_description = "test for TLS 1.2 protocol and EXPORT grade ciphers support";
     }
@@ -245,11 +275,11 @@ public:
 
 };
 
-class SslTest21 : public SslCiphersTest
+class SslTestCiphersTls12Low : public SslCiphersTest
 {
 public:
-    SslTest21() {
-        m_id = 21;
+    SslTestCiphersTls12Low() {
+        m_id = SslTestId::SslTestCiphersTls12Low;
         m_name = "TLS 1.2 protocol and LOW grade ciphers support";
         m_description = "test for TLS 1.2 protocol and LOW grade ciphers support";
     }
@@ -257,11 +287,11 @@ public:
 
 };
 
-class SslTest22 : public SslCiphersTest
+class SslTestCiphersTls12Med : public SslCiphersTest
 {
 public:
-    SslTest22() {
-        m_id = 22;
+    SslTestCiphersTls12Med() {
+        m_id = SslTestId::SslTestCiphersTls12Med;
         m_name = "TLS 1.2 protocol and MEDIUM grade ciphers support";
         m_description = "test for TLS 1.2 protocol and MEDIUM grade ciphers support";
     }
@@ -269,11 +299,11 @@ public:
 
 };
 
-class SslTest23 : public SslCiphersTest
+class SslTestCiphersDtls10Exp : public SslCiphersTest
 {
 public:
-    SslTest23() {
-        m_id = 23;
+    SslTestCiphersDtls10Exp() {
+        m_id = SslTestId::SslTestCiphersDtls10Exp;
         m_name = "DTLS 1.0 protocol and EXPORT grade ciphers support";
         m_description = "test for DTLS 1.0 protocol and EXPORT grade ciphers support";
     }
@@ -281,11 +311,11 @@ public:
 
 };
 
-class SslTest24 : public SslCiphersTest
+class SslTestCiphersDtls10Low : public SslCiphersTest
 {
 public:
-    SslTest24() {
-        m_id = 24;
+    SslTestCiphersDtls10Low() {
+        m_id = SslTestId::SslTestCiphersDtls10Low;
         m_name = "DTLS 1.0 protocol and LOW grade ciphers support";
         m_description = "test for DTLS 1.0 protocol and LOW grade ciphers support";
     }
@@ -293,11 +323,11 @@ public:
 
 };
 
-class SslTest25 : public SslCiphersTest
+class SslTestCiphersDtls10Med : public SslCiphersTest
 {
 public:
-    SslTest25() {
-        m_id = 25;
+    SslTestCiphersDtls10Med() {
+        m_id = SslTestId::SslTestCiphersDtls10Med;
         m_name = "DTLS 1.0 protocol and MEDIUM grade ciphers support";
         m_description = "test for DTLS 1.0 protocol and MEDIUM grade ciphers support";
     }
@@ -305,11 +335,11 @@ public:
 
 };
 
-class SslTest26 : public SslCiphersTest
+class SslTestCiphersDtls12Exp : public SslCiphersTest
 {
 public:
-    SslTest26() {
-        m_id = 26;
+    SslTestCiphersDtls12Exp() {
+        m_id = SslTestId::SslTestCiphersDtls12Exp;
         m_name = "DTLS 1.2 protocol and EXPORT grade ciphers support";
         m_description = "test for DTLS 1.2 protocol and EXPORT grade ciphers support";
     }
@@ -317,11 +347,11 @@ public:
 
 };
 
-class SslTest27 : public SslCiphersTest
+class SslTestCiphersDtls12Low : public SslCiphersTest
 {
 public:
-    SslTest27() {
-        m_id = 27;
+    SslTestCiphersDtls12Low() {
+        m_id = SslTestId::SslTestCiphersDtls12Low;
         m_name = "DTLS 1.2 protocol and LOW grade ciphers support";
         m_description = "test for DTLS 1.2 protocol and LOW grade ciphers support";
     }
@@ -329,11 +359,11 @@ public:
 
 };
 
-class SslTest28 : public SslCiphersTest
+class SslTestCiphersDtls12Med : public SslCiphersTest
 {
 public:
-    SslTest28() {
-        m_id = 28;
+    SslTestCiphersDtls12Med() {
+        m_id = SslTestId::SslTestCiphersDtls12Med;
         m_name = "DTLS 1.2 protocol and MEDIUM grade ciphers support";
         m_description = "test for DTLS 1.2 protocol and MEDIUM grade ciphers support";
     }

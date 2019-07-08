@@ -9,7 +9,7 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTest09:
+// Target SslTest is SslTestProtoSsl3:
 // "test for SSLv3 protocol support"
 // should be launched with unsafe openssl library
 
@@ -238,10 +238,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTest09", QList<SslTest *>() << new SslTest09)
-            << new Test02(2, "SslTest09", QList<SslTest *>() << new SslTest09)
-            << new Test03(3, "SslTest09", QList<SslTest *>() << new SslTest09)
-            << new Test04(4, "SslTest09", QList<SslTest *>() << new SslTest09)
+            << new Test01(1, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
+            << new Test02(2, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
+            << new Test03(3, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
+            << new Test04(4, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
                ;
 }
 

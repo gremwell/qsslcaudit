@@ -10,7 +10,54 @@
 #endif
 
 
-bool SslTest01::prepare(const SslUserSettings &settings)
+SslTestsFactory<SslTest> sslTestsFactory;
+
+void fillSslTestsFactory()
+{
+    // using 'switch ()' to be sure that all tests are registered
+    for (int i = 0; i < static_cast<int>(SslTestId::SslTestNonexisting); i++) {
+        switch (static_cast<SslTestId>(i)) {
+#define ADD_SSLTEST_CASE(type) \
+        case SslTestId::type: \
+            sslTestsFactory.registerType<type>(SslTestId::type); \
+        break;
+
+        ADD_SSLTEST_CASE(SslTestCertCustom1);
+        ADD_SSLTEST_CASE(SslTestCertSS1);
+        ADD_SSLTEST_CASE(SslTestCertSS2);
+        ADD_SSLTEST_CASE(SslTestCertCustom2);
+        ADD_SSLTEST_CASE(SslTestCertCustom3);
+        ADD_SSLTEST_CASE(SslTestCertCA1);
+        ADD_SSLTEST_CASE(SslTestCertCA2);
+        ADD_SSLTEST_CASE(SslTestProtoSsl2);
+        ADD_SSLTEST_CASE(SslTestProtoSsl3);
+        ADD_SSLTEST_CASE(SslTestCiphersSsl3Exp);
+        ADD_SSLTEST_CASE(SslTestCiphersSsl3Low);
+        ADD_SSLTEST_CASE(SslTestCiphersSsl3Med);
+        ADD_SSLTEST_CASE(SslTestProtoTls10);
+        ADD_SSLTEST_CASE(SslTestCiphersTls10Exp);
+        ADD_SSLTEST_CASE(SslTestCiphersTls10Low);
+        ADD_SSLTEST_CASE(SslTestCiphersTls10Med);
+        ADD_SSLTEST_CASE(SslTestCiphersTls11Exp);
+        ADD_SSLTEST_CASE(SslTestCiphersTls11Low);
+        ADD_SSLTEST_CASE(SslTestCiphersTls11Med);
+        ADD_SSLTEST_CASE(SslTestCiphersTls12Exp);
+        ADD_SSLTEST_CASE(SslTestCiphersTls12Low);
+        ADD_SSLTEST_CASE(SslTestCiphersTls12Med);
+        ADD_SSLTEST_CASE(SslTestCiphersDtls10Exp);
+        ADD_SSLTEST_CASE(SslTestCiphersDtls10Low);
+        ADD_SSLTEST_CASE(SslTestCiphersDtls10Med);
+        ADD_SSLTEST_CASE(SslTestCiphersDtls12Exp);
+        ADD_SSLTEST_CASE(SslTestCiphersDtls12Low);
+        ADD_SSLTEST_CASE(SslTestCiphersDtls12Med);
+
+        case SslTestId::SslTestNonexisting:
+            break;
+        }
+    }
+}
+
+bool SslTestCertCustom1::prepare(const SslUserSettings &settings)
 {
     // if user did not provide a certificate, do not emit error, just skip test initialization
     if (settings.getUserCertPath().isEmpty()) {
@@ -45,7 +92,7 @@ bool SslTest01::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTest02::prepare(const SslUserSettings &settings)
+bool SslTestCertSS1::prepare(const SslUserSettings &settings)
 {
     QPair<XSslCertificate, XSslKey> cert;
 
@@ -79,7 +126,7 @@ bool SslTest02::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTest03::prepare(const SslUserSettings &settings)
+bool SslTestCertSS2::prepare(const SslUserSettings &settings)
 {
     QPair<XSslCertificate, XSslKey> cert = SslCertGen::genSignedCert("www.example.com");
 
@@ -101,7 +148,7 @@ bool SslTest03::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTest04::prepare(const SslUserSettings &settings)
+bool SslTestCertCustom2::prepare(const SslUserSettings &settings)
 {
     QPair<QList<XSslCertificate>, XSslKey> generatedCert;
 
@@ -142,7 +189,7 @@ bool SslTest04::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTest05::prepare(const SslUserSettings &settings)
+bool SslTestCertCustom3::prepare(const SslUserSettings &settings)
 {
     QList<XSslCertificate> chain = settings.getUserCert();
     if (chain.size() == 0)
@@ -171,7 +218,7 @@ bool SslTest05::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTest06::prepare(const SslUserSettings &settings)
+bool SslTestCertCA1::prepare(const SslUserSettings &settings)
 {
     QString cn;
 
@@ -211,7 +258,7 @@ bool SslTest06::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTest07::prepare(const SslUserSettings &settings)
+bool SslTestCertCA2::prepare(const SslUserSettings &settings)
 {
     QList<XSslCertificate> chain = settings.getUserCaCert();
     if (chain.size() == 0)
@@ -240,125 +287,125 @@ bool SslTest07::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTest08::setProtoAndCiphers()
+bool SslTestProtoSsl2::setProtoAndCiphers()
 {
     return setProtoAndSupportedCiphers(XSsl::SslV2);
 }
 
 
-bool SslTest09::setProtoAndCiphers()
+bool SslTestProtoSsl3::setProtoAndCiphers()
 {
     return setProtoAndSupportedCiphers(XSsl::SslV3);
 }
 
 
-bool SslTest10::setProtoAndCiphers()
+bool SslTestCiphersSsl3Exp::setProtoAndCiphers()
 {
     return setProtoAndExportCiphers(XSsl::SslV3);
 }
 
 
-bool SslTest11::setProtoAndCiphers()
+bool SslTestCiphersSsl3Low::setProtoAndCiphers()
 {
     return setProtoAndLowCiphers(XSsl::SslV3);
 }
 
 
-bool SslTest12::setProtoAndCiphers()
+bool SslTestCiphersSsl3Med::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::SslV3);
 }
 
 
-bool SslTest13::setProtoAndCiphers()
+bool SslTestProtoTls10::setProtoAndCiphers()
 {
     return setProtoAndSupportedCiphers(XSsl::TlsV1_0);
 }
 
 
-bool SslTest14::setProtoAndCiphers()
+bool SslTestCiphersTls10Exp::setProtoAndCiphers()
 {
     return setProtoAndExportCiphers(XSsl::TlsV1_0);
 }
 
 
-bool SslTest15::setProtoAndCiphers()
+bool SslTestCiphersTls10Low::setProtoAndCiphers()
 {
     return setProtoAndLowCiphers(XSsl::TlsV1_0);
 }
 
 
-bool SslTest16::setProtoAndCiphers()
+bool SslTestCiphersTls10Med::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::TlsV1_0);
 }
 
 
-bool SslTest17::setProtoAndCiphers()
+bool SslTestCiphersTls11Exp::setProtoAndCiphers()
 {
     return setProtoAndExportCiphers(XSsl::TlsV1_1);
 }
 
 
-bool SslTest18::setProtoAndCiphers()
+bool SslTestCiphersTls11Low::setProtoAndCiphers()
 {
     return setProtoAndLowCiphers(XSsl::TlsV1_1);
 }
 
 
-bool SslTest19::setProtoAndCiphers()
+bool SslTestCiphersTls11Med::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::TlsV1_1);
 }
 
 
-bool SslTest20::setProtoAndCiphers()
+bool SslTestCiphersTls12Exp::setProtoAndCiphers()
 {
     return setProtoAndExportCiphers(XSsl::TlsV1_2);
 }
 
 
-bool SslTest21::setProtoAndCiphers()
+bool SslTestCiphersTls12Low::setProtoAndCiphers()
 {
     return setProtoAndLowCiphers(XSsl::TlsV1_2);
 }
 
 
-bool SslTest22::setProtoAndCiphers()
+bool SslTestCiphersTls12Med::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::TlsV1_2);
 }
 
-bool SslTest23::setProtoAndCiphers()
+bool SslTestCiphersDtls10Exp::setProtoAndCiphers()
 {
     return setProtoAndExportCiphers(XSsl::DtlsV1_0);
 }
 
 
-bool SslTest24::setProtoAndCiphers()
+bool SslTestCiphersDtls10Low::setProtoAndCiphers()
 {
     return setProtoAndLowCiphers(XSsl::DtlsV1_0);
 }
 
 
-bool SslTest25::setProtoAndCiphers()
+bool SslTestCiphersDtls10Med::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::DtlsV1_0);
 }
 
-bool SslTest26::setProtoAndCiphers()
+bool SslTestCiphersDtls12Exp::setProtoAndCiphers()
 {
     return setProtoAndExportCiphers(XSsl::DtlsV1_2);
 }
 
 
-bool SslTest27::setProtoAndCiphers()
+bool SslTestCiphersDtls12Low::setProtoAndCiphers()
 {
     return setProtoAndLowCiphers(XSsl::DtlsV1_2);
 }
 
 
-bool SslTest28::setProtoAndCiphers()
+bool SslTestCiphersDtls12Med::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::DtlsV1_2);
 }

@@ -19,23 +19,53 @@
 #include "ssltestresult.h"
 #include "clientinfo.h"
 
-enum {
-    SSLTESTS_GROUP_CERTS,
-    SSLTESTS_GROUP_PROTOS,
-    SSLTESTS_GROUP_CIPHERS,
+
+enum class SslTestGroup {
+    Certificates,
+    Protocols,
+    Ciphers,
+    Nonexisted,
 };
 
-static const QString SSLTESTS_GROUP_CERTS_STR = QString("certs");
-static const QString SSLTESTS_GROUP_PROTOS_STR = QString("protos");
-static const QString SSLTESTS_GROUP_CIPHERS_STR = QString("ciphers");
+enum class SslTestId : int {
+    SslTestCertCustom1,
+    SslTestCertSS1,
+    SslTestCertSS2,
+    SslTestCertCustom2,
+    SslTestCertCustom3,
+    SslTestCertCA1,
+    SslTestCertCA2,
+    SslTestProtoSsl2,
+    SslTestProtoSsl3,
+    SslTestCiphersSsl3Exp,
+    SslTestCiphersSsl3Low,
+    SslTestCiphersSsl3Med,
+    SslTestProtoTls10,
+    SslTestCiphersTls10Exp,
+    SslTestCiphersTls10Low,
+    SslTestCiphersTls10Med,
+    SslTestCiphersTls11Exp,
+    SslTestCiphersTls11Low,
+    SslTestCiphersTls11Med,
+    SslTestCiphersTls12Exp,
+    SslTestCiphersTls12Low,
+    SslTestCiphersTls12Med,
+    SslTestCiphersDtls10Exp,
+    SslTestCiphersDtls10Low,
+    SslTestCiphersDtls10Med,
+    SslTestCiphersDtls12Exp,
+    SslTestCiphersDtls12Low,
+    SslTestCiphersDtls12Med,
+    SslTestNonexisting,
+};
+
 
 class SslTest
 {
 public:
-    SslTest();
+    SslTest() { clear(); }
     virtual ~SslTest();
 
-    static SslTest *createTest(int id);
     void clear();
 
     // implemented by a particular tests
@@ -43,10 +73,23 @@ public:
     virtual void calcResults(const ClientInfo client) = 0;
 
     // test description
-    int id() const { return m_id; }
-    int group() const { return m_group; }
+    SslTestId id() const { return m_id; }
     QString name() const { return m_name; }
     QString description() const { return m_description; }
+
+    SslTestGroup group() const { return m_group; }
+    static QString groupToStr(SslTestGroup group) {
+        switch (group) {
+        case SslTestGroup::Certificates:
+            return "certs";
+        case SslTestGroup::Protocols:
+            return "protos";
+        case SslTestGroup::Ciphers:
+            return "ciphers";
+        case SslTestGroup::Nonexisted:
+            return "unassigned";
+        }
+    }
 
     // test results
     SslTestResult result() const { return m_result; }
@@ -64,8 +107,8 @@ protected:
     bool checkProtoSupport(XSsl::SslProtocol proto);
 
     // test info
-    int m_id;
-    int m_group;
+    SslTestId m_id;
+    SslTestGroup m_group;
     QString m_name;
     QString m_description;
 
@@ -85,7 +128,7 @@ class SslCertificatesTest : public SslTest
 {
 public:
     SslCertificatesTest() {
-        m_group = SSLTESTS_GROUP_CERTS;
+        m_group = SslTestGroup::Certificates;
     }
 
     virtual void calcResults(const ClientInfo client);
@@ -113,7 +156,7 @@ class SslProtocolsTest : public SslProtocolsCiphersTest
 {
 public:
     SslProtocolsTest() {
-        m_group = SSLTESTS_GROUP_PROTOS;
+        m_group = SslTestGroup::Protocols;
     }
 };
 
@@ -121,7 +164,7 @@ class SslCiphersTest : public SslProtocolsCiphersTest
 {
 public:
     SslCiphersTest() {
-        m_group = SSLTESTS_GROUP_CIPHERS;
+        m_group = SslTestGroup::Ciphers;
     }
 };
 

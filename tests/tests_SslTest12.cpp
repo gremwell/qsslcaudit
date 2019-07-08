@@ -10,7 +10,7 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTest12:
+// Target SslTest is SslTestCiphersSsl3Med:
 // "test for SSLv3 protocol and MEDIUM grade ciphers support"
 // should be launched with unsafe openssl library
 
@@ -288,10 +288,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTest12", QList<SslTest *>() << new SslTest12)
-            << new Test02(2, "SslTest12", QList<SslTest *>() << new SslTest12)
-            << new Test03(3, "SslTest12", QList<SslTest *>() << new SslTest12)
-            << new Test04(4, "SslTest12", QList<SslTest *>() << new SslTest12)
+            << new Test01(1, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
+            << new Test02(2, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
+            << new Test03(3, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
+            << new Test04(4, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
                ;
 }
 

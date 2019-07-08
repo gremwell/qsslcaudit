@@ -9,7 +9,7 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTest02:
+// Target SslTest is SslTestCertSS1:
 // "certificate trust test with self-signed certificate for user-supplied common name"
 
 // do not verify peer certificate, send data to socket
@@ -240,10 +240,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTest02", QList<SslTest *>() << new SslTest02)
-            << new Test02(2, "SslTest02", QList<SslTest *>() << new SslTest02)
-            << new Test03(3, "SslTest02", QList<SslTest *>() << new SslTest02)
-            << new Test04(4, "SslTest02", QList<SslTest *>() << new SslTest02)
+            << new Test01(1, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test02(2, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test03(3, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test04(4, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
                ;
 }
 

@@ -10,7 +10,7 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTest19:
+// Target SslTest is SslTestCiphersTls11Med:
 // "test for TLS 1.1 protocol and MEDIUM grade ciphers support"
 
 
@@ -287,10 +287,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTest19", QList<SslTest *>() << new SslTest19)
-            << new Test02(2, "SslTest19", QList<SslTest *>() << new SslTest19)
-            << new Test03(3, "SslTest19", QList<SslTest *>() << new SslTest19)
-            << new Test04(4, "SslTest19", QList<SslTest *>() << new SslTest19)
+            << new Test01(1, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
+            << new Test02(2, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
+            << new Test03(3, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
+            << new Test04(4, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
                ;
 }
 

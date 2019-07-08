@@ -128,8 +128,8 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTest13", QList<SslTest *>() << new SslTest13)
-            << new Test02(2, "SslTest13", QList<SslTest *>() << new SslTest13)
+            << new Test01(1, "SslTestProtoTls10", QList<SslTest *>() << new SslTestProtoTls10)
+            << new Test02(2, "SslTestProtoTls10", QList<SslTest *>() << new SslTestProtoTls10)
                ;
 }
 

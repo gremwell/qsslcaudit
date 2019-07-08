@@ -11,77 +11,8 @@
 #include <openssl/ssl.h>
 #endif
 
-SslTest::SslTest()
-{
-    clear();
-}
 
-SslTest::~SslTest()
-{
-}
-
-SslTest *SslTest::createTest(int id)
-{
-    switch (id) {
-    case 0:
-        return new SslTest01();
-    case 1:
-        return new SslTest02();
-    case 2:
-        return new SslTest03();
-    case 3:
-        return new SslTest04();
-    case 4:
-        return new SslTest05();
-    case 5:
-        return new SslTest06();
-    case 6:
-        return new SslTest07();
-    case 7:
-        return new SslTest08();
-    case 8:
-        return new SslTest09();
-    case 9:
-        return new SslTest10();
-    case 10:
-        return new SslTest11();
-    case 11:
-        return new SslTest12();
-    case 12:
-        return new SslTest13();
-    case 13:
-        return new SslTest14();
-    case 14:
-        return new SslTest15();
-    case 15:
-        return new SslTest16();
-    case 16:
-        return new SslTest17();
-    case 17:
-        return new SslTest18();
-    case 18:
-        return new SslTest19();
-    case 19:
-        return new SslTest20();
-    case 20:
-        return new SslTest21();
-    case 21:
-        return new SslTest22();
-    case 22:
-        return new SslTest23();
-    case 23:
-        return new SslTest24();
-    case 24:
-        return new SslTest25();
-    case 25:
-        return new SslTest26();
-    case 26:
-        return new SslTest27();
-    case 27:
-        return new SslTest28();
-    }
-    return nullptr;
-}
+SslTest::~SslTest() {}
 
 void SslTest::clear()
 {
@@ -224,12 +155,18 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
 bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
 {
     // in case of DTLS omit protocols test for normal TLS
-    // kind of weird piece of code, but should be okay for now and easily traceable in future
-    if (settings.getUseDtls()) {
-        if (id() <= 22)
+    switch (m_id) {
+    case SslTestId::SslTestCiphersDtls10Exp:
+    case SslTestId::SslTestCiphersDtls10Low:
+    case SslTestId::SslTestCiphersDtls10Med:
+    case SslTestId::SslTestCiphersDtls12Exp:
+    case SslTestId::SslTestCiphersDtls12Low:
+    case SslTestId::SslTestCiphersDtls12Med:
+        if (!settings.getUseDtls())
             return false;
-    } else {
-        if (id() >= 23)
+        break;
+    default:
+        if (settings.getUseDtls())
             return false;
     }
 

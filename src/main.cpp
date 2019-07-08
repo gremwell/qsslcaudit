@@ -21,8 +21,10 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 
     QString appDescription = "A tool to test SSL clients behavior\n\n";
     appDescription += "SSL client tests:\n";
-    for (int i = 0; i < SSLTESTS_COUNT; i++) {
-        SslTest *t = SslTest::createTest(i);
+    for (int i = 0; i < static_cast<int>(SslTestId::SslTestNonexisting); i++) {
+        SslTest *t = sslTestsFactory.create(static_cast<SslTestId>(i));
+        if (!t)
+            continue;
 
         appDescription += QString("\t%1: %2\n").arg(i + 1).arg(t->name());
         appDescription += QString("\t   %1\n").arg(t->description());
@@ -176,7 +178,8 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
                 int low = group.split("-").at(0).toInt(&ok1) - 1;
                 int high = group.split("-").at(1).toInt(&ok2) - 1;
 
-                if (ok1 && ok2 && (low <= high) && (high < SSLTESTS_COUNT)) {
+                if (ok1 && ok2 && (low <= high)
+                        && (high < static_cast<int>(SslTestId::SslTestNonexisting))) {
                     for (int num = low; num <= high; num++) {
                         selectedTests << num;
                     }
@@ -186,23 +189,25 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
             } else {
                 // check for single number
                 int num = group.toInt(&ok) - 1;
-                int selectedGroup = -1;
-                if (ok && (SSLTESTS_COUNT > num)) {
+                SslTestGroup selectedGroup = SslTestGroup::Nonexisted;
+                if (ok && (static_cast<int>(SslTestId::SslTestNonexisting) > num)) {
                     selectedTests << num;
-                } else if (group == SSLTESTS_GROUP_CERTS_STR) {
-                    selectedGroup = SSLTESTS_GROUP_CERTS;
-                } else if (group == SSLTESTS_GROUP_PROTOS_STR) {
-                    selectedGroup = SSLTESTS_GROUP_PROTOS;
-                } else if (group == SSLTESTS_GROUP_CIPHERS_STR) {
-                    selectedGroup = SSLTESTS_GROUP_CIPHERS;
+                } else if (group == static_cast<int>(SslTestGroup::Certificates)) {
+                    selectedGroup = SslTestGroup::Certificates;
+                } else if (group == static_cast<int>(SslTestGroup::Protocols)) {
+                    selectedGroup = SslTestGroup::Protocols;
+                } else if (group == static_cast<int>(SslTestGroup::Ciphers)) {
+                    selectedGroup = SslTestGroup::Ciphers;
                 } else {
                     VERBOSE("WARN: invalid test group skipped " + group);
                     break;
                 }
                 // groups handling is weird until we have global container for all existing tests
                 // TODO: for now, we create a temporary local one
-                for (int i = 0; i < SSLTESTS_COUNT; i++) {
-                    SslTest *test = SslTest::createTest(i);
+                for (int i = 0; i < static_cast<int>(SslTestId::SslTestNonexisting); i++) {
+                    SslTest *test = sslTestsFactory.create(static_cast<SslTestId>(i));
+                    if (!test)
+                        continue;
                     if (test->group() == selectedGroup) {
                         selectedTests << i;
                     }
@@ -212,7 +217,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         }
     } else {
         // if this option is not set -- select all available tests
-        for (int i = 0; i < SSLTESTS_COUNT; i++) {
+        for (int i = 0; i < static_cast<int>(SslTestId::SslTestNonexisting); i++) {
             selectedTests << i;
         }
     }
@@ -263,7 +268,9 @@ QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
 
     VERBOSE("preparing selected tests...");
     for (int i = 0; i < selectedTests.size(); i++) {
-        SslTest *test = SslTest::createTest(selectedTests.at(i));
+        SslTest *test = sslTestsFactory.create(static_cast<SslTestId>(selectedTests.at(i)));
+        if (!test)
+            continue;
         if (test->prepare(settings)) {
             ret << test;
         } else {
@@ -298,6 +305,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion(QSSLC_VERSION);
     QCoreApplication::setOrganizationName("Gremwell");
     QCoreApplication::setOrganizationDomain("gremwell.com");
+
+    // has to be called even before parsing options
+    fillSslTestsFactory();
 
     SslUserSettings settings;
 

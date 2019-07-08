@@ -61,7 +61,7 @@ void SslCAudit::setSslTests(const QList<SslTest *> &tests)
 
 void SslCAudit::runTest()
 {
-    WHITE(QString("running test #%1: %2").arg(currentTest->id()).arg(currentTest->description()));
+    WHITE(QString("running test #%1: %2").arg(static_cast<int>(currentTest->id())).arg(currentTest->description()));
 
     SslServer *sslServer = new SslServer(settings, currentTest, this);
     if (!sslServer->listen()) {
@@ -332,7 +332,8 @@ static void printTableHeaderLine(const QString &c0String, const QString &c1Strin
     out << endl;
 }
 
-static void printTableLineFormatted(int testId, const QString &testName, const QString &testStatus, int statusFormatLen, const QString &testComment)
+static void printTableLineFormatted(SslTestId testId, const QString &testName, const QString &testStatus,
+                                    int statusFormatLen, const QString &testComment)
 {
     QString shortenedTestName = testName.left(testColumnWidth);
     QString shortenedTestComment = testComment.left(commentColumnWidth);
@@ -341,7 +342,7 @@ static void printTableLineFormatted(int testId, const QString &testName, const Q
     out << "| ";
     out << qSetFieldWidth(testIdWidth);
     out.setFieldAlignment(QTextStream::AlignCenter);
-    (testId >= 0) ? out << testId : out << "";
+    (testId == SslTestId::SslTestNonexisting) ? (out << "") : (out << static_cast<int>(testId));
     out << qSetFieldWidth(0);
     out << "| ";
     out << qSetFieldWidth(testColumnWidth);
@@ -362,21 +363,22 @@ static void printTableLineFormatted(int testId, const QString &testName, const Q
     out << endl;
 
     if ((testName.length() > testColumnWidth) || (testComment.length() > commentColumnWidth)) {
-        printTableLineFormatted(-1, testName.mid(testColumnWidth), "", 0, testComment.mid(commentColumnWidth));
+        printTableLineFormatted(SslTestId::SslTestNonexisting, testName.mid(testColumnWidth),
+                                "", 0, testComment.mid(commentColumnWidth));
     }
 }
 
-static void printTableLineFailed(int testId, const QString &testName, const QString &testComment)
+static void printTableLineFailed(SslTestId testId, const QString &testName, const QString &testComment)
 {
     printTableLineFormatted(testId, testName, "\033[1;31mFAILED !!!\033[0m", 11, testComment);
 }
 
-static void printTableLinePassed(int testId, const QString &testName, const QString &testComment)
+static void printTableLinePassed(SslTestId testId, const QString &testName, const QString &testComment)
 {
     printTableLineFormatted(testId, testName, "\033[1;32mPASSED\033[0m", 11, testComment);
 }
 
-static void printTableLineUndefined(int testId, const QString &testName, const QString &testComment)
+static void printTableLineUndefined(SslTestId testId, const QString &testName, const QString &testComment)
 {
     printTableLineFormatted(testId, testName, "\033[1mUNDEF ???\033[0m", 8, testComment);
 }
@@ -426,7 +428,7 @@ void SslCAudit::writeXmlSummary(const QString &filename)
     xmlWriter.writeStartElement("qsslcaudit");
     for (int i = 0; i < sslTests.size(); i++) {
         SslTest *test = sslTests.at(i);
-        QString testId = QString::number(test->id());
+        QString testId = QString::number(static_cast<int>(test->id()));
         QString testName = test->name();
         QString testResult = sslTestResultToStatus(test->result());
 

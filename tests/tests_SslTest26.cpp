@@ -11,7 +11,7 @@
 #include <QDtls>
 #endif
 
-// Target SslTest is SslTest26:
+// Target SslTest is SslTestCiphersDtls12Exp:
 // "test for DTLS 1.2 protocol and EXPORT grade ciphers support"
 
 
@@ -493,11 +493,11 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTest26", QList<SslTest *>() << new SslTest26)
-            << new Test02(2, "SslTest26", QList<SslTest *>() << new SslTest26)
-            << new Test03(3, "SslTest26", QList<SslTest *>() << new SslTest26)
-            << new Test04(4, "SslTest26", QList<SslTest *>() << new SslTest26)
-            << new Test05(5, "SslTest26", QList<SslTest *>() << new SslTest26)
+            << new Test01(1, "SslTestCiphersDtls12Exp", QList<SslTest *>() << new SslTestCiphersDtls12Exp)
+            << new Test02(2, "SslTestCiphersDtls12Exp", QList<SslTest *>() << new SslTestCiphersDtls12Exp)
+            << new Test03(3, "SslTestCiphersDtls12Exp", QList<SslTest *>() << new SslTestCiphersDtls12Exp)
+            << new Test04(4, "SslTestCiphersDtls12Exp", QList<SslTest *>() << new SslTestCiphersDtls12Exp)
+            << new Test05(5, "SslTestCiphersDtls12Exp", QList<SslTest *>() << new SslTestCiphersDtls12Exp)
                ;
 }
 
