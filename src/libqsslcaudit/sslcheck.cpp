@@ -12,7 +12,7 @@ SslCheck::~SslCheck()
 
 }
 
-const SslCheckReport SslCheckSocketErrors::doCheck(const ClientInfo &client)
+const SslCheckReport SslCheckSocketErrors::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
@@ -47,7 +47,7 @@ const SslCheckReport SslCheckSocketErrors::doCheck(const ClientInfo &client)
     return rep;
 }
 
-const SslCheckReport SslCheckNonSslClient::doCheck(const ClientInfo &client)
+const SslCheckReport SslCheckNonSslClient::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
@@ -161,7 +161,7 @@ const SslCheckReport SslCheckNonSslClient::doCheck(const ClientInfo &client)
     return rep;
 }
 
-const SslCheckReport SslCheckForGenericSslErrors::doCheck(const ClientInfo &client)
+const SslCheckReport SslCheckForGenericSslErrors::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
@@ -178,7 +178,7 @@ const SslCheckReport SslCheckForGenericSslErrors::doCheck(const ClientInfo &clie
     return rep;
 }
 
-const SslCheckReport SslCheckCertificatesValidation::doCheck(const ClientInfo &client)
+const SslCheckReport SslCheckCertificatesValidation::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
@@ -237,7 +237,7 @@ const SslCheckReport SslCheckCertificatesValidation::doCheck(const ClientInfo &c
     return rep;
 }
 
-const SslCheckReport SslCheckProtocolsCiphersSupport::doCheck(const ClientInfo &client)
+const SslCheckReport SslCheckProtocolsCiphersSupport::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 

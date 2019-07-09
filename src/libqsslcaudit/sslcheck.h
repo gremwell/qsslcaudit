@@ -35,7 +35,7 @@ public:
     virtual ~SslCheck();
 
     const SslCheckInfo getInfo() { return info; }
-    virtual const SslCheckReport doCheck(const ClientInfo &client) = 0;
+    virtual const SslCheckReport doCheck(const ClientInfo &client) const = 0;
 
 protected:
     SslCheckInfo info;
@@ -48,7 +48,7 @@ public:
         info.id = SslCheckId::SslCheckSocketErrors;
         info.descr = QString("check if there are any errors reported by network socket");
     }
-    const SslCheckReport doCheck(const ClientInfo &client);
+    const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
 class SslCheckNonSslClient : public SslCheck
@@ -58,7 +58,7 @@ public:
         info.id = SslCheckId::SslCheckNonSslClient;
         info.descr = QString("check if the client is non-SSL or is broken in another way");
     }
-    const SslCheckReport doCheck(const ClientInfo &client);
+    const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
 class SslCheckForGenericSslErrors : public SslCheck
@@ -68,7 +68,7 @@ public:
         info.id = SslCheckId::SslCheckForGenericSslErrors;
         info.descr = QString("check if there are generic SSL errors during handshake");
     }
-    const SslCheckReport doCheck(const ClientInfo &client);
+    const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
 class SslCheckCertificatesValidation : public SslCheck
@@ -78,7 +78,7 @@ public:
         info.id = SslCheckId::SslCheckCertificatesValidation;
         info.descr = QString("check if client properly validates certificates");
     }
-    const SslCheckReport doCheck(const ClientInfo &client);
+    const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
 class SslCheckProtocolsCiphersSupport : public SslCheck
@@ -88,7 +88,7 @@ public:
         info.id = SslCheckId::SslCheckProtocolsCiphersSupport;
         info.descr = QString("check if client supports configured protocol/ciphers");
     }
-    const SslCheckReport doCheck(const ClientInfo &client);
+    const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
 #endif // SSLCHECK_H
