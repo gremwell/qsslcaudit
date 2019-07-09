@@ -53,7 +53,8 @@ const SslCheckReport SslCheckNonSslClient::doCheck(const ClientInfo &client) con
 
     rep.result = SslTestResult::Success;
 
-#ifdef UNSAFE_QSSL
+    // technically it depends on UNSAFE_QSSL, but it is always enabled
+//#ifdef UNSAFE_QSSL
     // some conditions below are excessive, this is for purpose to make our decisions clear
     if ((client.rawDataRecv().size() == 0)
             && !client.sslConnectionEstablished()
@@ -157,7 +158,7 @@ const SslCheckReport SslCheckNonSslClient::doCheck(const ClientInfo &client) con
         rep.comment = QString("broken client");
         return rep;
     }
-#endif
+//#endif
     return rep;
 }
 
