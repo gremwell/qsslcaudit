@@ -384,4 +384,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest02dtls.moc"
+#include "tests_SslTestCertSS1dtls.moc"

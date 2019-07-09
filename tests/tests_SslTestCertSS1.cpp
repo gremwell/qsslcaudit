@@ -1,6 +1,5 @@
 #include "test.h"
 #include "ssltests.h"
-#include "ciphers.h"
 
 #include <QCoreApplication>
 
@@ -10,12 +9,11 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTestCiphersTls11Med:
-// "test for TLS 1.1 protocol and MEDIUM grade ciphers support"
+// Target SslTest is SslTestCertSS1:
+// "certificate trust test with self-signed certificate for user-supplied common name"
 
-
-// do verify peer certificate, use TLSv1.2 and stronger protocols
-// check for proper test result code
+// do not verify peer certificate, send data to socket
+// check for proper test result code and intercepted data
 class Test01 : public Test
 {
     Q_OBJECT
@@ -38,23 +36,27 @@ public:
         if (!socket)
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::TlsV1_2);
+        data = QByteArray("GET / HTTP/1.0\r\n\r\n");
+
+        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
             setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
+            printTestFailed("can not establish encrypted connection");
+        } else {
+            socket->write(data);
+            socket->flush();
+            setResult(0);
         }
         socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::Success) {
+        if ((currentSslTest()->result() == SslTestResult::DataIntercepted)
+                && (currentClient().interceptedData() == data)) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -66,10 +68,11 @@ public:
 
 private:
     XSslSocket *socket;
+    QByteArray data;
 
 };
 
-// do verify peer certificate, use TlsV1_1 protocol with medium ciphers
+// do not verify peer certificate, disconnect after timeout
 // check for proper test result code
 class Test02 : public Test
 {
@@ -93,39 +96,23 @@ public:
         if (!socket)
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::TlsV1_1);
-        QList<XSslCipher> mediumCiphers;
-        QStringList opensslCiphers = ciphers_medium_str.split(":");
-
-        for (int i = 0; i < opensslCiphers.size(); i++) {
-            XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
-
-            if (!cipher.isNull())
-                mediumCiphers << cipher;
-        }
-        if (mediumCiphers.size() == 0) {
-            setResult(-1);
-            printTestFailed();
-            QThread::currentThread()->quit();
-            return;
-        }
-        socket->setCiphers(mediumCiphers);
+        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
             setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
+            printTestFailed("can not establish encrypted connection");
+        } else {
+            QThread::msleep(5500);
+            setResult(0);
         }
         socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::CertAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -140,7 +127,7 @@ private:
 
 };
 
-// do verify peer certificate, use TlsV1_1 protocol with high ciphers
+// do verify peer certificate
 // check for proper test result code
 class Test03 : public Test
 {
@@ -165,23 +152,6 @@ public:
             socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::TlsV1_1);
-        QList<XSslCipher> highCiphers;
-        QStringList opensslCiphers = ciphers_high_str.split(":");
-
-        for (int i = 0; i < opensslCiphers.size(); i++) {
-            XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
-
-            if (!cipher.isNull())
-                highCiphers << cipher;
-        }
-        if (highCiphers.size() == 0) {
-            setResult(-1);
-            printTestFailed();
-            QThread::currentThread()->quit();
-            return;
-        }
-        socket->setCiphers(highCiphers);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
@@ -196,7 +166,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::Success) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -211,7 +181,8 @@ private:
 
 };
 
-// do not verify peer certificate, use TlsV1_1 protocol with medium ciphers
+// connect to localhost, but set server name to the same as for ssl server
+// do verify peer certificate
 // check for proper test result code
 class Test04 : public Test
 {
@@ -235,40 +206,22 @@ public:
         if (!socket)
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
-        socket->setProtocol(XSsl::TlsV1_1);
-        QList<XSslCipher> mediumCiphers;
-        QStringList opensslCiphers = ciphers_medium_str.split(":");
+        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
 
-        for (int i = 0; i < opensslCiphers.size(); i++) {
-            XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
-
-            if (!cipher.isNull())
-                mediumCiphers << cipher;
-        }
-        if (mediumCiphers.size() == 0) {
-            setResult(-1);
-            printTestFailed();
-            QThread::currentThread()->quit();
-            return;
-        }
-        socket->setCiphers(mediumCiphers);
-
-        socket->connectToHostEncrypted("localhost", 8443);
+        socket->connectToHostEncrypted("localhost", 8443, "www.example.com");
 
         if (!socket->waitForEncrypted()) {
-            setResult(-1);
-            printTestFailed("can not establish encrypted connection");
-        } else {
             setResult(0);
+        } else {
+            setResult(-1);
+            printTestFailed("encrypted session was established, but should not");
         }
         socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
     {
-        if ((currentSslTest()->result() == SslTestResult::ProtoAccepted)
-                || (currentSslTest()->result() == SslTestResult::CertAccepted)) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -287,10 +240,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
-            << new Test02(2, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
-            << new Test03(3, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
-            << new Test04(4, "SslTestCiphersTls11Med", QList<SslTest *>() << new SslTestCiphersTls11Med)
+            << new Test01(1, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test02(2, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test03(3, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test04(4, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
                ;
 }
 
@@ -318,4 +271,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest19.moc"
+#include "tests_SslTestCertSS1.moc"

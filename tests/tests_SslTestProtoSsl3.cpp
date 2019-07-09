@@ -9,11 +9,13 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTestCertSS1:
-// "certificate trust test with self-signed certificate for user-supplied common name"
+// Target SslTest is SslTestProtoSsl3:
+// "test for SSLv3 protocol support"
+// should be launched with unsafe openssl library
 
-// do not verify peer certificate, send data to socket
-// check for proper test result code and intercepted data
+
+// do verify peer certificate, use secure protocols/ciphers
+// check for proper test result code
 class Test01 : public Test
 {
     Q_OBJECT
@@ -36,27 +38,23 @@ public:
         if (!socket)
             socket = new XSslSocket;
 
-        data = QByteArray("GET / HTTP/1.0\r\n\r\n");
-
-        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
+        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+        socket->setProtocol(XSsl::TlsV1_1OrLater);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            setResult(-1);
-            printTestFailed("can not establish encrypted connection");
-        } else {
-            socket->write(data);
-            socket->flush();
             setResult(0);
+        } else {
+            setResult(-1);
+            printTestFailed("encrypted session was established, but should not");
         }
         socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
     {
-        if ((currentSslTest()->result() == SslTestResult::DataIntercepted)
-                && (currentClient().interceptedData() == data)) {
+        if (currentSslTest()->result() == SslTestResult::Success) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -68,11 +66,9 @@ public:
 
 private:
     XSslSocket *socket;
-    QByteArray data;
-
 };
 
-// do not verify peer certificate, disconnect after timeout
+// do verify peer certificate, use SSLv3 protocol
 // check for proper test result code
 class Test02 : public Test
 {
@@ -96,23 +92,23 @@ public:
         if (!socket)
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
+        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+        socket->setProtocol(XSsl::SslV3);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            setResult(-1);
-            printTestFailed("can not establish encrypted connection");
-        } else {
-            QThread::msleep(5500);
             setResult(0);
+        } else {
+            setResult(-1);
+            printTestFailed("encrypted session was established, but should not");
         }
         socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::CertAccepted) {
+        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -127,7 +123,7 @@ private:
 
 };
 
-// do verify peer certificate
+// do not verify peer certificate, use secure protocols/ciphers
 // check for proper test result code
 class Test03 : public Test
 {
@@ -151,7 +147,8 @@ public:
         if (!socket)
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
+        socket->setProtocol(XSsl::TlsV1_1OrLater);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
@@ -166,7 +163,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::Undefined) {
+        if (currentSslTest()->result() == SslTestResult::Success) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -181,8 +178,7 @@ private:
 
 };
 
-// connect to localhost, but set server name to the same as for ssl server
-// do verify peer certificate
+// do not verify peer certificate, support SSLv3
 // check for proper test result code
 class Test04 : public Test
 {
@@ -206,22 +202,24 @@ public:
         if (!socket)
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
+        socket->setProtocol(XSsl::SslV3);
 
-        socket->connectToHostEncrypted("localhost", 8443, "www.example.com");
+        socket->connectToHostEncrypted("localhost", 8443);
 
         if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
             setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
+            printTestFailed("can not establish encrypted connection");
+        } else {
+            setResult(0);
         }
         socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::Undefined) {
+        if ((currentSslTest()->result() == SslTestResult::ProtoAccepted)
+                || (currentSslTest()->result() == SslTestResult::CertAccepted)) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -240,10 +238,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
-            << new Test02(2, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
-            << new Test03(3, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
-            << new Test04(4, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test01(1, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
+            << new Test02(2, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
+            << new Test03(3, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
+            << new Test04(4, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
                ;
 }
 
@@ -271,4 +269,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest02.moc"
+#include "tests_SslTestProtoSsl3.moc"

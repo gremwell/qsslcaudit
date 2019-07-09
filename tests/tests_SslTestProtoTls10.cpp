@@ -157,4 +157,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest13.moc"
+#include "tests_SslTestProtoTls10.moc"

@@ -9,8 +9,8 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTestProtoSsl3:
-// "test for SSLv3 protocol support"
+// Target SslTest is SslTestProtoSsl2:
+// "test for SSLv2 protocol support"
 // should be launched with unsafe openssl library
 
 
@@ -68,7 +68,7 @@ private:
     XSslSocket *socket;
 };
 
-// do verify peer certificate, use SSLv3 protocol
+// do verify peer certificate, use SSLv2 protocol
 // check for proper test result code
 class Test02 : public Test
 {
@@ -93,7 +93,7 @@ public:
             socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::SslV3);
+        socket->setProtocol(XSsl::SslV2);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
@@ -178,7 +178,7 @@ private:
 
 };
 
-// do not verify peer certificate, support SSLv3
+// do not verify peer certificate, support SSLv2
 // check for proper test result code
 class Test04 : public Test
 {
@@ -203,7 +203,8 @@ public:
             socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyNone);
-        socket->setProtocol(XSsl::SslV3);
+        // AnyProtocol does not include SSLv2
+        socket->setProtocol(XSsl::SslV2);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
@@ -218,8 +219,7 @@ public:
 
     void verifySslTestResult()
     {
-        if ((currentSslTest()->result() == SslTestResult::ProtoAccepted)
-                || (currentSslTest()->result() == SslTestResult::CertAccepted)) {
+        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -238,10 +238,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
-            << new Test02(2, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
-            << new Test03(3, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
-            << new Test04(4, "SslTestProtoSsl3", QList<SslTest *>() << new SslTestProtoSsl3)
+            << new Test01(1, "SslTestProtoSsl2", QList<SslTest *>() << new SslTestProtoSsl2)
+            << new Test02(2, "SslTestProtoSsl2", QList<SslTest *>() << new SslTestProtoSsl2)
+            << new Test03(3, "SslTestProtoSsl2", QList<SslTest *>() << new SslTestProtoSsl2)
+            << new Test04(4, "SslTestProtoSsl2", QList<SslTest *>() << new SslTestProtoSsl2)
                ;
 }
 
@@ -269,4 +269,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest09.moc"
+#include "tests_SslTestProtoSsl2.moc"

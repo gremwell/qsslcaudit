@@ -525,4 +525,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest26.moc"
+#include "tests_SslTestCiphersDtls12Exp.moc"

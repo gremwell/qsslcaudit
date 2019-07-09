@@ -10,12 +10,11 @@
 #include <QSslSocket>
 #endif
 
-// Target SslTest is SslTestCiphersSsl3Med:
-// "test for SSLv3 protocol and MEDIUM grade ciphers support"
-// should be launched with unsafe openssl library
+// Target SslTest is SslTestCiphersTls12Med:
+// "test for TLS 1.2 protocol and MEDIUM grade ciphers support"
 
 
-// do verify peer certificate, use TLSv1.1 and stronger protocols
+// do verify peer certificate, use TLSv1.1
 // check for proper test result code
 class Test01 : public Test
 {
@@ -40,7 +39,7 @@ public:
             socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::TlsV1_1OrLater);
+        socket->setProtocol(XSsl::TlsV1_1);
 
         socket->connectToHostEncrypted("localhost", 8443);
 
@@ -70,7 +69,7 @@ private:
 
 };
 
-// do verify peer certificate, use SSLv3 protocol with medium ciphers
+// do verify peer certificate, use TlsV1_2 protocol with medium ciphers
 // check for proper test result code
 class Test02 : public Test
 {
@@ -95,7 +94,7 @@ public:
             socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::SslV3);
+        socket->setProtocol(XSsl::TlsV1_2);
         QList<XSslCipher> mediumCiphers;
         QStringList opensslCiphers = ciphers_medium_str.split(":");
 
@@ -141,7 +140,7 @@ private:
 
 };
 
-// do verify peer certificate, use SSLv3 protocol with high ciphers
+// do verify peer certificate, use TlsV1_2 protocol with high ciphers
 // check for proper test result code
 class Test03 : public Test
 {
@@ -166,7 +165,7 @@ public:
             socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::SslV3);
+        socket->setProtocol(XSsl::TlsV1_2);
         QList<XSslCipher> highCiphers;
         QStringList opensslCiphers = ciphers_high_str.split(":");
 
@@ -212,7 +211,7 @@ private:
 
 };
 
-// do not verify peer certificate, use SSLv3 protocol with medium ciphers
+// do not verify peer certificate, use TlsV1_2 protocol with medium ciphers
 // check for proper test result code
 class Test04 : public Test
 {
@@ -237,7 +236,7 @@ public:
             socket = new XSslSocket;
 
         socket->setPeerVerifyMode(XSslSocket::VerifyNone);
-        socket->setProtocol(XSsl::SslV3);
+        socket->setProtocol(XSsl::TlsV1_2);
         QList<XSslCipher> mediumCiphers;
         QStringList opensslCiphers = ciphers_medium_str.split(":");
 
@@ -288,10 +287,10 @@ private:
 QList<Test *> createAutotests()
 {
     return QList<Test *>()
-            << new Test01(1, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
-            << new Test02(2, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
-            << new Test03(3, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
-            << new Test04(4, "SslTestCiphersSsl3Med", QList<SslTest *>() << new SslTestCiphersSsl3Med)
+            << new Test01(1, "SslTestCiphersTls12Med", QList<SslTest *>() << new SslTestCiphersTls12Med)
+            << new Test02(2, "SslTestCiphersTls12Med", QList<SslTest *>() << new SslTestCiphersTls12Med)
+            << new Test03(3, "SslTestCiphersTls12Med", QList<SslTest *>() << new SslTestCiphersTls12Med)
+            << new Test04(4, "SslTestCiphersTls12Med", QList<SslTest *>() << new SslTestCiphersTls12Med)
                ;
 }
 
@@ -319,4 +318,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest12.moc"
+#include "tests_SslTestCiphersTls12Med.moc"

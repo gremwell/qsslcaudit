@@ -393,4 +393,4 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-#include "tests_SslTest16.moc"
+#include "tests_SslTestCiphersTls10Med.moc"
