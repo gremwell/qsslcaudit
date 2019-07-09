@@ -65,91 +65,45 @@ bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)
 void SslCertificatesTest::calcResults(const ClientInfo client)
 {
     SslCheckReport rep;
+    QVector<SslCheck *> checks;
 
-    SslCheckSocketErrors check1 = SslCheckSocketErrors();
-    rep = check1.doCheck(client);
+    checks << new SslCheckSocketErrors();
+    checks << new SslCheckNonSslClient();
+    checks << new SslCheckForGenericSslErrors();
+    checks << new SslCheckCertificatesValidation();
 
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
+    for (int i = 0; i < checks.size(); i++) {
+        rep = checks.at(i)->doCheck(client);
 
-    if (m_result != SslTestResult::Success)
-        return;
+        m_result = rep.result;
+        m_resultComment = rep.comment;
+        m_report = rep.report;
 
-    SslCheckNonSslClient check2 = SslCheckNonSslClient();
-    rep = check2.doCheck(client);
-
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
-
-    if (m_result != SslTestResult::Success)
-        return;
-
-    SslCheckForGenericSslErrors check3 = SslCheckForGenericSslErrors();
-    rep = check3.doCheck(client);
-
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
-
-    if (m_result != SslTestResult::Success)
-        return;
-
-    SslCheckCertificatesValidation check4 = SslCheckCertificatesValidation();
-    rep = check4.doCheck(client);
-
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
-
-    if (m_result != SslTestResult::Success)
-        return;
+        if (m_result != SslTestResult::Success)
+            return;
+    }
 }
 
 void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
 {
     SslCheckReport rep;
+    QVector<SslCheck *> checks;
 
-    SslCheckSocketErrors check1 = SslCheckSocketErrors();
-    rep = check1.doCheck(client);
+    checks << new SslCheckSocketErrors();
+    checks << new SslCheckNonSslClient();
+    checks << new SslCheckForGenericSslErrors();
+    checks << new SslCheckProtocolsCiphersSupport();
 
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
+    for (int i = 0; i < checks.size(); i++) {
+        rep = checks.at(i)->doCheck(client);
 
-    if (m_result != SslTestResult::Success)
-        return;
+        m_result = rep.result;
+        m_resultComment = rep.comment;
+        m_report = rep.report;
 
-    SslCheckNonSslClient check2 = SslCheckNonSslClient();
-    rep = check2.doCheck(client);
-
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
-
-    if (m_result != SslTestResult::Success)
-        return;
-
-    SslCheckForGenericSslErrors check3 = SslCheckForGenericSslErrors();
-    rep = check3.doCheck(client);
-
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
-
-    if (m_result != SslTestResult::Success)
-        return;
-
-    SslCheckProtocolsCiphersSupport check4 = SslCheckProtocolsCiphersSupport();
-    rep = check4.doCheck(client);
-
-    m_result = rep.result;
-    m_resultComment = rep.comment;
-    m_report = rep.report;
-
-    if (m_result != SslTestResult::Success)
-        return;
+        if (m_result != SslTestResult::Success)
+            return;
+    }
 }
 
 bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
