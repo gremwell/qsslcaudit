@@ -1,5 +1,7 @@
 #include "clientinfo.h"
 #include "tlshello.h"
+// only for dtlsErrorToString method
+#include "sslserver.h"
 
 
 bool TlsClientHelloExt::operator==(const TlsClientHelloExt &other) const
@@ -227,6 +229,31 @@ QString ClientInfo::printable() const
     QTextStream out(&ret);
 
     out << "source host: " << m_sourceHost << endl;
+
+    out << "dtls?: " << m_dtlsMode << endl;
+    if (m_dtlsMode) {
+        out << "dtls errors: ";
+        for (int i = 0; i < m_dtlsErrors.size(); i++)
+            out << " " << SslServer::dtlsErrorToString(m_dtlsErrors.at(i));
+        out << endl;
+    }
+
+    out << "ssl errors: " << m_sslErrorsStr.join(" ") << endl;
+
+    out << "ssl conn established?: " << m_sslConnectionEstablished << endl;
+
+    if (m_socketErrors.size() > 0) {
+        out << "socket errors: ";
+        for (int i = 0; i < m_socketErrors.size(); i++)
+            out << " " << m_socketErrors.at(i);
+        out << endl;
+    }
+
+    out << "intercepted data: " << m_interceptedData << endl;
+
+    out << "received data, bytes: " << m_rawDataRecv.size() << endl;
+
+    out << "transmitted data, bytes: " << m_rawDataSent.size() << endl;
 
     if (!m_hasHelloMessage) {
         out << "not a valid TLS/SSL client, "
