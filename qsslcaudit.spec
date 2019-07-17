@@ -1,5 +1,5 @@
 Name: qsslcaudit
-Version: 0.6.0
+Version: 0.6.1
 Release: alt1
 Summary: test SSL/TLS clients how secure they are
 License: GPLv3
@@ -38,6 +38,9 @@ data transfers does this in a secure way.
 %doc README.md
 
 %changelog
+* Wed Jul 17 2019 Pavel Nakonechnyi <pavel@altlinux.org> 0.6.1-alt1
+- version 0.6.1
+
 * Thu Jul 04 2019 Pavel Nakonechnyi <pavel@altlinux.org> 0.6.0-alt1
 - version 0.6.0
 
