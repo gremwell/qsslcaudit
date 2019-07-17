@@ -6,7 +6,9 @@
 enum class SslCheckId : int
 {
     SslCheckSocketErrors,
-    SslCheckNonSslClient,
+    SslCheckNoData,
+    SslCheckNonSslData,
+    SslCheckInvalidSsl,
     SslCheckForGenericSslErrors,
     SslCheckCertificatesValidation,
     SslCheckProtocolsCiphersSupport,
@@ -51,11 +53,31 @@ public:
     const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
-class SslCheckNonSslClient : public SslCheck
+class SslCheckNoData : public SslCheck
 {
 public:
-    SslCheckNonSslClient() {
-        info.id = SslCheckId::SslCheckNonSslClient;
+    SslCheckNoData() {
+        info.id = SslCheckId::SslCheckNoData;
+        info.descr = QString("check if no data was transmitted");
+    }
+    const SslCheckReport doCheck(const ClientInfo &client) const;
+};
+
+class SslCheckNonSslData : public SslCheck
+{
+public:
+    SslCheckNonSslData() {
+        info.id = SslCheckId::SslCheckNonSslData;
+        info.descr = QString("check if data transmitted does not have valid HELLO message");
+    }
+    const SslCheckReport doCheck(const ClientInfo &client) const;
+};
+
+class SslCheckInvalidSsl : public SslCheck
+{
+public:
+    SslCheckInvalidSsl() {
+        info.id = SslCheckId::SslCheckInvalidSsl;
         info.descr = QString("check if the client is non-SSL or is broken in another way");
     }
     const SslCheckReport doCheck(const ClientInfo &client) const;

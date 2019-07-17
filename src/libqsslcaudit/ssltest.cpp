@@ -68,8 +68,13 @@ void SslCertificatesTest::calcResults(const ClientInfo client)
     QVector<SslCheck *> checks;
 
     checks << new SslCheckSocketErrors();
-    checks << new SslCheckNonSslClient();
+
+    checks << new SslCheckNoData();
+    checks << new SslCheckNonSslData();
+    checks << new SslCheckInvalidSsl();
+
     checks << new SslCheckForGenericSslErrors();
+
     checks << new SslCheckCertificatesValidation();
 
     for (int i = 0; i < checks.size(); i++) {
@@ -90,8 +95,13 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
     QVector<SslCheck *> checks;
 
     checks << new SslCheckSocketErrors();
-    checks << new SslCheckNonSslClient();
+
+    checks << new SslCheckNoData();
+    checks << new SslCheckNonSslData();
+    checks << new SslCheckInvalidSsl();
+
     checks << new SslCheckForGenericSslErrors();
+
     checks << new SslCheckProtocolsCiphersSupport();
 
     for (int i = 0; i < checks.size(); i++) {
