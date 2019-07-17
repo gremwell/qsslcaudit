@@ -79,6 +79,7 @@ bool SslUserSettings::setServerAddr(const QString &addr)
 
     if (!useDtls) {
         XSslSocket socket;
+        socket.setPeerVerifyMode(XSslSocket::VerifyNone);
         socket.connectToHostEncrypted(host, port);
         if (!socket.waitForEncrypted()) {
             RED("failed to connect to " + addr);
