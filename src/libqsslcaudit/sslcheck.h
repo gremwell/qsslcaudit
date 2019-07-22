@@ -10,8 +10,8 @@ enum class SslCheckId : int
     SslCheckNonSslData,
     SslCheckInvalidSsl,
     SslCheckForGenericSslErrors,
-    SslCheckCertificatesValidation,
-    SslCheckProtocolsCiphersSupport,
+    SslCheckConnectionEstablished,
+    SslCheckCertificateRefused,
 };
 
 class SslCheckInfo
@@ -93,22 +93,22 @@ public:
     const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
-class SslCheckCertificatesValidation : public SslCheck
+class SslCheckConnectionEstablished : public SslCheck
 {
 public:
-    SslCheckCertificatesValidation() {
-        info.id = SslCheckId::SslCheckCertificatesValidation;
-        info.descr = QString("check if client properly validates certificates");
+    SslCheckConnectionEstablished() {
+        info.id = SslCheckId::SslCheckConnectionEstablished;
+        info.descr = QString("check if SSL connection was established");
     }
     const SslCheckReport doCheck(const ClientInfo &client) const;
 };
 
-class SslCheckProtocolsCiphersSupport : public SslCheck
+class SslCheckCertificateRefused : public SslCheck
 {
 public:
-    SslCheckProtocolsCiphersSupport() {
-        info.id = SslCheckId::SslCheckProtocolsCiphersSupport;
-        info.descr = QString("check if client supports configured protocol/ciphers");
+    SslCheckCertificateRefused() {
+        info.id = SslCheckId::SslCheckCertificateRefused;
+        info.descr = QString("check if client explicitly refused server certificate");
     }
     const SslCheckReport doCheck(const ClientInfo &client) const;
 };

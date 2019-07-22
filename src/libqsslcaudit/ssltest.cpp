@@ -75,7 +75,7 @@ void SslCertificatesTest::calcResults(const ClientInfo client)
 
     checks << new SslCheckForGenericSslErrors();
 
-    checks << new SslCheckCertificatesValidation();
+    checks << new SslCheckConnectionEstablished();
 
     for (int i = 0; i < checks.size(); i++) {
         rep = checks.at(i)->doCheck(client);
@@ -102,7 +102,9 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
 
     checks << new SslCheckForGenericSslErrors();
 
-    checks << new SslCheckProtocolsCiphersSupport();
+    checks << new SslCheckConnectionEstablished();
+
+    checks << new SslCheckCertificateRefused();
 
     for (int i = 0; i < checks.size(); i++) {
         rep = checks.at(i)->doCheck(client);

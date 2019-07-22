@@ -264,7 +264,7 @@ public:
     {
         setResult(-1);
 
-        if (currentSslTest()->result() == SslTestResult::Undefined) {
+        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
             if (currentSslTestNum() == 1) {
                 if (!isSameClient(false)) {
                     setResult(-1);
@@ -331,7 +331,7 @@ public:
     {
         setResult(-1);
 
-        if (currentSslTest()->result() == SslTestResult::Undefined) {
+        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
             if (currentSslTestNum() == 1) {
                 if (isSameClient(false)) {
                     setResult(-1);
@@ -412,7 +412,7 @@ public:
     {
         setResult(-1);
 
-        if (currentSslTest()->result() == SslTestResult::Undefined) {
+        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
             if (currentSslTestNum() == 1) {
                 if (isSameClient(false)) {
                     setResult(-1);

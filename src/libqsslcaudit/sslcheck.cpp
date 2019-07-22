@@ -177,20 +177,32 @@ const SslCheckReport SslCheckForGenericSslErrors::doCheck(const ClientInfo &clie
             || client.socketErrors().contains(QAbstractSocket::SslInvalidUserDataError)) {
         rep.report = QString("failure during SSL initialization");
         rep.result = SslTestResult::Undefined;
-        rep.comment = QString("can't init SSL");
+        rep.comment = QString("can't init SSL context");
+        return rep;
+    }
+
+    if (!client.sslConnectionEstablished()
+            && (client.socketErrors().contains(QAbstractSocket::SslHandshakeFailedError)
+                && ((client.sslErrorsStr().filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)
+                    || (client.sslErrorsStr().filter(QString("ssl3_get_client_hello:wrong version number")).size() > 0)))) {
+        rep.report = QString("secure connection was not established, %1 bytes of unsupported TLS/SSL protocol were received before the connection was closed")
+                .arg(client.rawDataRecv().size());
+        rep.result = SslTestResult::Undefined;
+        rep.comment = QString("client proposed unsupported TLS/SSL protocol");
         return rep;
     }
 
     return rep;
 }
 
-const SslCheckReport SslCheckCertificatesValidation::doCheck(const ClientInfo &client) const
+const SslCheckReport SslCheckConnectionEstablished::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
     rep.result = SslTestResult::Success;
 
-    if (client.interceptedData().size() > 0) {
+    if (client.sslConnectionEstablished()
+            && (client.interceptedData().size() > 0)) {
         rep.report = QString("test failed, client accepted fake certificate, data was intercepted");
         rep.result = SslTestResult::DataIntercepted;
         rep.comment = QString("mitm possible");
@@ -207,91 +219,43 @@ const SslCheckReport SslCheckCertificatesValidation::doCheck(const ClientInfo &c
         return rep;
     }
 
-    if (!client.sslConnectionEstablished()
-            && (client.socketErrors().contains(QAbstractSocket::SslHandshakeFailedError)
-                && ((client.sslErrorsStr().filter(QString("SSL23_GET_CLIENT_HELLO:unknown protocol")).size() > 0)
-                    || (client.sslErrorsStr().filter(QString("ssl3_get_client_hello:wrong version number")).size() > 0)))) {
-        rep.report = QString("secure connection was not established, %1 bytes of unsupported TLS/SSL protocol were received before the connection was closed")
-                .arg(client.rawDataRecv().size());
-        rep.result = SslTestResult::Undefined;
-        rep.comment = QString("client proposed unsupported TLS/SSL protocol");
-        return rep;
-    }
-
-    if (!client.sslConnectionEstablished()) {
-        rep.report = QString("test passed, client refused fake certificate");
-        rep.result = SslTestResult::Success;
-        rep.comment = QString("");
-        return rep;
-    }
-
     // this is a controversion situation
     if (client.sslConnectionEstablished()
             && (client.interceptedData().size() == 0)
             && ((client.dtlsMode() && client.dtlsErrors().contains(XDtlsError::RemoteClosedConnectionError))
                 || (!client.dtlsMode() && client.socketErrors().contains(QAbstractSocket::RemoteHostClosedError)))) {
         rep.report = QString("test result not clear, client established TLS session but disconnected without data transmission and explicit error message");
-        rep.result = SslTestResult::Undefined;
-        rep.comment = QString("Invalid clients refuse cert in this way. Clients without data transmitted accept fake cert with the same diagnostics. Setup MitM proxy to be sure.");
-        return rep;
-    }
-
-    rep.report = QString("unhandled case! please report it to developers!");
-    rep.result = SslTestResult::Undefined;
-    rep.comment = QString("report this to developers");
-
-    return rep;
-}
-
-const SslCheckReport SslCheckProtocolsCiphersSupport::doCheck(const ClientInfo &client) const
-{
-    SslCheckReport rep;
-
-    rep.result = SslTestResult::Success;
-
-    if (client.interceptedData().size() > 0) {
-        rep.report = QString("test failed, client accepted fake certificate and weak protocol, data was intercepted");
-        rep.result = SslTestResult::DataIntercepted;
-        rep.comment = QString("mitm possible");
-        return rep;
-    }
-
-    if (client.sslConnectionEstablished()
-            && (client.interceptedData().size() == 0)
-            && ((client.dtlsMode() && !client.dtlsErrors().contains(XDtlsError::RemoteClosedConnectionError))
-                || (!client.dtlsMode() && !client.socketErrors().contains(QAbstractSocket::RemoteHostClosedError)))) {
-        rep.report = QString("test failed, client accepted fake certificate and weak protocol, but no data transmitted");
-        rep.result = SslTestResult::CertAccepted;
-        rep.comment = QString("mitm possible");
+        rep.result = SslTestResult::ProtoAccepted;
+        rep.comment = QString("Clients without data transmission accept cert with the same diagnostics. Others refuse cert in this way. Setup MitM proxy to be sure.");
         return rep;
     }
 
     if (client.sslConnectionEstablished()) {
-        rep.report = QString("test failed, client accepted weak protocol");
-        rep.result = SslTestResult::ProtoAccepted;
-        rep.comment = QString("");
+        rep.report = QString("unhandled case! please report it to developers!");
+        rep.result = SslTestResult::Undefined;
+        rep.comment = QString("report this to developers");
         return rep;
     }
+
+    return rep;
+}
+
+const SslCheckReport SslCheckCertificateRefused::doCheck(const ClientInfo &client) const
+{
+    SslCheckReport rep;
+
+    rep.result = SslTestResult::Success;
 
     if (!client.sslConnectionEstablished()
             && (client.dtlsMode() || (!client.dtlsMode() && client.socketErrors().contains(QAbstractSocket::SslHandshakeFailedError)))
             && ((client.sslErrorsStr().filter(QString("certificate unknown")).size() > 0)
                 || (client.sslErrorsStr().filter(QString("unknown ca")).size() > 0)
                 || (client.sslErrorsStr().filter(QString("bad certificate")).size() > 0))) {
-        rep.report = QString("test failed, client accepted weak protocol");
+        rep.report = QString("client accepted our protocol but explicitly refused our certificate");
         rep.result = SslTestResult::ProtoAcceptedWithErr;
         rep.comment = QString("");
         return rep;
-    } else if (!client.sslConnectionEstablished()) {
-        rep.report = QString("test passed, client does not accept weak protocol");
-        rep.result = SslTestResult::Success;
-        rep.comment = QString("");
-        return rep;
     }
-
-    rep.report = QString("unhandled case! please report it to developers!");
-    rep.result = SslTestResult::Undefined;
-    rep.comment = QString("report to developers");
 
     return rep;
 }
