@@ -26,7 +26,10 @@ class SslCheckReport
 public:
     QString report;
     QString comment;
-    SslTestResult result;
+    SslTestResult suggestedTestResult;
+    // returns false if the particular "check" conditions were met
+    // i.e. returns false for SslCheckSocketErrors if there were errors
+    bool isPassed;
 };
 
 class ClientInfo;

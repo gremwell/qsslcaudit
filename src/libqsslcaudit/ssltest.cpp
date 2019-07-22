@@ -80,13 +80,19 @@ void SslCertificatesTest::calcResults(const ClientInfo client)
     for (int i = 0; i < checks.size(); i++) {
         rep = checks.at(i)->doCheck(client);
 
-        m_result = rep.result;
-        m_resultComment = rep.comment;
-        m_report = rep.report;
-
-        if (m_result != SslTestResult::Success)
+        // stop at the first failed check
+        if (!rep.isPassed) {
+            m_result = rep.suggestedTestResult;
+            m_resultComment = rep.comment;
+            m_report = rep.report;
             return;
+        }
     }
+
+    // all checks passed, report the proper result
+    m_result = SslTestResult::Success;
+    m_report = QString("client did not accept fake certificate");
+    m_resultComment = QString("");
 }
 
 void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
@@ -109,13 +115,19 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
     for (int i = 0; i < checks.size(); i++) {
         rep = checks.at(i)->doCheck(client);
 
-        m_result = rep.result;
-        m_resultComment = rep.comment;
-        m_report = rep.report;
-
-        if (m_result != SslTestResult::Success)
+        // stop at the first failed check
+        if (!rep.isPassed) {
+            m_result = rep.suggestedTestResult;
+            m_resultComment = rep.comment;
+            m_report = rep.report;
             return;
+        }
     }
+
+    // all checks passed, report the proper result
+    m_result = SslTestResult::Success;
+    m_report = QString("client did not accept weak protocol");
+    m_resultComment = QString("");
 }
 
 bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
