@@ -16,10 +16,8 @@ const SslCheckReport SslCheckSocketErrors::doCheck(const ClientInfo &client) con
 {
     SslCheckReport rep;
 
-    rep.suggestedTestResult = SslTestResult::Success;
-    rep.isPassed = true;
-
-    // all errors should be here except those which we handle below in a particular test
+    // the errors here should not appear during regular communication
+    // the rest is fine and are important for other checks
     if (client.socketErrors().contains(QAbstractSocket::ConnectionRefusedError)
             || client.socketErrors().contains(QAbstractSocket::HostNotFoundError)
             || client.socketErrors().contains(QAbstractSocket::SocketAccessError)
@@ -30,6 +28,12 @@ const SslCheckReport SslCheckSocketErrors::doCheck(const ClientInfo &client) con
             || client.socketErrors().contains(QAbstractSocket::SocketAddressNotAvailableError)
             || client.socketErrors().contains(QAbstractSocket::UnsupportedSocketOperationError)
             || client.socketErrors().contains(QAbstractSocket::UnfinishedSocketOperationError)
+            || client.socketErrors().contains(QAbstractSocket::ProxyAuthenticationRequiredError)
+            || client.socketErrors().contains(QAbstractSocket::ProxyConnectionRefusedError)
+            || client.socketErrors().contains(QAbstractSocket::ProxyConnectionClosedError)
+            || client.socketErrors().contains(QAbstractSocket::ProxyConnectionTimeoutError)
+            || client.socketErrors().contains(QAbstractSocket::ProxyNotFoundError)
+            || client.socketErrors().contains(QAbstractSocket::ProxyProtocolError)
             || client.socketErrors().contains(QAbstractSocket::OperationError)
             || client.socketErrors().contains(QAbstractSocket::TemporaryError)) {
         rep.report = QString("socket/network error occuried");
@@ -37,9 +41,7 @@ const SslCheckReport SslCheckSocketErrors::doCheck(const ClientInfo &client) con
         rep.comment = QString("socket error");
         rep.isPassed = false;
         return rep;
-    }
-
-    if (client.socketErrors().contains(QAbstractSocket::UnknownSocketError)) {
+    } else if (client.socketErrors().contains(QAbstractSocket::UnknownSocketError)) {
         rep.report = QString("unknown socket error occuried");
         rep.suggestedTestResult = SslTestResult::Undefined;
         rep.comment = QString("socket error");
@@ -47,6 +49,10 @@ const SslCheckReport SslCheckSocketErrors::doCheck(const ClientInfo &client) con
         return rep;
     }
 
+    rep.report = QString("");
+    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.comment = QString("");
+    rep.isPassed = true;
     return rep;
 }
 
