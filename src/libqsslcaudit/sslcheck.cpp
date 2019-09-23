@@ -99,8 +99,13 @@ const SslCheckReport SslCheckNonSslData::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
-    rep.suggestedTestResult = SslTestResult::Success;
-    rep.isPassed = true;
+    if (client.hasHelloMessage()) {
+        rep.report = QString("");
+        rep.suggestedTestResult = SslTestResult::Undefined;
+        rep.comment = QString("");
+        rep.isPassed = true;
+        return rep;
+    }
 
     if ((client.rawDataRecv().size() > 0)
             && !client.hasHelloMessage()
@@ -138,17 +143,11 @@ const SslCheckReport SslCheckNonSslData::doCheck(const ClientInfo &client) const
         return rep;
     }
 
-    // failsafe check
-    if ((client.rawDataRecv().size() > 0)
-            && !client.hasHelloMessage()) {
-        rep.report = QString("%1 bytes were received, however, unexpected set of other errors observed")
-                .arg(client.rawDataRecv().size());
-        rep.suggestedTestResult = SslTestResult::Undefined;
-        rep.comment = QString("broken client");
-        rep.isPassed = false;
-        return rep;
-    }
-
+    rep.report = QString("%1 bytes were received, however, unexpected set of other errors observed")
+            .arg(client.rawDataRecv().size());
+    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.comment = QString("broken client");
+    rep.isPassed = false;
     return rep;
 }
 
