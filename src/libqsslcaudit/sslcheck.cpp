@@ -60,9 +60,6 @@ const SslCheckReport SslCheckNoData::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
-    rep.suggestedTestResult = SslTestResult::Success;
-    rep.isPassed = true;
-
     if ((client.rawDataRecv().size() == 0)
             && !client.socketErrors().contains(QAbstractSocket::RemoteHostClosedError)
             && client.socketErrors().contains(QAbstractSocket::SocketTimeoutError)) {
@@ -83,6 +80,18 @@ const SslCheckReport SslCheckNoData::doCheck(const ClientInfo &client) const
         return rep;
     }
 
+    if (client.rawDataRecv().size() > 0) {
+        rep.report = QString("");
+        rep.suggestedTestResult = SslTestResult::Undefined;
+        rep.comment = QString("");
+        rep.isPassed = true;
+        return rep;
+    }
+
+    rep.report = QString("no data received with socket in incorrect state");
+    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.comment = QString("report this case to developers");
+    rep.isPassed = false;
     return rep;
 }
 
