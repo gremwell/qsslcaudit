@@ -166,7 +166,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -221,7 +221,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {

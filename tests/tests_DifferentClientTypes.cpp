@@ -537,7 +537,7 @@ public:
     void verifySslTestResult()
     {
         // this is due to SSLv3 and current Qt's behaviour not to send proper TLS alert
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -647,7 +647,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -825,7 +825,7 @@ public:
     void verifySslTestResult()
     {
         // this is due to current Qt's behaviour not to send proper TLS alert
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -935,7 +935,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -1136,7 +1136,7 @@ public:
     void verifySslTestResult()
     {
         // this is due to current Qt's behaviour not to send proper TLS alert
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -1297,7 +1297,7 @@ public:
     void verifySslTestResult()
     {
         // we can't handle this case for now as we would like to
-        if (currentSslTest()->result() == SslTestResult::ProtoAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {

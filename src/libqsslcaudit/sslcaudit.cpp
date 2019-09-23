@@ -411,6 +411,7 @@ void SslCAudit::printSummary()
         case SslTestResult::Undefined:
         case SslTestResult::InitFailed:
         case SslTestResult::NotReady:
+        case SslTestResult::UnhandledCase:
             printTableLineUndefined(test->id(), testName, comment);
             break;
         case SslTestResult::DataIntercepted:

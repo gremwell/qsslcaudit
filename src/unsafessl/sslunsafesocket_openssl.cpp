@@ -362,6 +362,7 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
 
     // Create and initialize SSL session
     if (!(ssl = sslContextPointer->createSsl())) {
+        qDebug("0");
         // ### Bad error code
         setErrorAndEmit(QAbstractSocket::SslInternalError,
                         SslUnsafeSocket::tr("Error creating SSL session, %1").arg(getErrorsFromOpenSsl()));
@@ -397,6 +398,7 @@ bool SslUnsafeSocketBackendPrivate::initSslContext()
     readBio = q_BIO_new(q_BIO_s_mem());
     writeBio = q_BIO_new(q_BIO_s_mem());
     if (!readBio || !writeBio) {
+        qDebug("1");
         setErrorAndEmit(QAbstractSocket::SslInternalError,
                         SslUnsafeSocket::tr("Error creating SSL session: %1").arg(getErrorsFromOpenSsl()));
         return false;
@@ -646,6 +648,7 @@ QList<SslUnsafeCertificate> SslUnsafeSocketPrivate::systemCaCertificates()
 void SslUnsafeSocketBackendPrivate::startClientEncryption()
 {
     if (!initSslContext()) {
+        qDebug("2");
         setErrorAndEmit(QAbstractSocket::SslInternalError,
                         SslUnsafeSocket::tr("Unable to init SSL Context: %1").arg(getErrorsFromOpenSsl()));
         return;
@@ -660,6 +663,7 @@ void SslUnsafeSocketBackendPrivate::startClientEncryption()
 void SslUnsafeSocketBackendPrivate::startServerEncryption()
 {
     if (!initSslContext()) {
+        qDebug("3");
         setErrorAndEmit(QAbstractSocket::SslInternalError,
                         SslUnsafeSocket::tr("Unable to init SSL Context: %1").arg(getErrorsFromOpenSsl()));
         return;
@@ -713,6 +717,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                     } else {
                         // ### Better error handling.
                         const ScopedBool bg(inSetAndEmitError, true);
+                        qDebug("4");
                         setErrorAndEmit(QAbstractSocket::SslInternalError,
                                         SslUnsafeSocket::tr("Unable to write data: %1").arg(
                                             getErrorsFromOpenSsl()));
@@ -789,6 +794,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                 } else {
                     // ### Better error handling.
                     const ScopedBool bg(inSetAndEmitError, true);
+                    qDebug("5");
                     setErrorAndEmit(QAbstractSocket::SslInternalError,
                                     SslUnsafeSocket::tr("Unable to decrypt data: %1").arg(
                                         getErrorsFromOpenSsl()));
@@ -882,6 +888,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                 // so just return to prevent an endless loop in the outer "while" statement
                 {
                     const ScopedBool bg(inSetAndEmitError, true);
+                    qDebug("6");
                     setErrorAndEmit(QAbstractSocket::SslInternalError,
                                     SslUnsafeSocket::tr("Error while reading: %1").arg(getErrorsFromOpenSsl()));
                 }
@@ -894,6 +901,7 @@ void SslUnsafeSocketBackendPrivate::transmit()
                 // So this default case should never be triggered.
                 {
                     const ScopedBool bg(inSetAndEmitError, true);
+                    qDebug("7");
                     setErrorAndEmit(QAbstractSocket::SslInternalError,
                                     SslUnsafeSocket::tr("Error while reading: %1").arg(getErrorsFromOpenSsl()));
                 }

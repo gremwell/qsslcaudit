@@ -8,6 +8,7 @@ enum class SslTestResult : int
     Success = 0,
     NotReady = -99,
     Undefined = -98,
+    UnhandledCase = -97,
     InitFailed = -1,
     DataIntercepted = -2,
     CertAccepted = -3,

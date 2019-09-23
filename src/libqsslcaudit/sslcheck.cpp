@@ -89,7 +89,7 @@ const SslCheckReport SslCheckNoData::doCheck(const ClientInfo &client) const
     }
 
     rep.report = QString("no data received with socket in incorrect state");
-    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.suggestedTestResult = SslTestResult::UnhandledCase;
     rep.comment = QString("report this case to developers");
     rep.isPassed = false;
     return rep;
@@ -252,15 +252,15 @@ const SslCheckReport SslCheckConnectionEstablished::doCheck(const ClientInfo &cl
             && ((client.dtlsMode() && client.dtlsErrors().contains(XDtlsError::RemoteClosedConnectionError))
                 || (!client.dtlsMode() && client.socketErrors().contains(QAbstractSocket::RemoteHostClosedError)))) {
         rep.report = QString("test result not clear, client established TLS session but disconnected without data transmission and explicit error message");
-        rep.suggestedTestResult = SslTestResult::ProtoAccepted;
-        rep.comment = QString("consider PASSED for HTTPS clients. other clients test with complete MitM setup (see --forward)");
+        rep.suggestedTestResult = SslTestResult::Undefined;
+        rep.comment = QString("consider PASSED for clients which send data on the first connection. other clients test with complete MitM setup (see --forward)");
         rep.isPassed = false;
         return rep;
     }
 
     if (client.sslConnectionEstablished()) {
         rep.report = QString("unhandled case! please report it to developers!");
-        rep.suggestedTestResult = SslTestResult::Undefined;
+        rep.suggestedTestResult = SslTestResult::UnhandledCase;
         rep.comment = QString("report this to developers");
         rep.isPassed = false;
         return rep;
@@ -292,5 +292,35 @@ const SslCheckReport SslCheckCertificateRefused::doCheck(const ClientInfo &clien
         return rep;
     }
 
+    return rep;
+}
+
+const SslCheckReport SslCheckHttpsClient::doCheck(const ClientInfo &client) const
+{
+    SslCheckReport rep;
+
+    if (client.hasHelloMessage()
+            && (client.tlsHelloInfo.hnd_hello.alpn.contains(QByteArray("h2"))
+                || client.tlsHelloInfo.hnd_hello.alpn.contains(QByteArray("http/1.1")))) {
+        rep.report = QString("client identifies itself as HTTPS client");
+        rep.suggestedTestResult = SslTestResult::Success;
+        rep.comment = QString("");
+        rep.isPassed = true;
+        return rep;
+    }
+
+    if (client.hasHelloMessage()
+            && client.tlsHelloInfo.hnd_hello.alpn.isEmpty()) {
+        rep.report = QString("client does not explitictly defines expected protocol");
+        rep.suggestedTestResult = SslTestResult::Undefined;
+        rep.comment = QString("");
+        rep.isPassed = false;
+        return rep;
+    }
+
+    rep.report = QString("client requests some other protocol");
+    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.comment = QString("");
+    rep.isPassed = false;
     return rep;
 }

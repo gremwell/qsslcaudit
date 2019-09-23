@@ -8,6 +8,8 @@ const QString sslTestResultToString(SslTestResult r) {
         return "not ready";
     case SslTestResult::Undefined:
         return "undefined";
+    case SslTestResult::UnhandledCase:
+        return "unhandled case";
     case SslTestResult::InitFailed:
         return "init failed";
     case SslTestResult::DataIntercepted:
@@ -29,6 +31,7 @@ const QString sslTestResultToStatus(SslTestResult r)
         return "PASSED";
     case SslTestResult::NotReady:
     case SslTestResult::Undefined:
+    case SslTestResult::UnhandledCase:
     case SslTestResult::InitFailed:
         return "UNDEFINED";
     case SslTestResult::DataIntercepted:

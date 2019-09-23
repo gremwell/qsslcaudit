@@ -457,6 +457,7 @@ void SslUnsafeSocket::connectToHostEncrypted(const QString &hostName, quint16 po
 
     if (!supportsSsl()) {
         qCWarning(lcSsl, "SslUnsafeSocket::connectToHostEncrypted: TLS initialization failed");
+        qDebug("8");
         d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
         return;
     }
@@ -494,6 +495,7 @@ void SslUnsafeSocket::connectToHostEncrypted(const QString &hostName, quint16 po
 
     if (!supportsSsl()) {
         qCWarning(lcSsl, "SslUnsafeSocket::connectToHostEncrypted: TLS initialization failed");
+        qDebug("9");
         d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
         return;
     }
@@ -1847,6 +1849,7 @@ void SslUnsafeSocket::startClientEncryption()
 
     if (!supportsSsl()) {
         qCWarning(lcSsl, "SslUnsafeSocket::startClientEncryption: TLS initialization failed");
+        qDebug("10");
         d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
         return;
     }
@@ -1890,6 +1893,7 @@ void SslUnsafeSocket::startServerEncryption()
 #endif
     if (!supportsSsl()) {
         qCWarning(lcSsl, "SslUnsafeSocket::startServerEncryption: TLS initialization failed");
+        qDebug("11");
         d->setErrorAndEmit(QAbstractSocket::SslInternalError, tr("TLS initialization failed"));
         return;
     }

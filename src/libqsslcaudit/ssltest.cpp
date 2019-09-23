@@ -67,6 +67,7 @@ void SslCertificatesTest::calcResults(const ClientInfo client)
     SslCheckReport rep;
     QVector<SslCheck *> checks;
 
+    // doing common checks
     checks << new SslCheckSocketErrors();
 
     checks << new SslCheckNoData();
@@ -74,8 +75,6 @@ void SslCertificatesTest::calcResults(const ClientInfo client)
     checks << new SslCheckInvalidSsl();
 
     checks << new SslCheckForGenericSslErrors();
-
-    checks << new SslCheckConnectionEstablished();
 
     for (int i = 0; i < checks.size(); i++) {
         rep = checks.at(i)->doCheck(client);
@@ -89,6 +88,29 @@ void SslCertificatesTest::calcResults(const ClientInfo client)
         }
     }
 
+    // now we do controvertial tests
+    SslCheck *c1 = new SslCheckConnectionEstablished();
+    rep = c1->doCheck(client);
+    if (!rep.isPassed) {
+        // if test failed with undefined result, verify if it was HTTPS client
+        // if the result was 'defined', report it
+        // if the client is not HTTPS client, report it as undefined
+        if (rep.suggestedTestResult == SslTestResult::Undefined) {
+            SslCheck *c2 = new SslCheckHttpsClient();
+            rep = c2->doCheck(client);
+            if (rep.isPassed) {
+                m_result = SslTestResult::Success;
+                m_report = QString("HTTPS client did not accept fake certificate without explicit error message");
+                m_resultComment = QString("");
+                return;
+            }
+        }
+        m_result = rep.suggestedTestResult;
+        m_resultComment = rep.comment;
+        m_report = rep.report;
+        return;
+    }
+
     // all checks passed, report the proper result
     m_result = SslTestResult::Success;
     m_report = QString("client did not accept fake certificate");
@@ -100,6 +122,7 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
     SslCheckReport rep;
     QVector<SslCheck *> checks;
 
+    // doing common checks
     checks << new SslCheckSocketErrors();
 
     checks << new SslCheckNoData();
@@ -107,8 +130,6 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
     checks << new SslCheckInvalidSsl();
 
     checks << new SslCheckForGenericSslErrors();
-
-    checks << new SslCheckConnectionEstablished();
 
     checks << new SslCheckCertificateRefused();
 
@@ -122,6 +143,17 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
             m_report = rep.report;
             return;
         }
+    }
+
+    // now we do controvertial tests
+    SslCheck *c1 = new SslCheckConnectionEstablished();
+    rep = c1->doCheck(client);
+    if (!rep.isPassed) {
+        // if test failed with undefined result it still means that client supports the proposed protocol
+        m_result = SslTestResult::ProtoAccepted;
+        m_report = QString("client accepted our protocol but disconnected without explicit error message");
+        m_resultComment = QString("");
+        return;
     }
 
     // all checks passed, report the proper result
