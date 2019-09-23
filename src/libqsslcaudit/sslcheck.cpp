@@ -155,28 +155,7 @@ const SslCheckReport SslCheckInvalidSsl::doCheck(const ClientInfo &client) const
 {
     SslCheckReport rep;
 
-    rep.suggestedTestResult = SslTestResult::Success;
-    rep.isPassed = true;
-
-    // this case is the same for broken SSL clients and perfectly valid ones
-#if 0
-    if ((client.rawDataRecv().size() > 0)
-            && client.hasHelloMessage()
-            && !client.sslConnectionEstablished()
-            && (client.sslErrorsStr().size() == 1)
-            && client.sslErrorsStr().contains("The remote host closed the connection")) {
-        // client sent HELLO, but as SSL errors list is empty and encrypted connection
-        // was not established, something went wrong in the middle of handshake
-        // thus, consider client as non-SSL
-        rep.report = QString("secure connection was not properly established (however, the attempt was made), client closed the connection");
-        rep.result = SslTestResult::Undefined;
-        rep.comment = QString("broken client");
-        return rep;
-    }
-#endif
-
-    if ((client.rawDataRecv().size() > 0)
-            && client.hasHelloMessage()
+    if (client.hasHelloMessage()
             && !client.sslConnectionEstablished()
             // specifically checking that there are no SSL-related errors
             && (((client.sslErrorsStr().size() == 1) && client.sslErrorsStr().contains("Network operation timed out"))
@@ -191,6 +170,10 @@ const SslCheckReport SslCheckInvalidSsl::doCheck(const ClientInfo &client) const
         return rep;
     }
 
+    rep.report = QString("");
+    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.comment = QString("");
+    rep.isPassed = true;
     return rep;
 }
 
