@@ -392,24 +392,32 @@ void SslCAudit::printSummary()
     printTableHeaderLine("##", "Test Name", "Result", "Comment");
     printTableHSeparator();
 
+    QString previousComment;
+
     for (int i = 0; i < sslTests.size(); i++) {
         SslTest *test = sslTests.at(i);
         QString testName = test->name();
+        QString comment = test->resultComment();
+
+        if ((previousComment.size() > 0) && (previousComment == comment)) {
+            comment = QString("-//-");
+        }
+        previousComment = test->resultComment();
 
         switch (test->result()) {
         case SslTestResult::Success:
-            printTableLinePassed(test->id(), testName, test->resultComment());
+            printTableLinePassed(test->id(), testName, comment);
             break;
         case SslTestResult::Undefined:
         case SslTestResult::InitFailed:
         case SslTestResult::NotReady:
-            printTableLineUndefined(test->id(), testName, test->resultComment());
+            printTableLineUndefined(test->id(), testName, comment);
             break;
         case SslTestResult::DataIntercepted:
         case SslTestResult::CertAccepted:
         case SslTestResult::ProtoAccepted:
         case SslTestResult::ProtoAcceptedWithErr:
-            printTableLineFailed(test->id(), testName, test->resultComment());
+            printTableLineFailed(test->id(), testName, comment);
             break;
         }
     }
