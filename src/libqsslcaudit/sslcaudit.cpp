@@ -80,9 +80,6 @@ void SslCAudit::runTest()
         exit(-1);
     }
 
-    m_sslErrorsStr.clear();
-    m_sslErrors.clear();
-
     // can be emitted by both TCP and UDP servers
     connect(sslServer, &SslServer::sslSocketErrors, this, &SslCAudit::handleSslSocketErrors);
 
@@ -147,11 +144,12 @@ void SslCAudit::runTest()
         // check if *server* was not able to setup SSL connection
         // to check this we need to see if we already received some SSL errors
         // if this is the case -- then those errors are about SSL initialization
-        if ((m_sslErrorsStr.size() > 0) || (m_sslErrors.size() > 0)) {
+        if ((currentClientInfo->sslErrorsStr().size() > 0)
+                || (currentClientInfo->socketErrors().size() > 0)) {
             RED("failure during SSL initialization, test will not continue");
 
-            for (int i = 0; i < m_sslErrorsStr.size(); i++) {
-                VERBOSE("\t" + m_sslErrorsStr.at(i));
+            for (int i = 0; i < currentClientInfo->sslErrorsStr().size(); i++) {
+                VERBOSE("\t" + currentClientInfo->sslErrorsStr().at(i));
             }
 
             currentTest->calcResults(*currentClientInfo);
@@ -163,7 +161,7 @@ void SslCAudit::runTest()
         // this call will loop until connection close if 'forward' option is set
         sslServer->handleIncomingConnection();
     } else {
-        VERBOSE("could not establish encrypted connection (" + m_sslErrorsStr.join(", ") + ")");
+        VERBOSE("could not establish encrypted connection (" + currentClientInfo->sslErrorsStr().join(", ") + ")");
     }
 
     delete sslServer;
@@ -186,9 +184,6 @@ void SslCAudit::runTest()
 void SslCAudit::handleSslSocketErrors(const QList<XSslError> &sslErrors,
                                       const QString &errorStr, QAbstractSocket::SocketError socketError)
 {
-    m_sslErrorsStr << errorStr;
-    m_sslErrors << socketError;
-
     VERBOSE(QString("socket error: %1 (#%2)").arg(errorStr).arg(socketError));
 
     currentClientInfo->addSslErrors(sslErrors);

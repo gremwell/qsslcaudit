@@ -52,9 +52,6 @@ private:
     QVector<ClientInfo *> clientsInfo;
     ClientInfo *currentClientInfo;
 
-    QStringList m_sslErrorsStr;
-    QList<QAbstractSocket::SocketError> m_sslErrors;
-
 };
 
 #endif // SSLCAUDIT_H
