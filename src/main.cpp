@@ -26,7 +26,9 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         if (!t)
             continue;
 
-        appDescription += QString("\t%1: %2\n").arg(i + 1).arg(t->name());
+        appDescription += QString("\t%1: (%2) %3\n").arg(i + 1)
+                .arg(t->groupToStr(t->group()))
+                .arg(t->name());
         appDescription += QString("\t   %1\n").arg(t->description());
 
         delete t;

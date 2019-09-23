@@ -89,6 +89,7 @@ public:
         case SslTestGroup::Nonexisted:
             return "unassigned";
         }
+        return "";
     }
 
     // test results
