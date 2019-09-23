@@ -183,6 +183,19 @@ const SslCheckReport SslCheckForGenericSslErrors::doCheck(const ClientInfo &clie
 
     if (client.socketErrors().contains(QAbstractSocket::SslInternalError)
             || client.socketErrors().contains(QAbstractSocket::SslInvalidUserDataError)) {
+        // somehow Firefox triggers SslInternalError when refusing the proposed certificate
+        // checking it here
+        if (client.socketErrors().contains(QAbstractSocket::SslInternalError)) {
+            int idx = client.socketErrors().indexOf(QAbstractSocket::SslInternalError);
+            if ((client.sslErrorsStr().at(idx).contains("alert bad certificate"))
+                    || (client.sslErrorsStr().at(idx).contains("alert unknown ca"))) {
+                rep.report = QString("");
+                rep.suggestedTestResult = SslTestResult::Undefined;
+                rep.comment = QString("");
+                rep.isPassed = true;
+                return rep;
+            }
+        }
         rep.report = QString("failure during SSL initialization");
         rep.suggestedTestResult = SslTestResult::Undefined;
         rep.comment = QString("can't init SSL context");
