@@ -181,9 +181,6 @@ const SslCheckReport SslCheckForGenericSslErrors::doCheck(const ClientInfo &clie
 {
     SslCheckReport rep;
 
-    rep.suggestedTestResult = SslTestResult::Success;
-    rep.isPassed = true;
-
     if (client.socketErrors().contains(QAbstractSocket::SslInternalError)
             || client.socketErrors().contains(QAbstractSocket::SslInvalidUserDataError)) {
         rep.report = QString("failure during SSL initialization");
@@ -205,6 +202,10 @@ const SslCheckReport SslCheckForGenericSslErrors::doCheck(const ClientInfo &clie
         return rep;
     }
 
+    rep.report = QString("");
+    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.comment = QString("");
+    rep.isPassed = true;
     return rep;
 }
 
