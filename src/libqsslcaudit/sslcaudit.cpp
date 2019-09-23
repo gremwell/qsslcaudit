@@ -269,7 +269,8 @@ bool SslCAudit::isSameClient(bool doPrint)
     }
 
     if (ret && doPrint) {
-        GREEN("most likely all connections were established by the same client, some collected details:");
+        GREEN("most likely all connections were established by the same client");
+        VERBOSE("the first connection details:");
         VERBOSE(client0->printable());
     }
 
