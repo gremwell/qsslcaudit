@@ -1,12 +1,17 @@
 #include "sslserver.h"
 #include "debug.h"
+#include "sslusersettings.h"
 #include "starttls.h"
-#include "ssltest.h"
 #include "tcpsserver.h"
 #include "dtlsserver.h"
 
 
-SslServer::SslServer(const SslUserSettings &settings, const SslTest *test, QObject *parent) : QObject(parent)
+SslServer::SslServer(const SslUserSettings &settings,
+                     QList<XSslCertificate> localCert,
+                     XSslKey privateKey,
+                     XSsl::SslProtocol sslProtocol,
+                     QList<XSslCipher> sslCiphers,
+                     QObject *parent) : QObject(parent)
 {
     m_listenAddress = settings.getListenAddress();
     m_listenPort = settings.getListenPort();
@@ -16,7 +21,7 @@ SslServer::SslServer(const SslUserSettings &settings, const SslTest *test, QObje
     dtlsServer = nullptr;
 
     if (!m_dtlsMode) {
-        tcpsServer = new TcpsServer(settings, test, this);
+        tcpsServer = new TcpsServer(settings, localCert, privateKey, sslProtocol, sslCiphers, this);
 
         connect(tcpsServer, &TcpsServer::sslSocketErrors, this, &SslServer::sslSocketErrors);
         connect(tcpsServer, &TcpsServer::sslErrors, this, &SslServer::sslErrors);
@@ -26,7 +31,7 @@ SslServer::SslServer(const SslUserSettings &settings, const SslTest *test, QObje
         connect(tcpsServer, &TcpsServer::peerVerifyError, this, &SslServer::peerVerifyError);
         connect(tcpsServer, &TcpsServer::newPeer, this, &SslServer::newPeer);
     } else {
-        dtlsServer = new DtlsServer(settings, test, this);
+        dtlsServer = new DtlsServer(settings, localCert, privateKey, sslProtocol, sslCiphers, this);
 
         connect(dtlsServer, &DtlsServer::udpSocketErrors, this, &SslServer::sslSocketErrors, Qt::DirectConnection);
         connect(dtlsServer, &DtlsServer::dtlsHandshakeError, this, &SslServer::dtlsHandshakeError, Qt::DirectConnection);

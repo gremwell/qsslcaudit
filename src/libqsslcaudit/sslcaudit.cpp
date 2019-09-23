@@ -63,7 +63,12 @@ void SslCAudit::runTest()
 {
     WHITE(QString("running test #%1: %2").arg(static_cast<int>(currentTest->id())).arg(currentTest->description()));
 
-    SslServer *sslServer = new SslServer(settings, currentTest, this);
+    SslServer *sslServer = new SslServer(settings,
+                                         currentTest->localCert(),
+                                         currentTest->privateKey(),
+                                         currentTest->sslProtocol(),
+                                         currentTest->sslCiphers(),
+                                         this);
     if (!sslServer->listen()) {
         // this place is in the middle of code path and others could expect
         // some return values, signals, etc.

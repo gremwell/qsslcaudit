@@ -12,7 +12,12 @@ class TcpsServer : public QTcpServer
     Q_OBJECT
 
 public:
-    TcpsServer(const SslUserSettings &settings, const SslTest *test, QObject *parent = nullptr);
+    TcpsServer(const SslUserSettings &settings,
+               QList<XSslCertificate> localCert,
+               XSslKey privateKey,
+               XSsl::SslProtocol sslProtocol,
+               QList<XSslCipher> sslCiphers,
+               QObject *parent = nullptr);
 
     void handleIncomingConnection(XSslSocket *sslSocket);
 

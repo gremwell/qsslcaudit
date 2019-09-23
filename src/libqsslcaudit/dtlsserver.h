@@ -15,7 +15,12 @@ class DtlsServer : public QObject
     Q_OBJECT
 
 public:
-    DtlsServer(const SslUserSettings &settings, const SslTest *test, QObject *parent = nullptr);
+    DtlsServer(const SslUserSettings &settings,
+               QList<XSslCertificate> localCert,
+               XSslKey privateKey,
+               XSsl::SslProtocol sslProtocol,
+               QList<XSslCipher> sslCiphers,
+               QObject *parent = nullptr);
     ~DtlsServer();
 
     bool listen(const QHostAddress &address, quint16 port);

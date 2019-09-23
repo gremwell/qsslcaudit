@@ -10,18 +10,19 @@
 #include "sslunsafeellipticcurve.h"
 #include "sslunsafecipher.h"
 #include "sslunsafedtls.h"
+#include "sslunsafeconfiguration.h"
 #else
 #include <QSslCertificate>
 #include <QSslKey>
 #include <QSslEllipticCurve>
 #include <QSslCipher>
 #include <QDtls>
+#include <QSslConfiguration>
 #endif
 
 
 class XSslSocket;
 class SslUserSettings;
-class SslTest;
 
 class TcpsServer;
 class DtlsServer;
@@ -38,7 +39,12 @@ public:
         StartTlsUnknownProtocol = -1
     };
 
-    SslServer(const SslUserSettings &settings, const SslTest *test, QObject *parent = nullptr);
+    SslServer(const SslUserSettings &settings,
+              QList<XSslCertificate> localCert,
+              XSslKey privateKey,
+              XSsl::SslProtocol sslProtocol,
+              QList<XSslCipher> sslCiphers,
+              QObject *parent = nullptr);
     ~SslServer();
 
     bool listen();

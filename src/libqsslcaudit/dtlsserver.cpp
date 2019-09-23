@@ -1,6 +1,6 @@
 #include "dtlsserver.h"
 
-#include "ssltest.h"
+#include "sslusersettings.h"
 
 #include <QTimer>
 
@@ -271,7 +271,12 @@ Q_DECLARE_METATYPE(QHostAddress)
 Q_DECLARE_METATYPE(QList<SslUnsafeCertificate>)
 Q_DECLARE_METATYPE(SslUnsafeDtlsError)
 
-DtlsServer::DtlsServer(const SslUserSettings &settings, const SslTest *test, QObject *parent) : QObject(parent)
+DtlsServer::DtlsServer(const SslUserSettings &settings,
+                       QList<XSslCertificate> localCert,
+                       XSslKey privateKey,
+                       XSsl::SslProtocol sslProtocol,
+                       QList<XSslCipher> sslCiphers,
+                       QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<QHostAddress>("QHostAddress");
     qRegisterMetaType<QList<SslUnsafeCertificate>>("QList<SslUnsafeCertificate>");
@@ -304,10 +309,10 @@ DtlsServer::DtlsServer(const SslUserSettings &settings, const SslTest *test, QOb
 
     dtlsThread.start();
 
-    dtlsWorker->m_sslCertsChain = test->localCert();
-    dtlsWorker->m_sslPrivateKey = test->privateKey();
-    dtlsWorker->m_sslProtocol = test->sslProtocol();
-    dtlsWorker->m_sslCiphers = test->sslCiphers();
+    dtlsWorker->m_sslCertsChain = localCert;
+    dtlsWorker->m_sslPrivateKey = privateKey;
+    dtlsWorker->m_sslProtocol = sslProtocol;
+    dtlsWorker->m_sslCiphers = sslCiphers;
 
     dtlsWorker->m_startTlsProtocol = settings.getStartTlsProtocol();
     dtlsWorker->m_forwardHost = settings.getForwardHostAddr();

@@ -1,15 +1,20 @@
 #include "tcpsserver.h"
 
-#include "ssltest.h"
+#include "sslusersettings.h"
 #include "starttls.h"
 
-TcpsServer::TcpsServer(const SslUserSettings &settings, const SslTest *test, QObject *parent) : QTcpServer(parent)
+TcpsServer::TcpsServer(const SslUserSettings &settings,
+                       QList<XSslCertificate> localCert,
+                       XSslKey privateKey,
+                       XSsl::SslProtocol sslProtocol,
+                       QList<XSslCipher> sslCiphers,
+                       QObject *parent) :
+    QTcpServer(parent),
+    m_sslCertsChain(localCert),
+    m_sslPrivateKey(privateKey),
+    m_sslProtocol(sslProtocol),
+    m_sslCiphers(sslCiphers)
 {
-    m_sslCertsChain = test->localCert();
-    m_sslPrivateKey = test->privateKey();
-    m_sslProtocol = test->sslProtocol();
-    m_sslCiphers = test->sslCiphers();
-
     m_startTlsProtocol = settings.getStartTlsProtocol();
     m_forwardHost = settings.getForwardHostAddr();
     m_forwardPort = settings.getForwardHostPort();
