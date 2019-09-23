@@ -230,7 +230,7 @@ QString ClientInfo::printable() const
 
     out << "source host: " << m_sourceHost << endl;
 
-    out << "dtls?: " << m_dtlsMode << endl;
+    out << "dtls?: " << (m_dtlsMode ? "true" : "false") << endl;
     if (m_dtlsMode) {
         out << "dtls errors: ";
         for (int i = 0; i < m_dtlsErrors.size(); i++)
@@ -240,16 +240,18 @@ QString ClientInfo::printable() const
 
     out << "ssl errors: " << m_sslErrorsStr.join(" ") << endl;
 
-    out << "ssl conn established?: " << m_sslConnectionEstablished << endl;
+    out << "ssl conn established?: " <<
+           (m_sslConnectionEstablished ? "true" : "false") << endl;
 
     if (m_socketErrors.size() > 0) {
-        out << "socket errors: ";
+        out << "socket errors ids: ";
         for (int i = 0; i < m_socketErrors.size(); i++)
-            out << " " << m_socketErrors.at(i);
+            out << m_socketErrors.at(i) << " ";
         out << endl;
     }
 
-    out << "intercepted data: " << m_interceptedData << endl;
+    if (m_interceptedData.size() > 0)
+        out << "intercepted data: " << m_interceptedData << endl;
 
     out << "received data, bytes: " << m_rawDataRecv.size() << endl;
 
