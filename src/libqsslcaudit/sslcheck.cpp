@@ -213,9 +213,6 @@ const SslCheckReport SslCheckConnectionEstablished::doCheck(const ClientInfo &cl
 {
     SslCheckReport rep;
 
-    rep.suggestedTestResult = SslTestResult::Success;
-    rep.isPassed = true;
-
     if (client.sslConnectionEstablished()
             && (client.interceptedData().size() > 0)) {
         rep.report = QString("test failed, client accepted fake certificate, data was intercepted");
@@ -243,7 +240,7 @@ const SslCheckReport SslCheckConnectionEstablished::doCheck(const ClientInfo &cl
                 || (!client.dtlsMode() && client.socketErrors().contains(QAbstractSocket::RemoteHostClosedError)))) {
         rep.report = QString("test result not clear, client established TLS session but disconnected without data transmission and explicit error message");
         rep.suggestedTestResult = SslTestResult::ProtoAccepted;
-        rep.comment = QString("Clients without data transmission accept cert with the same diagnostics. Others refuse cert in this way. Setup MitM proxy to be sure.");
+        rep.comment = QString("consider PASSED for HTTPS clients. other clients test with complete MitM setup (see --forward)");
         rep.isPassed = false;
         return rep;
     }
@@ -256,6 +253,10 @@ const SslCheckReport SslCheckConnectionEstablished::doCheck(const ClientInfo &cl
         return rep;
     }
 
+    rep.report = QString("");
+    rep.suggestedTestResult = SslTestResult::Undefined;
+    rep.comment = QString("");
+    rep.isPassed = true;
     return rep;
 }
 
