@@ -339,11 +339,12 @@ static void printTableLineFormatted(SslTestId testId, const QString &testName, c
     QString shortenedTestName = testName.left(testColumnWidth);
     QString shortenedTestComment = testComment.left(commentColumnWidth);
     QTextStream out(stdout);
+    int id = static_cast<int>(testId) + 1; // keep identifiers aligned with human-readable numbering which starts from 1
 
     out << "| ";
     out << qSetFieldWidth(testIdWidth);
     out.setFieldAlignment(QTextStream::AlignCenter);
-    (testId == SslTestId::SslTestNonexisting) ? (out << "") : (out << static_cast<int>(testId));
+    (testId == SslTestId::SslTestNonexisting) ? (out << "") : (out << id);
     out << qSetFieldWidth(0);
     out << "| ";
     out << qSetFieldWidth(testColumnWidth);
