@@ -61,7 +61,8 @@ void SslCAudit::setSslTests(const QList<SslTest *> &tests)
 
 void SslCAudit::runTest()
 {
-    WHITE(QString("running test #%1: %2").arg(static_cast<int>(currentTest->id())).arg(currentTest->description()));
+    WHITE(QString("running test #%1: %2").arg(static_cast<int>(currentTest->id()) + 1)
+          .arg(currentTest->description()));
 
     SslServer *sslServer = new SslServer(settings,
                                          currentTest->localCert(),
