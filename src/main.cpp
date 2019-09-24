@@ -199,11 +199,11 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
                 SslTestGroup selectedGroup = SslTestGroup::Nonexisted;
                 if (ok && (static_cast<int>(SslTestId::SslTestNonexisting) > num)) {
                     selectedTests << num;
-                } else if (group == static_cast<int>(SslTestGroup::Certificates)) {
+                } else if (group == SslTest::groupToStr(SslTestGroup::Certificates)) {
                     selectedGroup = SslTestGroup::Certificates;
-                } else if (group == static_cast<int>(SslTestGroup::Protocols)) {
+                } else if (group == SslTest::groupToStr(SslTestGroup::Protocols)) {
                     selectedGroup = SslTestGroup::Protocols;
-                } else if (group == static_cast<int>(SslTestGroup::Ciphers)) {
+                } else if (group == SslTest::groupToStr(SslTestGroup::Ciphers)) {
                     selectedGroup = SslTestGroup::Ciphers;
                 } else {
                     VERBOSE("WARN: invalid test group skipped " + group);
