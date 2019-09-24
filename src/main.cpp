@@ -87,9 +87,14 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
     parser.addOption(pidFileOption);
     QCommandLineOption useDtlsOption(QStringList() << "dtls", "use DTLS protocol over UDP");
     parser.addOption(useDtlsOption);
+    QCommandLineOption doubleFirstTest(QStringList() << "double-first-test", "execute the first test two times and ignore its client fingerprint");
+    parser.addOption(doubleFirstTest);
 
     parser.process(a);
 
+    if (parser.isSet(doubleFirstTest)) {
+        settings->setDoubleFirstTest(true);
+    }
     if (parser.isSet(useDtlsOption)) {
         settings->setUseDtls(true);
     }
@@ -267,6 +272,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
 {
     QList<SslTest *> ret;
+    bool doubled = false;
 
     VERBOSE("preparing selected tests...");
     for (int i = 0; i < selectedTests.size(); i++) {
@@ -275,6 +281,14 @@ QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
             continue;
         if (test->prepare(settings)) {
             ret << test;
+
+            // dublicate the first test if requested
+            if (!doubled && settings.getDoubleFirstTest()) {
+                doubled = true;
+                test = sslTestsFactory.create(static_cast<SslTestId>(selectedTests.at(i)));
+                test->prepare(settings);
+                ret << test;
+            }
         } else {
             VERBOSE("\tskipping test: " + test->description());
         }

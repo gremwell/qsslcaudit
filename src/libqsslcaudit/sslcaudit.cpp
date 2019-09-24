@@ -245,7 +245,12 @@ bool SslCAudit::isSameClient(bool doPrint)
     if (!clientsInfo.size())
         return ret;
 
-    client0 = clientsInfo.at(0);
+    // ignore the first client fingerprint if duplication of the first test was requested
+    if (!settings.getDoubleFirstTest()) {
+        client0 = clientsInfo.at(0);
+    } else {
+        client0 = clientsInfo.at(1);
+    }
 
     for (int i = 1; i < clientsInfo.size(); i++) {
         if (!client0->isEqualTo(clientsInfo.at(i))) {

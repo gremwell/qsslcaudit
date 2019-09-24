@@ -35,6 +35,7 @@ SslUserSettings::SslUserSettings()
     outputXmlFilename = "";
     pidFile = "";
     useDtls = false;
+    doubleFirstTest = false;
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -372,4 +373,14 @@ void SslUserSettings::setUseDtls(bool dtls)
 bool SslUserSettings::getUseDtls() const
 {
     return useDtls;
+}
+
+void SslUserSettings::setDoubleFirstTest(bool flag)
+{
+    doubleFirstTest = flag;
+}
+
+bool SslUserSettings::getDoubleFirstTest() const
+{
+    return doubleFirstTest;
 }

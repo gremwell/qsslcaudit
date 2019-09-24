@@ -69,6 +69,9 @@ public:
     void setUseDtls(bool dtls);
     bool getUseDtls() const;
 
+    void setDoubleFirstTest(bool flag);
+    bool getDoubleFirstTest() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -86,6 +89,7 @@ private:
     QString outputXmlFilename;
     QString pidFile;
     bool useDtls;
+    bool doubleFirstTest;
 };
 
 #endif // SSLUSERSETTINGS_H
