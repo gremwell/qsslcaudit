@@ -439,7 +439,7 @@ void SslCAudit::writeXmlSummary(const QString &filename)
     xmlWriter.writeStartElement("qsslcaudit");
     for (int i = 0; i < sslTests.size(); i++) {
         SslTest *test = sslTests.at(i);
-        QString testId = QString::number(static_cast<int>(test->id()));
+        QString testId = QString::number(static_cast<int>(test->id()) + 1); // keep numbering in human format
         QString testName = test->name();
         QString testResult = sslTestResultToStatus(test->result());
 
