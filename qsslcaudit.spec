@@ -1,5 +1,5 @@
 Name: qsslcaudit
-Version: 0.6.1
+Version: 0.7.0
 Release: alt1
 Summary: test SSL/TLS clients how secure they are
 License: GPLv3
@@ -25,6 +25,7 @@ data transfers does this in a secure way.
 %prep
 %setup -n %name
 %patch -p1
+echo %version > .version
 
 %build
 %cmake_insource -DCMAKE_BUILD_TYPE=Release
@@ -38,6 +39,9 @@ data transfers does this in a secure way.
 %doc README.md
 
 %changelog
+* Tue Sep 24 2019 Pavel Nakonechnyi <pavel@altlinux.org> 0.7.0-alt1
+- version 0.7.0
+
 * Wed Jul 17 2019 Pavel Nakonechnyi <pavel@altlinux.org> 0.6.1-alt1
 - version 0.6.1
 
