@@ -1601,7 +1601,7 @@ public:
                 SslTestResult::Success
         #else
                 // in safe mode OpenSSL does not know about SSLv3 and will return another error which makes test result undefined
-                SslTestResult::SSLTEST_RESULT_UNDEFINED
+                SslTestResult::Undefined
         #endif
                 ) {
             setResult(0);
