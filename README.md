@@ -48,14 +48,14 @@ This tool can be used to determine if an application that uses TLS/SSL for its d
 
 Basically, after performing tests using `qsslcaudit` one can answer the following questions about TLS/SSL client:
 
-* Does it properly verify server's certificate?
+* Does it properly verify a server's certificate?
 * Does it verify that server name (CN) field in the certificate is the same as the target name?
 * Does it verify that certificate was issued by an authority that can be trusted?
 * Does it support weak protocols (SSLv2, SSLv3) or weak ciphers (EXPORT/LOW/MEDIUM grade)?
 
 If the tested application has some weaknesses in TLS/SSL implementation, there is a risk of man-in-the-middle attack which could lead to sensitive information (such as user credentials) disclosure.
 
-Assume that we have mobile application which at some point requests https://login.domain.tld/ Such request can be forwarded to rogue server (i.e. on public WiFi network) and, if mobile app does not verify server's certificate, users credentials will be intercepted.
+Assume that we have mobile application which at some point requests https://login.domain.tld/ Such request can be forwarded to rogue server (i.e. on public WiFi network) and, if mobile app does not verify the server's certificate, users credentials will be intercepted.
 
 To check how the application behaves in this scenario we should setup our own rogue TLS/SSL server and forward the app to it. Then we launch the application, try to login and observe the results. In case login failed -- all is fine.
 
@@ -65,26 +65,37 @@ In order to help with tasks like described above, `qsslcaudit` tool has been cre
 
 # Installation from Binary Packages
 
-Prior note: `openssl-unsafe` package will *not* override system OpenSSL library. It has all its libraries renamed so one can not occasionally link against *unsafe* version.
+## Prior note
 
-## Debian / Kali
+The tool heavily relies on unsafe version of OpenSSL library (see below). It is separately packaged. Do not that its installation will not interfere with system version of OpenSSL and will not introduce security risks by itself.
 
-Download `qsslcaudit` deb package from https://github.com/gremwell/qsslcaudit/releases
-Download `openssl-unsafe` deb packages from https://github.com/gremwell/unsafeopenssl-pkg-debian/releases page.
+`qsslcaudit` uses only unsafe *libraries*. However, you might be interested in `openssl-unsafe` package which can be used to connect to TLS servers using insecure protocols/ciphers. This is can be combined with tools like [testssl.sh](https://testssl.sh).
 
-Install them altogether:
+## Ubuntu
+
+Use PPA to install packages on Xenial and Bionic distros:
 ```
-dpkg -i qsslcaudit_0.2.1-1_amd64.deb openssl-unsafe_1.0.2i-2_amd64.deb libunsafessl1.0.2_1.0.2i-2_amd64.deb
+add-apt-repository ppa:gremwell/qsslcaudit
+apt-get update
+apt-get install qsslcaudit
 ```
 
-## ALTLinux
+## Kali
 
-Download `qsslcaudit` RPM package from https://github.com/gremwell/qsslcaudit/releases
-Download `openssl-unsafe` packages from https://github.com/gremwell/unsafeopenssl-pkg-alt/releases page.
-
-Install them altogether:
+Use the corresponding repository to install packages. Add the following line to your sources list:
 ```
-apt-get install qsslcaudit-0.2.1-alt1.x86_64.rpm libunsafecrypto10-1.0.2i-alt2.x86_64.rpm libunsafessl10-1.0.2i-alt2.x86_64.rpm openssl-unsafe-1.0.2i-alt2.x86_64.rpm
+deb http://pkg.gremwell.com/kali kali main
+```
+
+Import Gremwell key used for packaging (fingerprint is `F1ACAA9B4A123E4A897A90AFF91BDF3688550108`):
+```
+wget -O - http://pkg.gremwell.com/gremwell.asc | apt-key add -
+```
+
+Update `apt` cache and install packages:
+```
+apt-get update
+apt-get install qsslcaudit
 ```
 
 # Installation from Sources
@@ -101,9 +112,9 @@ For these reasons we advise you to compile `qsslcaudit` using OpenSSL versions 1
 
 ## Note on unsafe OpenSSL variant
 
-As even 1.0.x versions are too safe for some of the tests included, we prepared so-called *unsafe* build of OpenSSL library. See repositories https://github.com/gremwell/unsafeopenssl-pkg-debian and https://github.com/gremwell/unsafeopenssl-pkg-alt
+As even 1.0.x versions are too safe for some of the tests included, we prepared so-called *unsafe* build of OpenSSL library. See https://github.com/gremwell/unsafeopenssl-pkg-deb
 
-Packages backed from these repos follow filesystem hierarchy standard but install renamed OpenSSL libraries, i.e. `libunsafessl` and `libunsafecrypto`. This makes it impossible to accidentally link your program against these libraries. Additionally, they provide `openssl-unsafe` binary which can be useful by itself with tools like https://testssl.sh/
+Packages backed from this repo follow filesystem hierarchy standard but install renamed OpenSSL libraries, i.e. `libunsafessl` and `libunsafecrypto`. This makes it impossible to accidentally link your program against these libraries. Additionally, they provide `openssl-unsafe` binary which can be useful by itself with tools like [testssl.sh](https://testssl.sh/)
 
 Build system of `qsslcaudit` determines which OpenSSL variant is installed and will use *unsafe* version if it is available.
 
@@ -116,17 +127,13 @@ Some packages have to be installed in order to compile `qsslcaudit`:
 * [OpenSSL](https://www.openssl.org/) library development package
 * [CMake](https://cmake.org/) tool
 
-If you want to use unsafe OpenSSL variant, install corresponding packages from https://github.com/gremwell/unsafeopenssl-pkg-debian or https://github.com/gremwell/unsafeopenssl-pkg-alt and avoid having standard system OpenSSL devel packages. Below we mention default system libraries.
+If you want to use unsafe OpenSSL variant, install corresponding "-dev" packages from PPA/Kali repositories mentioned earlier. This is a recommended way as having `qsslcaudit` in its *safe* form allows to perform very little amount of tests.
 
-Installing packages for ALT Linux (P8, Sisyphus@01-2018): `sudo apt-get install cmake qt5-base-devel libgnutls-devel libssl-devel`.
+Installing packages for Kali: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libunsafessl-dev`.
 
-Installing packages for Kali (rolling@01-2018): `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
+Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev libgnutls-dev libunsafessl-dev`.
 
-Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev libgnutls-dev libssl-dev`.
-
-Installing packages for Ubuntu 18.04: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl1.0-dev`.
-
-Installing packages for Linux Mint 18.3: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libssl-dev g++`.
+Installing packages for Ubuntu 18.04: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libunsafessl-dev`.
 
 ### Detailed build description
 
@@ -147,7 +154,7 @@ sudo make install
 
 Now the tool is installed.
 
-OpenSSL library is determine during `cmake` run. If your system has unsafe version (see above), it will be used. Otherwise -- available system version (1.0.x or 1.1.x).
+OpenSSL library is determined during `cmake` run. If your system has the unsafe version (see above), it will be used. Otherwise -- available system version (1.0.x or 1.1.x).
 
 #### Building unsafe OpenSSL library
 
@@ -207,7 +214,7 @@ Implications:
 Connections can also be forwarded with help of HTTP proxy:
 
 * Setup HTTP/HTTPS proxy on the host which has network access to `qsslcaudit` instance.
-* Configure client's system to use proxy.
+* Configure the client's system to use proxy.
 * Configure proxy to forward incoming connections to the target host towards `qsslcaudit` listener. This is complicated step which is described below.
 
 Forwarding connections can not be done in [Burp](http://releases.portswigger.net/) (the only option is to forward all connections). [Fiddler](https://www.telerik.com/fiddler) also does not support such mode. A custom tool can be used (like Python script).
