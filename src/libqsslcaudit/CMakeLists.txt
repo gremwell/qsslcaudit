@@ -14,6 +14,7 @@ set(qsslcauditSources
     sslcheck.cpp
     ssltestresult.cpp
     clientinfo.cpp
+    openssl-helper.cpp
     cve-2020-0601_poc.cpp
     )
 
@@ -34,6 +35,7 @@ set(qsslcauditHeaders
     sslcheck.h
     ssltestresult.h
     clientinfo.h
+    openssl-helper.h
     cve-2020-0601_poc.h
     )
 
