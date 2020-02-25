@@ -149,11 +149,6 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         ok = settings->setUserCaCertPath(parser.value(userCaCertOption));
         if (!ok)
             exit(-1);
-
-        if (!parser.isSet(userCaKeyOption)) {
-            RED("custom private key for CA is not specified, exiting");
-            exit(-1);
-        }
     }
     if (parser.isSet(userCaKeyOption)) {
         ok = settings->setUserCaKeyPath(parser.value(userCaKeyOption));
