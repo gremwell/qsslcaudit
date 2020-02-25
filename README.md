@@ -5,8 +5,9 @@
 
 - [Summary](#summary)
 - [Installation from Binary Packages](#installation-from-binary-packages)
-    - [Debian / Kali](#debian--kali)
-    - [ALTLinux](#altlinux)
+    - [Prior note](#prior-note)
+    - [Ubuntu](#ubuntu)
+    - [Kali](#kali)
 - [Installation from Sources](#installation-from-sources)
     - [Note on OpenSSL 1.1.0](#note-on-openssl-110)
     - [Note on unsafe OpenSSL variant](#note-on-unsafe-openssl-variant)
@@ -22,6 +23,7 @@
     - [Usage Example #1](#usage-example-1)
     - [Usage Example #2](#usage-example-2)
     - [Usage Example #3](#usage-example-3)
+    - [CVE-2020-0601](#cve-2020-0601)
     - [(Some) Command Line Options](#some-command-line-options)
     - [Tests](#tests)
         - [certificate trust test with user-supplied certificate](#certificate-trust-test-with-user-supplied-certificate)
@@ -67,7 +69,7 @@ In order to help with tasks like described above, `qsslcaudit` tool has been cre
 
 ## Prior note
 
-The tool heavily relies on unsafe version of OpenSSL library (see below). It is separately packaged. Do not that its installation will not interfere with system version of OpenSSL and will not introduce security risks by itself.
+The tool heavily relies on unsafe version of OpenSSL library (see below). It is separately packaged. Do note that its installation will not interfere with system version of OpenSSL and will not introduce security risks by itself.
 
 `qsslcaudit` uses only unsafe *libraries*. However, you might be interested in `openssl-unsafe` package which can be used to connect to TLS servers using insecure protocols/ciphers. This is can be combined with tools like [testssl.sh](https://testssl.sh).
 
@@ -82,21 +84,7 @@ apt-get install qsslcaudit
 
 ## Kali
 
-Use the corresponding repository to install packages. Add the following line to your sources list:
-```
-deb http://pkg.gremwell.com/kali kali main
-```
-
-Import Gremwell key used for packaging (fingerprint is `F1ACAA9B4A123E4A897A90AFF91BDF3688550108`):
-```
-wget -O - http://pkg.gremwell.com/gremwell.asc | apt-key add -
-```
-
-Update `apt` cache and install packages:
-```
-apt-get update
-apt-get install qsslcaudit
-```
+Starting from 2020 `qsslcaudit` is included in the official Kali repository.
 
 # Installation from Sources
 
@@ -125,15 +113,16 @@ Some packages have to be installed in order to compile `qsslcaudit`:
 * [Qt](https://www.qt.io/) (Qt5-base) development package
 * [GNU TLS](https://www.gnutls.org/) library development package
 * [OpenSSL](https://www.openssl.org/) library development package
+* [CryptoPP](https://cryptopp.com/) library development package
 * [CMake](https://cmake.org/) tool
 
 If you want to use unsafe OpenSSL variant, install corresponding "-dev" packages from PPA/Kali repositories mentioned earlier. This is a recommended way as having `qsslcaudit` in its *safe* form allows to perform very little amount of tests.
 
-Installing packages for Kali: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libunsafessl-dev`.
+Installing packages for Kali: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libunsafessl-dev libcrypto++-dev`.
 
-Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev libgnutls-dev libunsafessl-dev`.
+Installing packages for Ubuntu 16.04: `sudo apt-get install cmake qtbase5-dev libgnutls-dev libunsafessl-dev libcrypto++-dev`.
 
-Installing packages for Ubuntu 18.04: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libunsafessl-dev`.
+Installing packages for Ubuntu 18.04: `sudo apt-get install cmake qtbase5-dev libgnutls28-dev libunsafessl-dev libcrypto++-dev`.
 
 ### Detailed build description
 
@@ -369,6 +358,87 @@ We simulated test failure by using `s_client` tool with explicitly set weak conf
 $ openssl s_client -connect 127.0.0.1:8443 -ssl3 -cipher MEDIUM
 ```
 
+## CVE-2020-0601
+
+A test for [CVE-2020-0601](https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-0601) (`the way Windows CryptoAPI (Crypt32.dll) validates Elliptic Curve Cryptography (ECC) certificates`) is included in certificate validation tests group and always tries to enable itself.
+
+However, if one wants to test if a particular client application is affected by CVE-2020-0601 the following preconditions have to be met:
+- a signed using elliptic-curve cryptography algorithm CA certificate has to be provided;
+- this certificate has to be cached by client's crypto subsystem.
+
+CA certificate can be provided in two ways:
+- With option `--user-ca-cert`. Provide a path to CA certificate file.
+- With option `--server`. If the provided TLS server has CA certificate in its chain, it will be used. Please note that it is not common to add CA into chain of certificates.
+
+The test will explicitly output an error message occurred. This should help to find out what went wrong.
+
+An example of what happens when invalid certificate is provided:
+```
+$ qsslcaudit --selected-tests 29 --user-ca-cert ./AddTrustExternalCARoot
+preparing selected tests...
+        CVE-2020-0601: the provided CA certificate is not signed using ECC
+        skipping test: test for trusting certificate signed by private key with custom curve
+
+...skipped...
+```
+
+An example demonstrating that targeted client is vulnerable:
+```
+$ sudo qsslcaudit -l 0.0.0.0 -p 443 --selected-tests 29 --user-ca-cert ./USERTrustECCCertificationAuthority.crt --user-cn example.com
+preparing selected tests...
+
+SSL library used: OpenSSL 1.0.2u  20 Dec 2019
+
+running test #29: test for trusting certificate signed by private key with custom curve
+listening on 0.0.0.0:443
+connection from: 127.0.0.1:52454
+SSL connection established
+received data: GET / HTTP/1.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-BE
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362
+Accept-Encoding: gzip, deflate, br
+Host: example.com
+Connection: Keep-Alive
+
+
+disconnected
+report:
+test failed, client accepted fake certificate, data was intercepted
+test finished
+
+tests results summary table:
++----|------------------------------------|------------|-----------------------------+
+| ## |             Test Name              |   Result   |           Comment           |
++----|------------------------------------|------------|-----------------------------+
+| 29 | CVE-2020-0601 ECC cert trust       | FAILED !!! | mitm possible               |
++----|------------------------------------|------------|-----------------------------+
+most likely all connections were established by the same client
+the first connection details:
+source host: 127.0.0.1
+dtls?: false
+ssl errors:
+ssl conn established?: true
+intercepted data: GET / HTTP/1.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-BE
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362
+Accept-Encoding: gzip, deflate, br
+Host: example.com
+Connection: Keep-Alive
+
+
+received data, bytes: 722
+transmitted data, bytes: 1698
+protocol: TLSv1.2
+accepted ciphers: TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:TLS_RSA_WITH_AES_256_GCM_SHA384:TLS_RSA_WITH_AES_128_GCM_SHA256:TLS_RSA_WITH_AES_256_CBC_SHA256:TLS_RSA_WITH_AES_128_CBC_SHA256:TLS_RSA_WITH_AES_256_CBC_SHA:TLS_RSA_WITH_AES_128_CBC_SHA:TLS_RSA_WITH_3DES_EDE_CBC_SHA
+SNI: example.com
+ALPN: h2, http/1.1
+
+qsslcaudit version: 0.7.1-snapshot
+```
 
 ## (Some) Command Line Options
 
