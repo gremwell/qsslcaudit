@@ -371,4 +371,16 @@ public:
 
 };
 
+class SslTestCertCve20200601 : public SslCertificatesTest
+{
+public:
+    SslTestCertCve20200601() : SslCertificatesTest() {
+        m_id = SslTestId::SslTestCertCve20200601;
+        m_name = "CVE-2020-0601 ECC cert trust";
+        m_description = "test for trusting certificate signed by private key with custom curve";
+    }
+    bool prepare(const SslUserSettings &settings);
+
+};
+
 #endif // SSLTESTS_H

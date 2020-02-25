@@ -56,6 +56,7 @@ enum class SslTestId : int {
     SslTestCiphersDtls12Exp,
     SslTestCiphersDtls12Low,
     SslTestCiphersDtls12Med,
+    SslTestCertCve20200601,
     SslTestNonexisting,
 };
 
