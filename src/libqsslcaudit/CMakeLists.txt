@@ -14,6 +14,7 @@ set(qsslcauditSources
     sslcheck.cpp
     ssltestresult.cpp
     clientinfo.cpp
+    cve-2020-0601_poc.cpp
     )
 
 set(qsslcauditHeaders
@@ -33,6 +34,7 @@ set(qsslcauditHeaders
     sslcheck.h
     ssltestresult.h
     clientinfo.h
+    cve-2020-0601_poc.h
     )
 
 include_directories(
@@ -47,7 +49,7 @@ endif()
 add_library(qsslcaudit_lib STATIC ${qsslcauditSources} ${qsslcauditHeaders})
 set_target_properties(qsslcaudit_lib PROPERTIES AUTOMOC TRUE)
 
-target_link_libraries(qsslcaudit_lib qtcertificateaddon)
+target_link_libraries(qsslcaudit_lib qtcertificateaddon ${CRYPTOPP_LIBRARIES})
 
 if(UNSAFE_QSSL)
     target_link_libraries(qsslcaudit_lib unsafessl)

@@ -152,6 +152,8 @@ add_definitions(-fPIC)
 
 add_definitions(-DQSSLC_VERSION="${QSSLC_VERSION}")
 
+find_package(CryptoPP REQUIRED)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
 set(THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
