@@ -16,6 +16,7 @@ set(qsslcauditSources
     clientinfo.cpp
     openssl-helper.cpp
     cve-2020-0601_poc.cpp
+    testserver.cpp
     )
 
 set(qsslcauditHeaders
@@ -37,6 +38,7 @@ set(qsslcauditHeaders
     clientinfo.h
     openssl-helper.h
     cve-2020-0601_poc.h
+    testserver.h
     )
 
 include_directories(

@@ -43,7 +43,7 @@ public:
         m_name = "custom certificate trust";
         m_description = "certificate trust test with user-supplied certificate";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 
@@ -55,7 +55,7 @@ public:
         m_name = "self-signed certificate for target domain trust";
         m_description = "certificate trust test with self-signed certificate for user-supplied common name";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 
@@ -67,7 +67,7 @@ public:
         m_name = "self-signed certificate for invalid domain trust";
         m_description = "certificate trust test with self-signed certificate for www.example.com";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 
@@ -79,7 +79,7 @@ public:
         m_name = "custom certificate for target domain trust";
         m_description = "certificate trust test with user-supplied common name signed by user-supplied certificate";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 
@@ -91,7 +91,7 @@ public:
         m_name = "custom certificate for invalid domain trust";
         m_description = "certificate trust test with www.example.com common name signed by user-supplied certificate";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 
@@ -103,7 +103,7 @@ public:
         m_name = "certificate for target domain signed by custom CA trust";
         m_description = "certificate trust test with user-supplied common name signed by user-supplied CA certificate";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 
@@ -115,7 +115,7 @@ public:
         m_name = "certificate for invalid domain signed by custom CA trust";
         m_description = "certificate trust test with www.example.com common name signed by user-supplied CA certificate";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 
@@ -379,7 +379,7 @@ public:
         m_name = "CVE-2020-0601 ECC cert trust";
         m_description = "test for trusting certificate signed by private key with custom curve";
     }
-    bool prepare(const SslUserSettings &settings);
+    bool prepare(const SslUserSettings *settings);
 
 };
 

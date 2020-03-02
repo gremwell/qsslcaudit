@@ -3,8 +3,7 @@
 #include <QtEndian>
 #include <QDebug>
 
-// this we need only for TlsClientHello type
-#include "ssltest.h"
+#include "clientinfo.h"
 
 // taken from packet-{d,t}ls.c, wireshark source code
 

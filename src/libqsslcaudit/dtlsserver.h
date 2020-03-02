@@ -15,7 +15,7 @@ class DtlsServer : public QObject
     Q_OBJECT
 
 public:
-    DtlsServer(const SslUserSettings &settings,
+    DtlsServer(const SslUserSettings *settings,
                QList<XSslCertificate> localCert,
                XSslKey privateKey,
                XSsl::SslProtocol sslProtocol,
@@ -25,7 +25,6 @@ public:
 
     bool listen(const QHostAddress &address, quint16 port);
     void close();
-    bool waitForNewClient();
     void handleClient();
 
 signals:
@@ -36,10 +35,20 @@ signals:
     void sslHandshakeFinished(const QList<XSslCertificate> &clientCerts);
     void newPeer(const QHostAddress &peerAddress);
     void rawDataCollected(const QByteArray &rdData, const QByteArray &wrData);
+    void sessionFinished();
+    void newConnection();
 
 private:
+    void handleSigInt();
+    bool isForwarding();
+
     QThread dtlsThread;
     DtlsServerWorker *dtlsWorker;
+
+    bool m_stopForwarding;
+    bool m_isForwarding;
+
+    friend class SslServer;
 };
 
 #endif // DTLSSERVER_H

@@ -2,6 +2,7 @@
 #include "ssltests.h"
 #include "sslcertgen.h"
 #include "debug.h"
+#include "sslusersettings.h"
 #include "openssl-helper.h"
 #include "cve-2020-0601_poc.h"
 
@@ -60,14 +61,14 @@ void fillSslTestsFactory()
     }
 }
 
-bool SslTestCertCustom1::prepare(const SslUserSettings &settings)
+bool SslTestCertCustom1::prepare(const SslUserSettings *settings)
 {
     // if user did not provide a certificate, do not emit error, just skip test initialization
-    if (settings.getUserCertPath().isEmpty()) {
+    if (settings->getUserCertPath().isEmpty()) {
         return false;
     }
 
-    QList<XSslCertificate> chain = settings.getUserCert();
+    QList<XSslCertificate> chain = settings->getUserCert();
     if (chain.size() == 0) {
         RED("can not parse user-supplied certificate");
         return false;
@@ -75,7 +76,7 @@ bool SslTestCertCustom1::prepare(const SslUserSettings &settings)
 
     m_localCertsChain = chain;
 
-    XSslKey key = settings.getUserKey();
+    XSslKey key = settings->getUserKey();
     if (key.isNull()) {
         RED("can not parse user-supplied key");
         return false;
@@ -85,7 +86,7 @@ bool SslTestCertCustom1::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;
@@ -95,16 +96,16 @@ bool SslTestCertCustom1::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTestCertSS1::prepare(const SslUserSettings &settings)
+bool SslTestCertSS1::prepare(const SslUserSettings *settings)
 {
     QPair<XSslCertificate, XSslKey> cert;
 
-    if (settings.getUserCN().length() != 0) {
-        QString cn = settings.getUserCN();
+    if (settings->getUserCN().length() != 0) {
+        QString cn = settings->getUserCN();
 
         cert = SslCertGen::genSignedCert(cn);
-    } else if (settings.getServerAddr().length() != 0) {
-        XSslCertificate basecert = settings.getPeerCertificates().first();
+    } else if (settings->getServerAddr().length() != 0) {
+        XSslCertificate basecert = settings->getPeerCertificates().first();
 
         cert = SslCertGen::genSignedCertFromTemplate(basecert);
     } else {
@@ -119,7 +120,7 @@ bool SslTestCertSS1::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;
@@ -129,7 +130,7 @@ bool SslTestCertSS1::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTestCertSS2::prepare(const SslUserSettings &settings)
+bool SslTestCertSS2::prepare(const SslUserSettings *settings)
 {
     QPair<XSslCertificate, XSslKey> cert = SslCertGen::genSignedCert("www.example.com");
 
@@ -141,7 +142,7 @@ bool SslTestCertSS2::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;
@@ -151,24 +152,24 @@ bool SslTestCertSS2::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTestCertCustom2::prepare(const SslUserSettings &settings)
+bool SslTestCertCustom2::prepare(const SslUserSettings *settings)
 {
     QPair<QList<XSslCertificate>, XSslKey> generatedCert;
 
-    QList<XSslCertificate> chain = settings.getUserCert();
+    QList<XSslCertificate> chain = settings->getUserCert();
     if (chain.size() == 0)
         return false;
 
-    XSslKey key = settings.getUserKey();
+    XSslKey key = settings->getUserKey();
     if (key.isNull())
         return false;
 
-    if (settings.getUserCN().length() != 0) {
-        QString cn = settings.getUserCN();
+    if (settings->getUserCN().length() != 0) {
+        QString cn = settings->getUserCN();
 
         generatedCert = SslCertGen::genSignedByCACert(cn, chain.at(0), key);
-    } else if (settings.getServerAddr().length() != 0) {
-        XSslCertificate basecert = settings.getPeerCertificates().first();
+    } else if (settings->getServerAddr().length() != 0) {
+        XSslCertificate basecert = settings->getPeerCertificates().first();
 
         generatedCert = SslCertGen::genSignedByCACertFromTemplate(basecert, chain.at(0), key);
     } else {
@@ -182,7 +183,7 @@ bool SslTestCertCustom2::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;
@@ -192,13 +193,13 @@ bool SslTestCertCustom2::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTestCertCustom3::prepare(const SslUserSettings &settings)
+bool SslTestCertCustom3::prepare(const SslUserSettings *settings)
 {
-    QList<XSslCertificate> chain = settings.getUserCert();
+    QList<XSslCertificate> chain = settings->getUserCert();
     if (chain.size() == 0)
         return false;
 
-    XSslKey key = settings.getUserKey();
+    XSslKey key = settings->getUserKey();
     if (key.isNull())
         return false;
 
@@ -211,7 +212,7 @@ bool SslTestCertCustom3::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;
@@ -221,23 +222,23 @@ bool SslTestCertCustom3::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTestCertCA1::prepare(const SslUserSettings &settings)
+bool SslTestCertCA1::prepare(const SslUserSettings *settings)
 {
     QString cn;
 
-    if (settings.getUserCN().length() != 0) {
-        cn = settings.getUserCN();
-    } else if (settings.getServerAddr().length() != 0) {
-        cn = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
+    if (settings->getUserCN().length() != 0) {
+        cn = settings->getUserCN();
+    } else if (settings->getServerAddr().length() != 0) {
+        cn = settings->getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
     } else {
         return false;
     }
 
-    QList<XSslCertificate> chain = settings.getUserCaCert();
+    QList<XSslCertificate> chain = settings->getUserCaCert();
     if (chain.size() == 0)
         return false;
 
-    XSslKey key = settings.getUserCaKey();
+    XSslKey key = settings->getUserCaKey();
     if (key.isNull())
         return false;
 
@@ -251,7 +252,7 @@ bool SslTestCertCA1::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;
@@ -261,13 +262,13 @@ bool SslTestCertCA1::prepare(const SslUserSettings &settings)
 }
 
 
-bool SslTestCertCA2::prepare(const SslUserSettings &settings)
+bool SslTestCertCA2::prepare(const SslUserSettings *settings)
 {
-    QList<XSslCertificate> chain = settings.getUserCaCert();
+    QList<XSslCertificate> chain = settings->getUserCaCert();
     if (chain.size() == 0)
         return false;
 
-    XSslKey key = settings.getUserCaKey();
+    XSslKey key = settings->getUserCaKey();
     if (key.isNull())
         return false;
 
@@ -280,7 +281,7 @@ bool SslTestCertCA2::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;
@@ -413,7 +414,7 @@ bool SslTestCiphersDtls12Med::setProtoAndCiphers()
     return setProtoAndMediumCiphers(XSsl::DtlsV1_2);
 }
 
-bool SslTestCertCve20200601::prepare(const SslUserSettings &settings)
+bool SslTestCertCve20200601::prepare(const SslUserSettings *settings)
 {
     XSslCertificate caCert;
     QByteArray caSN;
@@ -422,14 +423,14 @@ bool SslTestCertCve20200601::prepare(const SslUserSettings &settings)
     bool ret = false;
 
     // if user provided CA cert, use it as a base one
-    QList<XSslCertificate> chain = settings.getUserCaCert();
+    QList<XSslCertificate> chain = settings->getUserCaCert();
     if (chain.size() == 0) {
         // ok, no CA cert, may be remote server is provided?
-        if (settings.getServerAddr().length() != 0) {
+        if (settings->getServerAddr().length() != 0) {
             // assume that CA will be last in the list
-            caCert = settings.getPeerCertificates().last();
+            caCert = settings->getPeerCertificates().last();
             // get common name of the host
-            targetCN = settings.getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
+            targetCN = settings->getPeerCertificates().first().subjectInfo(XSslCertificate::CommonName).first();
         }
     } else {
         caCert = chain.at(0);
@@ -473,8 +474,8 @@ bool SslTestCertCve20200601::prepare(const SslUserSettings &settings)
     caPubKey.resize(caPubKeyLen);
 
     // decide what target common name to use
-    if (settings.getUserCN().size() > 0) {
-        targetCN = settings.getUserCN();
+    if (settings->getUserCN().size() > 0) {
+        targetCN = settings->getUserCN();
     }
     if (targetCN.size() == 0) {
         targetCN = "www.example.com";
@@ -553,7 +554,7 @@ bool SslTestCertCve20200601::prepare(const SslUserSettings &settings)
 
     m_sslCiphers = XSslConfiguration::supportedCiphers();
     // DTLS mode requires specific protocol to be set
-    if (settings.getUseDtls()) {
+    if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
     } else {
         m_sslProtocol = XSsl::AnyProtocol;

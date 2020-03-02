@@ -4,6 +4,7 @@
 #include "ssltests.h"
 #include "ciphers.h"
 #include "sslcheck.h"
+#include "sslusersettings.h"
 
 #ifdef UNSAFE
 #include <openssl-unsafe/ssl.h>
@@ -62,7 +63,7 @@ bool SslTest::checkProtoSupport(XSsl::SslProtocol proto)
     return true;
 }
 
-void SslCertificatesTest::calcResults(const ClientInfo client)
+void SslCertificatesTest::calcResults(const ClientInfo *client)
 {
     SslCheckReport rep;
     QVector<SslCheck *> checks;
@@ -117,7 +118,7 @@ void SslCertificatesTest::calcResults(const ClientInfo client)
     m_resultComment = QString("");
 }
 
-void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
+void SslProtocolsCiphersTest::calcResults(const ClientInfo *client)
 {
     SslCheckReport rep;
     QVector<SslCheck *> checks;
@@ -162,7 +163,7 @@ void SslProtocolsCiphersTest::calcResults(const ClientInfo client)
     m_resultComment = QString("");
 }
 
-bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
+bool SslProtocolsCiphersTest::prepare(const SslUserSettings *settings)
 {
     // in case of DTLS omit protocols test for normal TLS
     switch (m_id) {
@@ -172,25 +173,25 @@ bool SslProtocolsCiphersTest::prepare(const SslUserSettings &settings)
     case SslTestId::SslTestCiphersDtls12Exp:
     case SslTestId::SslTestCiphersDtls12Low:
     case SslTestId::SslTestCiphersDtls12Med:
-        if (!settings.getUseDtls())
+        if (!settings->getUseDtls())
             return false;
         break;
     default:
-        if (settings.getUseDtls())
+        if (settings->getUseDtls())
             return false;
     }
 
     XSslKey key;
-    QList<XSslCertificate> chain = settings.getUserCert();
+    QList<XSslCertificate> chain = settings->getUserCert();
     if (chain.size() != 0) {
-        key = settings.getUserKey();
+        key = settings->getUserKey();
     }
 
     if ((chain.size() == 0) || key.isNull()) {
         QString cn;
 
-        if (settings.getUserCN().length() > 0) {
-            cn = settings.getUserCN();
+        if (settings->getUserCN().length() > 0) {
+            cn = settings->getUserCN();
         } else {
             cn = "www.example.com";
         }

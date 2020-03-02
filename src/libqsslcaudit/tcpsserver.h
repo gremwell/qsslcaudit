@@ -12,7 +12,7 @@ class TcpsServer : public QTcpServer
     Q_OBJECT
 
 public:
-    TcpsServer(const SslUserSettings &settings,
+    TcpsServer(const SslUserSettings *settings,
                QList<XSslCertificate> localCert,
                XSslKey privateKey,
                XSsl::SslProtocol sslProtocol,
@@ -33,12 +33,15 @@ signals:
     void peerVerifyError(const XSslError &error);
     void sslErrors(const QList<XSslError> &errors);
     void newPeer(const QHostAddress &peerAddress);
+    void sessionFinished();
 
 private:
     void handleStartTls(XSslSocket *const socket);
     void handleSocketError(QAbstractSocket::SocketError socketError);
     void handleSslHandshakeFinished();
     void proxyConnection(XSslSocket *sslSocket);
+    void handleSigInt();
+    bool isForwarding();
 
     QList<XSslCertificate> m_sslCertsChain;
     XSslKey m_sslPrivateKey;
@@ -49,6 +52,9 @@ private:
     QHostAddress m_forwardHost;
     quint16 m_forwardPort;
     quint32 m_waitDataTimeout;
+
+    bool m_stopForwarding;
+    bool m_isForwarding;
 
     friend class SslServer;
 };

@@ -39,7 +39,7 @@ public:
         StartTlsUnknownProtocol = -1
     };
 
-    SslServer(const SslUserSettings &settings,
+    SslServer(const SslUserSettings *settings,
               QList<XSslCertificate> localCert,
               XSslKey privateKey,
               XSsl::SslProtocol sslProtocol,
@@ -48,10 +48,10 @@ public:
     ~SslServer();
 
     bool listen();
-    bool waitForClient();
-    void handleIncomingConnection();
 
     static QString dtlsErrorToString(XDtlsError error);
+
+    void handleSigInt();
 
 signals:
     void sslSocketErrors(const QList<XSslError> &sslErrors,
@@ -65,7 +65,12 @@ signals:
 
     void dtlsHandshakeError(const XDtlsError, const QString &);
 
+    void sessionFinished();
+
 private:
+    void handleIncomingConnection();
+    void handleSessionFinished();
+
     QHostAddress m_listenAddress;
     quint16 m_listenPort;
     bool m_dtlsMode;

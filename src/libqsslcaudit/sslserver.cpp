@@ -6,16 +6,16 @@
 #include "dtlsserver.h"
 
 
-SslServer::SslServer(const SslUserSettings &settings,
+SslServer::SslServer(const SslUserSettings *settings,
                      QList<XSslCertificate> localCert,
                      XSslKey privateKey,
                      XSsl::SslProtocol sslProtocol,
                      QList<XSslCipher> sslCiphers,
                      QObject *parent) : QObject(parent)
 {
-    m_listenAddress = settings.getListenAddress();
-    m_listenPort = settings.getListenPort();
-    m_dtlsMode = settings.getUseDtls();
+    m_listenAddress = settings->getListenAddress();
+    m_listenPort = settings->getListenPort();
+    m_dtlsMode = settings->getUseDtls();
 
     tcpsServer = nullptr;
     dtlsServer = nullptr;
@@ -29,7 +29,12 @@ SslServer::SslServer(const SslUserSettings &settings,
         connect(tcpsServer, &TcpsServer::rawDataCollected, this, &SslServer::rawDataCollected);
         connect(tcpsServer, &TcpsServer::sslHandshakeFinished, this, &SslServer::sslHandshakeFinished);
         connect(tcpsServer, &TcpsServer::peerVerifyError, this, &SslServer::peerVerifyError);
+
+        connect(tcpsServer, &TcpsServer::newConnection, this, &SslServer::handleIncomingConnection);
+
         connect(tcpsServer, &TcpsServer::newPeer, this, &SslServer::newPeer);
+
+        connect(tcpsServer, &TcpsServer::sessionFinished, this, &SslServer::handleSessionFinished);
     } else {
         dtlsServer = new DtlsServer(settings, localCert, privateKey, sslProtocol, sslCiphers, this);
 
@@ -37,21 +42,22 @@ SslServer::SslServer(const SslUserSettings &settings,
         connect(dtlsServer, &DtlsServer::dtlsHandshakeError, this, &SslServer::dtlsHandshakeError, Qt::DirectConnection);
         connect(dtlsServer, &DtlsServer::dataIntercepted, this, &SslServer::dataIntercepted, Qt::DirectConnection);
         connect(dtlsServer, &DtlsServer::sslHandshakeFinished, this, &SslServer::sslHandshakeFinished, Qt::DirectConnection);
-        connect(dtlsServer, &DtlsServer::newPeer, this, &SslServer::newPeer, Qt::DirectConnection);
         connect(dtlsServer, &DtlsServer::rawDataCollected, this, &SslServer::rawDataCollected, Qt::DirectConnection);
+
+        connect(dtlsServer, &DtlsServer::newConnection, this, &SslServer::handleIncomingConnection);
+
+        connect(dtlsServer, &DtlsServer::newPeer, this, &SslServer::newPeer, Qt::DirectConnection);
+
+        connect(dtlsServer, &DtlsServer::sessionFinished, this, &SslServer::handleSessionFinished);
     }
 }
 
 SslServer::~SslServer()
 {
-    if (tcpsServer) {
-        tcpsServer->close();
-        delete tcpsServer;
-    }
-    if (dtlsServer) {
-        dtlsServer->close();
-        delete dtlsServer;
-    }
+    if (tcpsServer)
+        tcpsServer->deleteLater();
+    if (dtlsServer)
+        dtlsServer->deleteLater();
 }
 
 bool SslServer::listen()
@@ -70,15 +76,6 @@ bool SslServer::listen()
 
     VERBOSE(QString("listening on %1:%2").arg(m_listenAddress.toString()).arg(m_listenPort));
     return true;
-}
-
-bool SslServer::waitForClient()
-{
-    if (!m_dtlsMode) {
-        return tcpsServer->waitForNewConnection(-1);
-    } else {
-        return dtlsServer->waitForNewClient();
-    }
 }
 
 void SslServer::handleIncomingConnection()
@@ -114,4 +111,30 @@ QString SslServer::dtlsErrorToString(XDtlsError error)
         return QString("TlsNonFatalError");
     }
     return QString("");
+}
+
+void SslServer::handleSessionFinished()
+{
+    if (!m_dtlsMode) {
+        tcpsServer->close();
+    } else {
+        dtlsServer->close();
+    }
+
+    emit sessionFinished();
+}
+
+void SslServer::handleSigInt()
+{
+    // we handle SIGINT only to break forwarding process gracefully
+    // in case we are not in forwarding state, just exit
+    if (!m_dtlsMode) {
+        if (!tcpsServer->isForwarding())
+            exit(0);
+        tcpsServer->handleSigInt();
+    } else {
+        if (!dtlsServer->isForwarding())
+            exit(0);
+        dtlsServer->handleSigInt();
+    }
 }

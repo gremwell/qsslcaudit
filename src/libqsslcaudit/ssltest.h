@@ -15,10 +15,10 @@
 #include <QSslConfiguration>
 #endif
 
-#include "sslusersettings.h"
 #include "ssltestresult.h"
-#include "clientinfo.h"
 
+class SslUserSettings;
+class ClientInfo;
 
 enum class SslTestGroup {
     Certificates,
@@ -70,8 +70,8 @@ public:
     void clear();
 
     // implemented by a particular tests
-    virtual bool prepare(const SslUserSettings &settings) = 0;
-    virtual void calcResults(const ClientInfo client) = 0;
+    virtual bool prepare(const SslUserSettings *settings) = 0;
+    virtual void calcResults(const ClientInfo *client) = 0;
 
     // test description
     SslTestId id() const { return m_id; }
@@ -133,15 +133,15 @@ public:
         m_group = SslTestGroup::Certificates;
     }
 
-    virtual void calcResults(const ClientInfo client);
+    virtual void calcResults(const ClientInfo *client);
 
 };
 
 class SslProtocolsCiphersTest : public SslTest
 {
 public:
-    virtual bool prepare(const SslUserSettings &settings);
-    virtual void calcResults(const ClientInfo client);
+    virtual bool prepare(const SslUserSettings *settings);
+    virtual void calcResults(const ClientInfo *client);
     virtual bool setProtoAndCiphers() = 0;
 protected:
     bool setProtoAndSupportedCiphers(XSsl::SslProtocol proto);

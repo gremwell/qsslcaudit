@@ -3,16 +3,45 @@
 #include "sslusersettings.h"
 #include "ssltests.h"
 #include "sslcaudit.h"
+#include "ciphers.h"
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QThread>
 #include <QHostAddress>
 #include <QFile>
-
+#include <QTimer>
 
 static QList<int> selectedTests;
 
+
+void showCiphersGroup(const QString &groupName, const QString &ciphersStr)
+{
+    QStringList opensslCiphers = ciphersStr.split(":");
+    QString supportedCiphersStr;
+
+    VERBOSE("  " + groupName + ":");
+
+    for (int i = 0; i < opensslCiphers.size(); i++) {
+        XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+        if (!cipher.isNull())
+            supportedCiphersStr += opensslCiphers.at(i) + ":";
+    }
+
+    supportedCiphersStr.chop(1);
+
+    VERBOSE("    " + supportedCiphersStr);
+}
+
+void showCiphers()
+{
+    VERBOSE("supported ciphers:");
+    showCiphersGroup("EXPORT", ciphers_export_str);
+    showCiphersGroup("LOW", ciphers_low_str);
+    showCiphersGroup("MEDIUM", ciphers_medium_str);
+    showCiphersGroup("HIGH", ciphers_high_str);
+}
 
 void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 {
@@ -99,7 +128,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
         settings->setUseDtls(true);
     }
     if (parser.isSet(showciphersOption)) {
-        SslCAudit::showCiphers();
+        showCiphers();
         exit(0);
     }
     if (parser.isSet(listenAddressOption)) {
@@ -264,7 +293,7 @@ void parseOptions(const QCoreApplication &a, SslUserSettings *settings)
 }
 
 
-QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
+QList<SslTest *> prepareSslTests(const SslUserSettings *settings)
 {
     QList<SslTest *> ret;
     bool doubled = false;
@@ -278,7 +307,7 @@ QList<SslTest *> prepareSslTests(const SslUserSettings &settings)
             ret << test;
 
             // dublicate the first test if requested
-            if (!doubled && settings.getDoubleFirstTest()) {
+            if (!doubled && settings->getDoubleFirstTest()) {
                 doubled = true;
                 test = sslTestsFactory.create(static_cast<SslTestId>(selectedTests.at(i)));
                 test->prepare(settings);
@@ -308,7 +337,6 @@ void deletePidFile(const QString &pidFile) {
     QFile::remove(pidFile);
 }
 
-
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -320,19 +348,23 @@ int main(int argc, char *argv[])
     // has to be called even before parsing options
     fillSslTestsFactory();
 
-    SslUserSettings settings;
+    SslUserSettings *settings = new SslUserSettings();
 
-    parseOptions(a, &settings);
+    parseOptions(a, settings);
 
     QList<SslTest *> sslTests = prepareSslTests(settings);
 
-    QThread thread;
     SslCAudit *caudit = new SslCAudit(settings);
 
     caudit->setSslTests(sslTests);
-    caudit->moveToThread(&thread);
+
+    QThread thread;
+
     QObject::connect(&thread, &QThread::finished, caudit, &QObject::deleteLater);
-    QObject::connect(&thread, &QThread::started, caudit, &SslCAudit::run);
+
+    caudit->moveToThread(&thread);
+    thread.start();
+
 
     QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){
         caudit->printSummary();
@@ -340,17 +372,17 @@ int main(int argc, char *argv[])
 
         VERBOSE(QString("%1 version: %2").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion()));
 
-        if (settings.getOutputXml().length() > 0)
-            caudit->writeXmlSummary(settings.getOutputXml());
+        if (settings->getOutputXml().length() > 0)
+            caudit->writeXmlSummary(settings->getOutputXml());
 
         qApp->exit();
     });
 
-    QString pidFile = settings.getPidFile();
+    QString pidFile = settings->getPidFile();
     if (pidFile.length() > 0)
         createPidFile(pidFile);
 
-    thread.start();
+    QTimer::singleShot(0, caudit, &SslCAudit::run);
 
     int exitCode = a.exec();
 

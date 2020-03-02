@@ -41,7 +41,7 @@ public:
     virtual ~SslCheck();
 
     const SslCheckInfo getInfo() { return info; }
-    virtual const SslCheckReport doCheck(const ClientInfo &client) const = 0;
+    virtual const SslCheckReport doCheck(const ClientInfo *client) const = 0;
 
 protected:
     SslCheckInfo info;
@@ -54,7 +54,7 @@ public:
         info.id = SslCheckId::SslCheckSocketErrors;
         info.descr = QString("check if there are any errors reported by network socket");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 class SslCheckNoData : public SslCheck
@@ -64,7 +64,7 @@ public:
         info.id = SslCheckId::SslCheckNoData;
         info.descr = QString("check if no data was transmitted");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 class SslCheckNonSslData : public SslCheck
@@ -74,7 +74,7 @@ public:
         info.id = SslCheckId::SslCheckNonSslData;
         info.descr = QString("check if data transmitted does not have valid HELLO message");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 class SslCheckInvalidSsl : public SslCheck
@@ -84,7 +84,7 @@ public:
         info.id = SslCheckId::SslCheckInvalidSsl;
         info.descr = QString("check if the client is non-SSL or is broken in another way");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 class SslCheckForGenericSslErrors : public SslCheck
@@ -94,7 +94,7 @@ public:
         info.id = SslCheckId::SslCheckForGenericSslErrors;
         info.descr = QString("check if there are generic SSL errors during handshake");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 class SslCheckConnectionEstablished : public SslCheck
@@ -104,7 +104,7 @@ public:
         info.id = SslCheckId::SslCheckConnectionEstablished;
         info.descr = QString("check if SSL connection was established");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 class SslCheckCertificateRefused : public SslCheck
@@ -114,7 +114,7 @@ public:
         info.id = SslCheckId::SslCheckCertificateRefused;
         info.descr = QString("check if client explicitly refused server certificate");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 class SslCheckHttpsClient : public SslCheck
@@ -124,7 +124,7 @@ public:
         info.id = SslCheckId::SslCheckHttpsClient;
         info.descr = QString("check if client identifies itself as HTTPS one");
     }
-    const SslCheckReport doCheck(const ClientInfo &client) const;
+    const SslCheckReport doCheck(const ClientInfo *client) const;
 };
 
 #endif // SSLCHECK_H

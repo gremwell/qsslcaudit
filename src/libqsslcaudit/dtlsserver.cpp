@@ -66,6 +66,8 @@ signals:
     void sslHandshakeFinished(const QList<XSslCertificate> &clientCerts);
     void newPeer(const QHostAddress &peerAddress);
     void rawDataCollected(const QByteArray &rdData, const QByteArray &wrData);
+    void sessionFinished();
+    void newConnection();
 
 private slots:
     void handleSocketError(QAbstractSocket::SocketError socketError);
@@ -142,6 +144,8 @@ void DtlsServerWorker::readyRead()
 
         collectedDgram = dgram;
         clientConnected = true;
+
+        emit newConnection();
     } else if (!currentConnection.isNull()) {
         if (currentConnection->isConnectionEncrypted()) {
             decryptDatagram(currentConnection, dgram);
@@ -193,6 +197,7 @@ void DtlsServerWorker::doHandshake(const QByteArray &clientHello)
 
     if (!result) {
         clientFinished = true;
+        emit sessionFinished();
         return;
     }
 
@@ -243,6 +248,7 @@ void DtlsServerWorker::decryptDatagram(DtlsConnection connection, const QByteArr
         emit dataIntercepted(dgram);
     } else if (connection->dtlsError() == XDtlsError::RemoteClosedConnectionError) {
         clientFinished = true;
+        sessionFinished();
     } else {
         VERBOSE("data decryption error");
     }
@@ -271,7 +277,7 @@ Q_DECLARE_METATYPE(QHostAddress)
 Q_DECLARE_METATYPE(QList<SslUnsafeCertificate>)
 Q_DECLARE_METATYPE(SslUnsafeDtlsError)
 
-DtlsServer::DtlsServer(const SslUserSettings &settings,
+DtlsServer::DtlsServer(const SslUserSettings *settings,
                        QList<XSslCertificate> localCert,
                        XSslKey privateKey,
                        XSsl::SslProtocol sslProtocol,
@@ -306,6 +312,8 @@ DtlsServer::DtlsServer(const SslUserSettings &settings,
     connect(dtlsWorker, &DtlsServerWorker::rawDataCollected, [=](const QByteArray &rdData, const QByteArray &wrData) {
         emit rawDataCollected(rdData, wrData);
     });
+    connect(dtlsWorker, &DtlsServerWorker::sessionFinished, this, &DtlsServer::sessionFinished);
+    connect(dtlsWorker, &DtlsServerWorker::newConnection, this, &DtlsServer::newConnection);
 
     dtlsThread.start();
 
@@ -314,10 +322,10 @@ DtlsServer::DtlsServer(const SslUserSettings &settings,
     dtlsWorker->m_sslProtocol = sslProtocol;
     dtlsWorker->m_sslCiphers = sslCiphers;
 
-    dtlsWorker->m_startTlsProtocol = settings.getStartTlsProtocol();
-    dtlsWorker->m_forwardHost = settings.getForwardHostAddr();
-    dtlsWorker->m_forwardPort = settings.getForwardHostPort();
-    dtlsWorker->m_waitDataTimeout = settings.getWaitDataTimeout();
+    dtlsWorker->m_startTlsProtocol = settings->getStartTlsProtocol();
+    dtlsWorker->m_forwardHost = settings->getForwardHostAddr();
+    dtlsWorker->m_forwardPort = settings->getForwardHostPort();
+    dtlsWorker->m_waitDataTimeout = settings->getWaitDataTimeout();
 
     dtlsWorker->clientConnected = false;
 }
@@ -342,15 +350,20 @@ void DtlsServer::close()
     QTimer::singleShot(0, dtlsWorker, SLOT(close()));
 }
 
-bool DtlsServer::waitForNewClient()
-{
-    return dtlsWorker->waitForNewClient();
-}
-
 void DtlsServer::handleClient()
 {
     QTimer::singleShot(0, dtlsWorker, SLOT(handleClient()));
     dtlsWorker->waitForClientFinished();
+}
+
+bool DtlsServer::isForwarding()
+{
+    return m_isForwarding;
+}
+
+void DtlsServer::handleSigInt()
+{
+
 }
 
 #include "dtlsserver.moc"
