@@ -35,21 +35,18 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::TlsV1_2);
+            socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+            socket->setProtocol(XSsl::TlsV1_2);
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
+        }
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
-            setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -90,37 +87,34 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::TlsV1_1);
-        QList<XSslCipher> mediumCiphers;
-        QStringList opensslCiphers = ciphers_medium_str.split(":");
+            socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+            socket->setProtocol(XSsl::TlsV1_1);
+            QList<XSslCipher> mediumCiphers;
+            QStringList opensslCiphers = ciphers_medium_str.split(":");
 
-        for (int i = 0; i < opensslCiphers.size(); i++) {
-            XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+            for (int i = 0; i < opensslCiphers.size(); i++) {
+                XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
 
-            if (!cipher.isNull())
-                mediumCiphers << cipher;
+                if (!cipher.isNull())
+                    mediumCiphers << cipher;
+            }
+            if (mediumCiphers.size() == 0) {
+                setResult(-1);
+                printTestFailed();
+                QThread::currentThread()->quit();
+                return;
+            }
+            socket->setCiphers(mediumCiphers);
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
         }
-        if (mediumCiphers.size() == 0) {
-            setResult(-1);
-            printTestFailed();
-            QThread::currentThread()->quit();
-            return;
-        }
-        socket->setCiphers(mediumCiphers);
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
-            setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -161,37 +155,34 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
-        socket->setProtocol(XSsl::TlsV1_1);
-        QList<XSslCipher> highCiphers;
-        QStringList opensslCiphers = ciphers_high_str.split(":");
+            socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+            socket->setProtocol(XSsl::TlsV1_1);
+            QList<XSslCipher> highCiphers;
+            QStringList opensslCiphers = ciphers_high_str.split(":");
 
-        for (int i = 0; i < opensslCiphers.size(); i++) {
-            XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+            for (int i = 0; i < opensslCiphers.size(); i++) {
+                XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
 
-            if (!cipher.isNull())
-                highCiphers << cipher;
+                if (!cipher.isNull())
+                    highCiphers << cipher;
+            }
+            if (highCiphers.size() == 0) {
+                setResult(-1);
+                printTestFailed();
+                QThread::currentThread()->quit();
+                return;
+            }
+            socket->setCiphers(highCiphers);
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
         }
-        if (highCiphers.size() == 0) {
-            setResult(-1);
-            printTestFailed();
-            QThread::currentThread()->quit();
-            return;
-        }
-        socket->setCiphers(highCiphers);
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
-            setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -232,37 +223,33 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
 
-        socket->setPeerVerifyMode(XSslSocket::VerifyNone);
-        socket->setProtocol(XSsl::TlsV1_1);
-        QList<XSslCipher> mediumCiphers;
-        QStringList opensslCiphers = ciphers_medium_str.split(":");
+            socket->setPeerVerifyMode(XSslSocket::VerifyNone);
+            socket->setProtocol(XSsl::TlsV1_1);
+            QList<XSslCipher> mediumCiphers;
+            QStringList opensslCiphers = ciphers_medium_str.split(":");
 
-        for (int i = 0; i < opensslCiphers.size(); i++) {
-            XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+            for (int i = 0; i < opensslCiphers.size(); i++) {
+                XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
 
-            if (!cipher.isNull())
-                mediumCiphers << cipher;
+                if (!cipher.isNull())
+                    mediumCiphers << cipher;
+            }
+            if (mediumCiphers.size() == 0) {
+                setResult(-1);
+                printTestFailed();
+                QThread::currentThread()->quit();
+                return;
+            }
+            socket->setCiphers(mediumCiphers);
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+            });
         }
-        if (mediumCiphers.size() == 0) {
-            setResult(-1);
-            printTestFailed();
-            QThread::currentThread()->quit();
-            return;
-        }
-        socket->setCiphers(mediumCiphers);
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(-1);
-            printTestFailed("can not establish encrypted connection");
-        } else {
-            setResult(0);
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -297,25 +284,17 @@ QList<Test *> createAutotests()
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    QThread thread;
     TestsLauncher *testsLauncher;
 
     testsLauncher = new TestsLauncher(createAutotests());
-    testsLauncher->moveToThread(&thread);
-    QObject::connect(&thread, &QThread::finished, testsLauncher, &QObject::deleteLater);
-    QObject::connect(&thread, &QThread::started, testsLauncher, &TestsLauncher::launchTests);
+
     QObject::connect(testsLauncher, &TestsLauncher::autotestsFinished, [=](){
         qApp->exit(testsLauncher->testsResult());
     });
 
-    thread.start();
+    testsLauncher->launchNextTest();
 
-    int ret = a.exec();
-
-    thread.quit();
-    thread.wait();
-
-    return ret;
+    return a.exec();
 }
 
 #include "tests_SslTestCiphersTls11Med.moc"

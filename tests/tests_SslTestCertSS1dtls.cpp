@@ -1,6 +1,7 @@
 #include "test.h"
 #include "ssltests.h"
 #include "ciphers.h"
+#include "clientinfo.h"
 
 #include <QCoreApplication>
 #include <QUdpSocket>
@@ -55,7 +56,6 @@ public:
 
         bool ret = dtls.doHandshake(socket);
         if (!ret) {
-            setResult(-1);
             printTestFailed("handshake failed too early");
             dtls.shutdown(socket);
             return;
@@ -72,9 +72,7 @@ public:
         if ((dtls.handshakeState() == XDtls::HandshakeComplete)
                 && (dtls.dtlsError() == XDtlsError::NoError)) {
             dtls.writeDatagramEncrypted(socket, data);
-            setResult(0);
         } else {
-            setResult(-1);
             printTestFailed("encrypted session was not established, but should");
         }
 
@@ -84,7 +82,7 @@ public:
     void verifySslTestResult()
     {
         if ((currentSslTest()->result() == SslTestResult::DataIntercepted)
-                && (currentClient().interceptedData() == data)) {
+                && (currentClient()->interceptedData() == data)) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -137,7 +135,6 @@ public:
 
         bool ret = dtls.doHandshake(socket);
         if (!ret) {
-            setResult(-1);
             printTestFailed("handshake failed too early");
             dtls.shutdown(socket);
             return;
@@ -154,9 +151,7 @@ public:
         if ((dtls.handshakeState() == XDtls::HandshakeComplete)
                 && (dtls.dtlsError() == XDtlsError::NoError)) {
             QThread::msleep(5500);
-            setResult(0);
         } else {
-            setResult(-1);
             printTestFailed("encrypted session was not established, but should");
         }
 
@@ -165,7 +160,7 @@ public:
 
     void verifySslTestResult()
     {
-        if (currentSslTest()->result() == SslTestResult::CertAccepted) {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
             setResult(0);
             printTestSucceeded();
         } else {
@@ -218,7 +213,6 @@ public:
 
         bool ret = dtls.doHandshake(socket);
         if (!ret) {
-            setResult(-1);
             printTestFailed("handshake failed too early");
             dtls.shutdown(socket);
             return;
@@ -239,9 +233,7 @@ public:
         }
 
         if (verifyError) {
-            setResult(0);
         } else {
-            setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
         dtls.shutdown(socket);
@@ -303,7 +295,6 @@ public:
 
         bool ret = dtls.doHandshake(socket);
         if (!ret) {
-            setResult(-1);
             printTestFailed("handshake failed too early");
             dtls.shutdown(socket);
             return;
@@ -324,9 +315,7 @@ public:
         }
 
         if (verifyError) {
-            setResult(0);
         } else {
-            setResult(-1);
             printTestFailed("encrypted session was established, but should not");
         }
         dtls.shutdown(socket);
@@ -363,25 +352,17 @@ QList<Test *> createAutotests()
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    QThread thread;
     TestsLauncher *testsLauncher;
 
     testsLauncher = new TestsLauncher(createAutotests());
-    testsLauncher->moveToThread(&thread);
-    QObject::connect(&thread, &QThread::finished, testsLauncher, &QObject::deleteLater);
-    QObject::connect(&thread, &QThread::started, testsLauncher, &TestsLauncher::launchTests);
+
     QObject::connect(testsLauncher, &TestsLauncher::autotestsFinished, [=](){
         qApp->exit(testsLauncher->testsResult());
     });
 
-    thread.start();
+    testsLauncher->launchNextTest();
 
-    int ret = a.exec();
-
-    thread.quit();
-    thread.wait();
-
-    return ret;
+    return a.exec();
 }
 
 #include "tests_SslTestCertSS1dtls.moc"

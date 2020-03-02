@@ -3,10 +3,12 @@
 
 #include "debug.h"
 #include "sslcaudit.h"
+#include "ssltest.h"
 #include "ssltestresult.h"
+#include "sslusersettings.h"
 
 #include <QThread>
-
+#include <QTimer>
 
 class Test : public QObject
 {
@@ -26,7 +28,7 @@ public:
     ~Test() {
         sslCAuditThread.quit();
         sslCAuditThread.wait();
-        delete caudit;
+        caudit->deleteLater();
     }
 
     int getId() { return id; }
@@ -47,12 +49,12 @@ public:
         return sslTests.at(currentTestNum);
     }
 
-    ClientInfo currentClient() {
+    const ClientInfo *currentClient() {
         return caudit->getClientInfo(currentTestNum);
     }
 
     // required for "recurrentRequests" test
-    ClientInfo getClient(int testNum) {
+    const ClientInfo *getClient(int testNum) {
         return caudit->getClientInfo(testNum);
     }
 
@@ -68,10 +70,6 @@ public:
     virtual void startTests() {
         prepareTests();
         launchSslCAudit();
-        if (!waitForSslTestsFinished()) {
-            setResult(-1);
-            printTestFailed("tests are not finished in time");
-        }
     }
 
     // called by Test class in prepareTests() method
@@ -92,70 +90,28 @@ public:
         setTestsSettings();
 
         for (int i = 0; i < sslTests.size(); i++) {
-            if (!sslTests.at(i)->prepare(testSettings)) {
+            if (!sslTests.at(i)->prepare(&testSettings)) {
                 RED("failed to prepare test " + sslTests.at(i)->name());
                 return;
             }
         }
 
-        caudit = new SslCAudit(testSettings);
+        caudit = new SslCAudit(&testSettings);
 
+        caudit->moveToThread(&sslCAuditThread);
+        sslCAuditThread.start();
+
+        connect(caudit, &SslCAudit::sslTestReady, this, &Test::launchClientTest);
+        connect(caudit, &SslCAudit::sslTestFinished, this, &Test::handleTestFinished);
         connect(caudit, &SslCAudit::sslTestsFinished, this, &Test::handleAllTestsFinished);
 
-        connect(caudit, &SslCAudit::sslTestReady, this, &Test::handleTestReady);
-
-        connect(caudit, &SslCAudit::sslTestFinished, this, &Test::handleTestFinished);
-
-        connect(&sslCAuditThread, &QThread::started, caudit, &SslCAudit::run);
-
         caudit->setSslTests(sslTests);
-        caudit->moveToThread(&sslCAuditThread);
     }
 
     // asynchronously launches SslCAudit thread. this ends up with the first test becoming ready
     // this is supposed to be called by autotest
     void launchSslCAudit() {
-        // flush all the statuses
-        testIsReady = false;
-        testIsFinished = false;
-        testsAreFinished = false;
-
-        sslCAuditThread.quit();
-        sslCAuditThread.wait();
-
-        sslCAuditThread.start();
-    }
-
-    // synchronously waits for the current test to become ready
-    bool waitforSslTestReady() {
-        int count = 0;
-        int to = 5000;
-        while (!testIsReady && ++count < to/10)
-            QThread::msleep(10);
-
-        return testIsReady;
-    }
-
-    // synchronously waits for all the tests to finish
-    bool waitForSslTestsFinished() {
-        int count = 0;
-        // we have to wait more than the test will be executed
-        int to = static_cast<int>(2 * testSettings.getWaitDataTimeout()) * sslTests.size();
-        while (!testsAreFinished && ++count < to/10)
-            QThread::msleep(10);
-
-        return testsAreFinished;
-    }
-
-    // synchronously waits for the current test to finish
-    bool waitForSslTestFinished() {
-        int count = 0;
-        // we have to wait more than the test will be executed
-        int to = static_cast<int>(2 * testSettings.getWaitDataTimeout());
-        while (!testIsFinished && ++count < to/10)
-            QThread::msleep(10);
-
-        return testIsFinished;
+        QTimer::singleShot(0, caudit, &SslCAudit::run);
     }
 
     // print helpers
@@ -180,34 +136,27 @@ protected:
         testResults[currentTestNum] = result;
     }
 
+signals:
+    void autotestFinished();
+
 private slots:
-    void handleAllTestsFinished() {
-        testsAreFinished = true;
-    }
-
-    void handleTestReady() {
-        testIsReady = true;
-        testIsFinished = false;
-
-        // executeNextSslTest() must set current test result to '0' if this stage succeeded
+    void launchClientTest() {
         setResult(-1);
         executeNextSslTest();
     }
 
+    void handleAllTestsFinished() {
+        sslCAuditThread.quit();
+        sslCAuditThread.wait();
+    }
+
     void handleTestFinished() {
-        testIsFinished = true;
+        verifySslTestResult();
 
-        // if test failed during execution, do not even run results
-        // verification because it could produce false-positives
-        if (getResult() != 0) {
-            printTestFailed("test failed on execution");
+        if (currentTestNum == sslTests.size()-1) {
+            emit autotestFinished();
         } else {
-            verifySslTestResult();
-        }
-
-        currentTestNum++;
-        if (currentTestNum >= sslTests.size()) {
-            currentTestNum = sslTests.size()-1;
+            currentTestNum++;
         }
     }
 
@@ -215,11 +164,10 @@ private:
     int id;
     QString testBaseName;
     QVector<int> testResults;
-    bool testIsReady;
-    bool testIsFinished;
-    bool testsAreFinished;
+
     QThread sslCAuditThread;
     SslCAudit *caudit;
+
     int currentTestNum;
     QList<SslTest *> sslTests;
 
@@ -233,29 +181,33 @@ public:
     TestsLauncher(QList<Test *> sslTests, QObject *parent = nullptr) :
         QObject(parent),
         sslTests(sslTests)
-    {}
-
-    ~TestsLauncher() {}
-
-    void launchTests()
     {
         retCode = 0;
 
-        while (sslTests.size() > 0) {
+        // re-parenting tests as they will belong to the main()'s thread
+        for (int i = 0; i < sslTests.size(); i++) {
+            sslTests.at(i)->setParent(this);
+        }
+    }
+
+    ~TestsLauncher() {}
+
+    void launchNextTest()
+    {
+        if (sslTests.size() > 0) {
             Test *test = sslTests.takeFirst();
             launchSingleTest(test);
-            if (test->getResult() != 0) {
-                retCode = -1;
-            }
-            test->deleteLater();
+        } else {
+            emit autotestsFinished();
         }
-
-        emit autotestsFinished();
     }
 
     void launchSingleTest(Test *autotest)
     {
         WHITE(QString("launching autotest #%1").arg(autotest->getId()));
+
+        connect(autotest, &Test::autotestFinished, this, &TestsLauncher::handleAutotestFinished);
+
         autotest->startTests();
     }
 
@@ -268,6 +220,17 @@ signals:
     void autotestsFinished();
 
 private:
+    void handleAutotestFinished()
+    {
+        Test *autotest = qobject_cast<Test *>(sender());
+        if (autotest->getResult() != 0) {
+            retCode = -1;
+        }
+        autotest->deleteLater();
+
+        launchNextTest();
+    }
+
     QList<Test *> sslTests;
     int retCode;
 

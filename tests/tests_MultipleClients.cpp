@@ -1,6 +1,7 @@
 #include "test.h"
 #include "ssltests.h"
 #include "ciphers.h"
+#include "clientinfo.h"
 
 #include <QCoreApplication>
 
@@ -44,21 +45,18 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new QTcpSocket;
 
-        socket->connectToHost("localhost", 8443);
-
-        if (!socket->waitForConnected()) {
-            setResult(-1);
-            printTestFailed("can not establish connection");
-        } else {
-            QThread::msleep(10);
-            socket->disconnectFromHost();
-            if (socket->state() != QAbstractSocket::UnconnectedState)
-                socket->waitForDisconnected();
-            setResult(0);
+            connect(socket, &QTcpSocket::connected, [=]() {
+                QThread::msleep(10);
+                socket->disconnectFromHost();
+                if (socket->state() != QAbstractSocket::UnconnectedState)
+                    socket->waitForDisconnected();
+            });
         }
+
+        socket->connectToHost("localhost", 8443);
     }
 
     void verifySslTestResult()
@@ -94,6 +92,7 @@ class Test02 : public Test
 public:
     Test02(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests) {
         socket = nullptr;
+        data = QByteArray("ABCDEF");
     }
 
     ~Test02() {
@@ -107,25 +106,20 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new QTcpSocket;
 
-        data = QByteArray("ABCDEF");
+            connect(socket, &QTcpSocket::connected, [=]() {
+                socket->write(data);
+                socket->flush();
+                QThread::msleep(10);
+                socket->disconnectFromHost();
+                if (socket->state() != QAbstractSocket::UnconnectedState)
+                    socket->waitForDisconnected();
+            });
+        }
 
         socket->connectToHost("localhost", 8443);
-
-        if (!socket->waitForConnected()) {
-            setResult(-1);
-            printTestFailed("can not establish connection");
-        } else {
-            socket->write(data);
-            socket->flush();
-            QThread::msleep(10);
-            socket->disconnectFromHost();
-            if (socket->state() != QAbstractSocket::UnconnectedState)
-                socket->waitForDisconnected();
-            setResult(0);
-        }
     }
 
     void verifySslTestResult()
@@ -175,25 +169,22 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
-            socket = new QTcpSocket;
-
         data = QString("ABCDEF%1").arg(currentSslTestNum()).toLocal8Bit();
 
-        socket->connectToHost("localhost", 8443);
+        if (!socket) {
+            socket = new QTcpSocket;
 
-        if (!socket->waitForConnected()) {
-            setResult(-1);
-            printTestFailed("can not establish connection");
-        } else {
-            socket->write(data);
-            socket->flush();
-            QThread::msleep(10);
-            socket->disconnectFromHost();
-            if (socket->state() != QAbstractSocket::UnconnectedState)
-                socket->waitForDisconnected();
-            setResult(0);
+            connect(socket, &QTcpSocket::connected, [=]() {
+                socket->write(data);
+                socket->flush();
+                QThread::msleep(10);
+                socket->disconnectFromHost();
+                if (socket->state() != QAbstractSocket::UnconnectedState)
+                    socket->waitForDisconnected();
+            });
         }
+
+        socket->connectToHost("localhost", 8443);
     }
 
     void verifySslTestResult()
@@ -243,21 +234,18 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
 
-        socket->setProtocol(XSsl::TlsV1_1);
-        socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+            socket->setProtocol(XSsl::TlsV1_1);
+            socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
+        }
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
-            setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -306,8 +294,13 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
+        }
 
         if (currentSslTestNum() == 0) {
             socket->setProtocol(XSsl::TlsV1_1);
@@ -317,14 +310,6 @@ public:
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
-            setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -373,8 +358,13 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
+        }
 
         socket->setProtocol(XSsl::TlsV1_2);
         if (currentSslTestNum() == 1) {
@@ -398,14 +388,6 @@ public:
         socket->setPeerVerifyMode(XSslSocket::VerifyPeer);
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(0);
-        } else {
-            setResult(-1);
-            printTestFailed("encrypted session was established, but should not");
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -454,8 +436,14 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                socket->write(data);
+                socket->flush();
+            });
+        }
 
         data = QString("ABCDEF%1").arg(currentSslTestNum()).toLocal8Bit();
 
@@ -463,16 +451,6 @@ public:
         socket->setPeerVerifyMode(XSslSocket::VerifyNone);
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(-1);
-            printTestFailed("can not establish encrypted connection");
-        } else {
-            setResult(0);
-            socket->write(data);
-            socket->flush();
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -480,7 +458,7 @@ public:
         setResult(-1);
 
         if ((currentSslTest()->result() == SslTestResult::DataIntercepted)
-                && (currentClient().interceptedData() == data)) {
+                && (currentClient()->interceptedData() == data)) {
             if (currentSslTestNum() == 1) {
                 if (!isSameClient(false)) {
                     setResult(-1);
@@ -523,8 +501,14 @@ public:
 
     void executeNextSslTest()
     {
-        if (!socket)
+        if (!socket) {
             socket = new XSslSocket;
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                socket->write(data);
+                socket->flush();
+            });
+        }
 
         data = QByteArray("ABCDEF");
 
@@ -536,16 +520,6 @@ public:
         socket->setPeerVerifyMode(XSslSocket::VerifyNone);
 
         socket->connectToHostEncrypted("localhost", 8443);
-
-        if (!socket->waitForEncrypted()) {
-            setResult(-1);
-            printTestFailed("can not establish encrypted connection");
-        } else {
-            setResult(0);
-            socket->write(data);
-            socket->flush();
-        }
-        socket->disconnectFromHost();
     }
 
     void verifySslTestResult()
@@ -553,7 +527,7 @@ public:
         setResult(-1);
 
         if ((currentSslTest()->result() == SslTestResult::DataIntercepted)
-                && (currentClient().interceptedData() == data)) {
+                && (currentClient()->interceptedData() == data)) {
             if (currentSslTestNum() == 1) {
                 if (isSameClient(false)) {
                     setResult(-1);
@@ -593,25 +567,17 @@ QList<Test *> createAutotests()
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    QThread thread;
     TestsLauncher *testsLauncher;
 
     testsLauncher = new TestsLauncher(createAutotests());
-    testsLauncher->moveToThread(&thread);
-    QObject::connect(&thread, &QThread::finished, testsLauncher, &QObject::deleteLater);
-    QObject::connect(&thread, &QThread::started, testsLauncher, &TestsLauncher::launchTests);
+
     QObject::connect(testsLauncher, &TestsLauncher::autotestsFinished, [=](){
         qApp->exit(testsLauncher->testsResult());
     });
 
-    thread.start();
+    testsLauncher->launchNextTest();
 
-    int ret = a.exec();
-
-    thread.quit();
-    thread.wait();
-
-    return ret;
+    return a.exec();
 }
 
 
