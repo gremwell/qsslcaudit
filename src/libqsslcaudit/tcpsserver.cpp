@@ -135,6 +135,16 @@ void TcpsServer::proxyConnection(XSslSocket *sslSocket)
     // - synchronously read data from ssl socket
     // - synchronously send this data to proxy
     QTcpSocket proxy;
+    QByteArray data;
+
+    // before connecting to the proxy, collect data from the socket
+    // it will make tests decision logic happy
+    // we also need waitFor() here. it gives some windows for signal/slots subsystem to
+    // process all events from SSL socket
+    if (sslSocket->waitForReadyRead(100)) {
+        data = sslSocket->readAll();
+        emit dataIntercepted(data);
+    }
 
     proxy.connectToHost(m_forwardHost, m_forwardPort);
 
@@ -144,14 +154,26 @@ void TcpsServer::proxyConnection(XSslSocket *sslSocket)
         WHITE("forwarding incoming data to the provided proxy");
         WHITE("to get test results, relauch this app without 'forward' option");
 
-        while (1) {
+        // disconnect socket errors slot, otherwise it will flood us with 'timeout' errors
+        disconnect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
+                   this, &TcpsServer::handleSocketError);
+
+        // start with sending previously read data
+        proxy.write(data);
+
+        // we wait until one of the communicating parties disconnect the socket
+        // or SIGINT is sent
+        m_stopForwarding = false;
+        m_isForwarding = true;
+
+        while (!m_stopForwarding) {
             if (sslSocket->state() == QAbstractSocket::UnconnectedState)
                 break;
             if (proxy.state() == QAbstractSocket::UnconnectedState)
                 break;
 
             if (sslSocket->waitForReadyRead(100)) {
-                QByteArray data = sslSocket->readAll();
+                data = sslSocket->readAll();
 
                 emit dataIntercepted(data);
 
@@ -159,9 +181,17 @@ void TcpsServer::proxyConnection(XSslSocket *sslSocket)
             }
 
             if (proxy.waitForReadyRead(100)) {
-                sslSocket->write(proxy.readAll());
+                data = proxy.readAll();
+
+                emit dataIntercepted(data);
+
+                sslSocket->write(data);
             }
         }
+
+        // return socket errors handling
+        connect(sslSocket, static_cast<void(XSslSocket::*)(QAbstractSocket::SocketError)>(&XSslSocket::error),
+                this, &TcpsServer::handleSocketError);
     }
 }
 

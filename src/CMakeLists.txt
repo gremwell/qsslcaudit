@@ -12,7 +12,7 @@ if(UNSAFE_QSSL)
   include_directories(${UNSAFESSL_DIR})
 endif()
 
-add_executable(qsslcaudit main.cpp)
+add_executable(qsslcaudit main.cpp sigwatch.cpp sigwatch.h)
 set_target_properties(qsslcaudit PROPERTIES AUTOMOC TRUE)
 
 target_link_libraries(qsslcaudit qsslcaudit_lib)

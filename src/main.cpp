@@ -4,6 +4,7 @@
 #include "ssltests.h"
 #include "sslcaudit.h"
 #include "ciphers.h"
+#include "sigwatch.h"
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
@@ -365,6 +366,9 @@ int main(int argc, char *argv[])
     caudit->moveToThread(&thread);
     thread.start();
 
+    UnixSignalWatcher sigwatch;
+    sigwatch.watchForSignal(SIGINT);
+    QObject::connect(&sigwatch, &UnixSignalWatcher::unixSignal, caudit, &SslCAudit::handleSigInt);
 
     QObject::connect(caudit, &SslCAudit::sslTestsFinished, [=](){
         caudit->printSummary();
