@@ -225,7 +225,13 @@ void DtlsServerWorker::decryptDatagram(DtlsConnection connection, const QByteArr
         emit dtlsHandshakeError(connection->dtlsError(), connection->dtlsErrorString());
 
     if (dgram.size()) {
-        VERBOSE("received data: " + QString(dgram));
+        // check if datagram has binary data
+        bool binData = false;
+        for (int i = 0; i < dgram.size(); i++) {
+            if (dgram.at(i) < ' ')
+                binData = true;
+        }
+        VERBOSE("received data: " + (binData ? QString(dgram.toHex()) : QString(dgram)));
         emit dataIntercepted(dgram);
 
         // send data to proxy, if requested
