@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 set(QSSLC_VERSION_MAJOR 0)
 set(QSSLC_VERSION_MINOR 8)
-set(QSSLC_VERSION_PATCH 1)
+set(QSSLC_VERSION_PATCH 2)
 set(QSSLC_VERSION "${QSSLC_VERSION_MAJOR}.${QSSLC_VERSION_MINOR}.${QSSLC_VERSION_PATCH}")
 # version formatting stolen from KeepAssXC's CMakeLists.txt :-)
 set(OVERRIDE_VERSION "" CACHE STRING "Override the qsslcaudit Version for Snapshot builds")
