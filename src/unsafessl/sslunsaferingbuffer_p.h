@@ -55,6 +55,8 @@
 #include <QtCore/qbytearray.h>
 #include <QtCore/qvector.h>
 
+#include <climits>
+
 QT_BEGIN_NAMESPACE
 
 #ifndef QRINGBUFFER_CHUNKSIZE
