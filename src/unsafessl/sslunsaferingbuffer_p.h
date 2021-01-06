@@ -55,6 +55,9 @@
 #include <QtCore/qbytearray.h>
 #include <QtCore/qvector.h>
 
+// Add missing climits header for INT_MAX
+#include <climits>
+
 QT_BEGIN_NAMESPACE
 
 #ifndef QRINGBUFFER_CHUNKSIZE
