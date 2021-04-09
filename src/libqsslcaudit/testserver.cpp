@@ -5,6 +5,9 @@
 #include "clientinfo.h"
 #include "sslusersettings.h"
 
+// for msleep()
+#include <QThread>
+
 TestServer::TestServer(SslTest *sslTest, const SslUserSettings *settings,
                        QObject *parent) :
     QObject(parent),
@@ -97,6 +100,14 @@ void TestServer::runTest()
 {
     WHITE(QString("running test #%1: %2").arg(static_cast<int>(sslTest->id()) + 1)
           .arg(sslTest->description()));
+
+    // when doing many tests in a row creating a new listener too soon after the previous
+    // has finished may cause weird errors in some clients. in most cases this will be an
+    // iOS mobile app
+    // this can be easily avoided by the following weird delay. this does not impact on
+    // our tests but solves the weird issue with clients. technically, can be set as
+    // another user option, but it will be too much as for me
+    QThread::msleep(500);
 
     sslTest->clear();
     clientInfo->clear();
