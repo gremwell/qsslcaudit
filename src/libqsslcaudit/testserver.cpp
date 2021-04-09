@@ -150,6 +150,8 @@ void TestServer::handleSessionFinished()
         GREEN(sslTest->report());
     }
 
+    WHITE("result: " + sslTestResultToStatus(sslTest->result()));
+
     WHITE("test finished");
 
     emit sslTestFinished();
