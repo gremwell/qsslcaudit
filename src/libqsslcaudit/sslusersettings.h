@@ -72,6 +72,9 @@ public:
     void setDoubleFirstTest(bool flag);
     bool getDoubleFirstTest() const;
 
+    void setSupportedCiphers(const QString &ciphers);
+    QList<XSslCipher> getSupportedCiphers() const;
+
 private:
     QHostAddress listenAddress;
     quint16 listenPort;
@@ -90,6 +93,7 @@ private:
     QString pidFile;
     bool useDtls;
     bool doubleFirstTest;
+    QList<XSslCipher> supportedCiphers;
 };
 
 #endif // SSLUSERSETTINGS_H

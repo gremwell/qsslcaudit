@@ -36,6 +36,7 @@ SslUserSettings::SslUserSettings()
     pidFile = "";
     useDtls = false;
     doubleFirstTest = false;
+    supportedCiphers = QList<XSslCipher>();
 }
 
 void SslUserSettings::setListenAddress(const QHostAddress &addr)
@@ -383,4 +384,21 @@ void SslUserSettings::setDoubleFirstTest(bool flag)
 bool SslUserSettings::getDoubleFirstTest() const
 {
     return doubleFirstTest;
+}
+
+void SslUserSettings::setSupportedCiphers(const QString &ciphers)
+{
+    QStringList opensslCiphers = ciphers.split(":");
+
+    for (int i = 0; i < opensslCiphers.size(); i++) {
+        XSslCipher cipher = XSslCipher(opensslCiphers.at(i));
+
+        if (!cipher.isNull())
+            supportedCiphers << cipher;
+    }
+}
+
+QList<SslUnsafeCipher> SslUserSettings::getSupportedCiphers() const
+{
+    return supportedCiphers;
 }
