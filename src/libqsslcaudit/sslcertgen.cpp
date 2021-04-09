@@ -162,7 +162,7 @@ static void setCertOptions(CertificateBuilder *builder, bool constrains, bool ca
     builder->setVersion(3);
     builder->setSerial(serial);
     builder->setActivationTime(QDateTime::currentDateTimeUtc());
-    builder->setExpirationTime(QDateTime::currentDateTimeUtc().addYears(10));
+    builder->setExpirationTime(QDateTime::currentDateTimeUtc().addYears(1));
     CertificateBuilder::KeyUsageFlags flags = CertificateBuilder::UsageKeyEncipherment | CertificateBuilder::UsageDigitalSignature;
     if (cansign)
         flags |= CertificateBuilder::UsageKeyCertSign;
