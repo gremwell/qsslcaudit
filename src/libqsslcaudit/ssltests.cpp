@@ -84,7 +84,9 @@ bool SslTestCertCustom1::prepare(const SslUserSettings *settings)
 
     m_privateKey = key;
 
-    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    m_sslCiphers = settings->getSupportedCiphers().count() ?
+                settings->getSupportedCiphers() : XSslConfiguration::supportedCiphers();
+
     // DTLS mode requires specific protocol to be set
     if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
@@ -118,7 +120,9 @@ bool SslTestCertSS1::prepare(const SslUserSettings *settings)
     m_localCertsChain = chain;
     m_privateKey = cert.second;
 
-    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    m_sslCiphers = settings->getSupportedCiphers().count() ?
+                settings->getSupportedCiphers() : XSslConfiguration::supportedCiphers();
+
     // DTLS mode requires specific protocol to be set
     if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
@@ -140,7 +144,9 @@ bool SslTestCertSS2::prepare(const SslUserSettings *settings)
     m_localCertsChain = chain;
     m_privateKey = cert.second;
 
-    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    m_sslCiphers = settings->getSupportedCiphers().count() ?
+                settings->getSupportedCiphers() : XSslConfiguration::supportedCiphers();
+
     // DTLS mode requires specific protocol to be set
     if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
@@ -181,7 +187,9 @@ bool SslTestCertCustom2::prepare(const SslUserSettings *settings)
     m_localCertsChain = generatedCert.first;
     m_privateKey = generatedCert.second;
 
-    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    m_sslCiphers = settings->getSupportedCiphers().count() ?
+                settings->getSupportedCiphers() : XSslConfiguration::supportedCiphers();
+
     // DTLS mode requires specific protocol to be set
     if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
@@ -210,7 +218,9 @@ bool SslTestCertCustom3::prepare(const SslUserSettings *settings)
     m_localCertsChain = generatedCert.first;
     m_privateKey = generatedCert.second;
 
-    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    m_sslCiphers = settings->getSupportedCiphers().count() ?
+                settings->getSupportedCiphers() : XSslConfiguration::supportedCiphers();
+
     // DTLS mode requires specific protocol to be set
     if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
@@ -250,7 +260,9 @@ bool SslTestCertCA1::prepare(const SslUserSettings *settings)
     m_localCertsChain = generatedCert.first;
     m_privateKey = generatedCert.second;
 
-    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    m_sslCiphers = settings->getSupportedCiphers().count() ?
+                settings->getSupportedCiphers() : XSslConfiguration::supportedCiphers();
+
     // DTLS mode requires specific protocol to be set
     if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
@@ -279,7 +291,9 @@ bool SslTestCertCA2::prepare(const SslUserSettings *settings)
     m_localCertsChain = generatedCert.first;
     m_privateKey = generatedCert.second;
 
-    m_sslCiphers = XSslConfiguration::supportedCiphers();
+    m_sslCiphers = settings->getSupportedCiphers().count() ?
+                settings->getSupportedCiphers() : XSslConfiguration::supportedCiphers();
+
     // DTLS mode requires specific protocol to be set
     if (settings->getUseDtls()) {
         m_sslProtocol = XSsl::DtlsV1_0OrLater;
