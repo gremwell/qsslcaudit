@@ -77,6 +77,8 @@ void SslCertificatesTest::calcResults(const ClientInfo *client)
 
     checks << new SslCheckForGenericSslErrors();
 
+    checks << new SslCheckNoSharedCipher();
+
     for (int i = 0; i < checks.size(); i++) {
         rep = checks.at(i)->doCheck(client);
 
