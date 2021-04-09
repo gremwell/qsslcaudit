@@ -277,6 +277,61 @@ private:
 
 };
 
+// do verify peer certificate but do not support server's ciphers
+// check for proper test result code
+class Test06 : public Test
+{
+    Q_OBJECT
+public:
+    Test06(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests) {
+        socket = nullptr;
+    }
+
+    ~Test06() {
+        delete socket;
+    }
+
+    void setTestsSettings()
+    {
+        testSettings.setUserCN("www.example.com");
+        testSettings.setSupportedCiphers("DHE-DSS-AES256-SHA");
+    }
+
+    void executeNextSslTest()
+    {
+        if (!socket) {
+            socket = new XSslSocket;
+
+            SslUnsafeConfiguration c;
+            c.setPeerVerifyMode(XSslSocket::VerifyPeer);
+            c.setCiphers(QList<XSslCipher>() << XSslCipher("AES128-GCM-SHA256"));
+            socket->setSslConfiguration(c);
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
+        }
+
+        socket->connectToHostEncrypted("localhost", 8443);
+    }
+
+    void verifySslTestResult()
+    {
+        if (currentSslTest()->result() == SslTestResult::Undefined) {
+            setResult(0);
+            printTestSucceeded();
+        } else {
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
+        }
+    }
+
+private:
+    XSslSocket *socket;
+
+};
+
 
 QList<Test *> createAutotests()
 {
@@ -286,6 +341,7 @@ QList<Test *> createAutotests()
             << new Test03(3, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
             << new Test04(4, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
             << new Test05(5, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test06(5, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
                ;
 }
 
