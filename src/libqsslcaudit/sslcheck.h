@@ -12,6 +12,7 @@ enum class SslCheckId : int
     SslCheckForGenericSslErrors,
     SslCheckConnectionEstablished,
     SslCheckCertificateRefused,
+    SslCheckNoSharedCipher,
     SslCheckHttpsClient,
 };
 
@@ -113,6 +114,16 @@ public:
     SslCheckCertificateRefused() {
         info.id = SslCheckId::SslCheckCertificateRefused;
         info.descr = QString("check if client explicitly refused server certificate");
+    }
+    const SslCheckReport doCheck(const ClientInfo *client) const;
+};
+
+class SslCheckNoSharedCipher : public SslCheck
+{
+public:
+    SslCheckNoSharedCipher() {
+        info.id = SslCheckId::SslCheckNoSharedCipher;
+        info.descr = QString("check if client did not accept any of server ciphers");
     }
     const SslCheckReport doCheck(const ClientInfo *client) const;
 };
