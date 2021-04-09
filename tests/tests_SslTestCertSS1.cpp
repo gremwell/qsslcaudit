@@ -119,7 +119,7 @@ private:
 
 };
 
-// do verify peer certificate
+// do verify peer certificate, do not specify application protocol, result should be undefined
 // check for proper test result code
 class Test03 : public Test
 {
@@ -170,8 +170,7 @@ private:
 
 };
 
-// connect to localhost, but set server name to the same as for ssl server
-// do verify peer certificate
+// do verify peer certificate, do specify application protocol (HTTP), result should be failed
 // check for proper test result code
 class Test04 : public Test
 {
@@ -182,6 +181,61 @@ public:
     }
 
     ~Test04() {
+        delete socket;
+    }
+
+    void setTestsSettings()
+    {
+        testSettings.setUserCN("www.example.com");
+    }
+
+    void executeNextSslTest()
+    {
+        if (!socket) {
+            socket = new XSslSocket;
+
+            SslUnsafeConfiguration c;
+            c.setPeerVerifyMode(XSslSocket::VerifyPeer);
+            c.setAllowedNextProtocols(QList<QByteArray>() << SslUnsafeConfiguration::ALPNProtocolHTTP2);
+            socket->setSslConfiguration(c);
+
+            connect(socket, &XSslSocket::encrypted, [=]() {
+                printTestFailed("encrypted session was established, but should not");
+            });
+        }
+
+        socket->connectToHostEncrypted("localhost", 8443);
+    }
+
+    void verifySslTestResult()
+    {
+        if (currentSslTest()->result() == SslTestResult::Success) {
+            setResult(0);
+            printTestSucceeded();
+        } else {
+            setResult(-1);
+            printTestFailed(QString("unexpected test result (%1)")
+                            .arg(sslTestResultToString(currentSslTest()->result())));
+        }
+    }
+
+private:
+    XSslSocket *socket;
+
+};
+
+// connect to localhost, but set server name to the same as for ssl server
+// do verify peer certificate
+// check for proper test result code
+class Test05 : public Test
+{
+    Q_OBJECT
+public:
+    Test05(int id, QString testBaseName, QList<SslTest *> sslTests) : Test(id, testBaseName, sslTests) {
+        socket = nullptr;
+    }
+
+    ~Test05() {
         delete socket;
     }
 
@@ -231,6 +285,7 @@ QList<Test *> createAutotests()
             << new Test02(2, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
             << new Test03(3, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
             << new Test04(4, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
+            << new Test05(5, "SslTestCertSS1", QList<SslTest *>() << new SslTestCertSS1)
                ;
 }
 
