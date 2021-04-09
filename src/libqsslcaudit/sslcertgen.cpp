@@ -77,8 +77,10 @@ static CertificateRequest genCertRequest(const XSslKey &key, const QString &comm
     reqbuilder.setKey(key);
     reqbuilder.addNameEntry(Certificate::EntryCountryName, "BE");
     reqbuilder.addNameEntry(Certificate::EntryOrganizationName, org.toLocal8Bit());
-    if (commonName.length() > 0)
+    if (commonName.length() > 0) {
         reqbuilder.addNameEntry(Certificate::EntryCommonName, commonName.toLocal8Bit());
+        reqbuilder.addSubjectAlternativeNameEntry(XSsl::DnsEntry, commonName.toLocal8Bit());
+    }
 
     // sign the request
     CertificateRequest req = reqbuilder.signedRequest(key);
@@ -143,13 +145,18 @@ static CertificateRequest genCertRequestFromTemplate(const XSslKey &key, const X
         }
     }
 
+    QMultiMap<SslUnsafe::AlternativeNameEntryType, QString> sans = basecert.subjectAlternativeNames();
+    for (auto item = sans.begin(); item != sans.end(); item++) {
+        reqbuilder.addSubjectAlternativeNameEntry(item.key(), item.value().toLocal8Bit());
+    }
+
     // sign the request
     CertificateRequest req = reqbuilder.signedRequest(key);
 
     return req;
 }
 
-static void setCertOptions(CertificateBuilder *builder, bool constrains, bool cansign, const QByteArray &serial = RandomGenerator::getPositiveBytes(16))
+static void setCertOptions(CertificateBuilder *builder, bool constrains, bool cansign, const CertificateRequest &req = CertificateRequest(), const QByteArray &serial = RandomGenerator::getPositiveBytes(16))
 {
     // set common options
     builder->setVersion(3);
@@ -163,6 +170,7 @@ static void setCertOptions(CertificateBuilder *builder, bool constrains, bool ca
     builder->addKeyPurpose(CertificateBuilder::PurposeWebServer);
     builder->addKeyPurpose(CertificateBuilder::PurposeWebClient);
     builder->addSubjectKeyIdentifier();
+    builder->copyRequestExtensions(req);
 
     builder->setBasicConstraints(constrains);
 }
@@ -185,7 +193,7 @@ QPair<XSslCertificate, XSslKey> SslCertGen::genSignedCert(const QString &domain,
     CertificateBuilder builder;
     builder.setRequest(req);
 
-    setCertOptions(&builder, false, false);
+    setCertOptions(&builder, false, false, req);
 
     XSslCertificate cert = builder.signedCertificate(key);
 
@@ -213,9 +221,9 @@ QPair<XSslCertificate, XSslKey> SslCertGen::genSignedCertFromTemplate(const XSsl
 
     QStringList serialInfo = basecert.subjectInfo(XSslCertificate::SerialNumber);
     if (serialInfo.isEmpty()) {
-        setCertOptions(&builder, false, false);
+        setCertOptions(&builder, false, false, req);
     } else {
-        setCertOptions(&builder, false, false, serialInfo.first().toLocal8Bit());
+        setCertOptions(&builder, false, false, req, serialInfo.first().toLocal8Bit());
     }
 
     XSslCertificate cert = builder.signedCertificate(key);
@@ -234,7 +242,7 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACert(const QStri
     CertificateBuilder leafbuilder;
     leafbuilder.setRequest(leafreq);
 
-    setCertOptions(&leafbuilder, false, false);
+    setCertOptions(&leafbuilder, false, false, leafreq);
 
     leafbuilder.addAuthorityKeyIdentifier(cacert);
 
@@ -259,9 +267,9 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACertFromTemplate
 
     QStringList serialInfo = basecert.subjectInfo(XSslCertificate::SerialNumber);
     if (serialInfo.isEmpty()) {
-        setCertOptions(&leafbuilder, false, false);
+        setCertOptions(&leafbuilder, false, false, leafreq);
     } else {
-        setCertOptions(&leafbuilder, false, false, serialInfo.first().toLocal8Bit());
+        setCertOptions(&leafbuilder, false, false, leafreq, serialInfo.first().toLocal8Bit());
     }
 
     leafbuilder.addAuthorityKeyIdentifier(cacert);
@@ -286,7 +294,7 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACertChain(const 
     CertificateBuilder interbuilder;
     interbuilder.setRequest(interreq);
 
-    setCertOptions(&interbuilder, true, true);
+    setCertOptions(&interbuilder, true, true, interreq);
 
     interbuilder.copyRequestExtensions(interreq);
     interbuilder.addAuthorityKeyIdentifier(cacert);
@@ -301,7 +309,7 @@ QPair<QList<XSslCertificate>, XSslKey> SslCertGen::genSignedByCACertChain(const 
     CertificateBuilder leafbuilder;
     leafbuilder.setRequest(leafreq);
 
-    setCertOptions(&leafbuilder, false, false);
+    setCertOptions(&leafbuilder, false, false, leafreq);
 
     leafbuilder.copyRequestExtensions(leafreq);
     leafbuilder.addAuthorityKeyIdentifier(intercert);
