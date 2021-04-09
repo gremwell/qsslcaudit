@@ -370,7 +370,7 @@ XSslCertificate CertificateBuilder::signedCertificate(const XSslCertificate &qca
     //
     // Sign the cert
     //
-    d->errnumber = gnutls_x509_crt_privkey_sign(d->crt, cacrt, abstractKey, GNUTLS_DIG_SHA1, 0);
+    d->errnumber = gnutls_x509_crt_privkey_sign(d->crt, cacrt, abstractKey, GNUTLS_DIG_SHA256, 0);
 
     gnutls_x509_crt_deinit(cacrt);
     gnutls_x509_privkey_deinit(key);
