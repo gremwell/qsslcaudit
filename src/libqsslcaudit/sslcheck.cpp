@@ -330,7 +330,7 @@ const SslCheckReport SslCheckHttpsClient::doCheck(const ClientInfo *client) cons
 
     if (client->hasHelloMessage()
             && client->tlsHelloInfo.hnd_hello.alpn.isEmpty()) {
-        rep.report = QString("client does not explitictly defines expected protocol");
+        rep.report = QString("client does not explitictly define application layer protocol");
         rep.suggestedTestResult = SslTestResult::Undefined;
         rep.comment = QString("");
         rep.isPassed = false;
