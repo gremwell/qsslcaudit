@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - 'claude/**'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-safe:
+    name: Build & test (safe / ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            g++ \
+            qtbase5-dev \
+            libgnutls28-dev \
+            libssl-dev \
+            libcrypto++-dev \
+            curl \
+            libxml-xpath-perl \
+            lsb-release
+
+      - name: Configure
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=true ..
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Install
+        run: sudo cmake --install build
+
+      - name: Run unit tests
+        working-directory: build
+        run: ctest --output-on-failure
+
+      - name: Run e2e tests (safe)
+        run: tools/run-e2e-tests.sh safe

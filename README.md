@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/gremwell/qsslcaudit.svg?branch=master)](https://travis-ci.com/gremwell/qsslcaudit)
+[![CI](https://github.com/gremwell/qsslcaudit/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/gremwell/qsslcaudit/actions/workflows/ci.yml)
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
